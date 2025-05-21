@@ -237,8 +237,8 @@ export default function HomePage() {
       <div className="relative pt-16 pb-16 px-4"> {/* Reduced pt-20 to pt-16 to maintain spacing */}
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl md:text-5xl font-bold mb-3 text-white">
-            Mioto - Cùng Bạn<br />
-            Đến Mọi Hành Trình
+            Whale Xe - More than rentals<br />
+            We deliver happiness
           </h1> 
           
           {/* Search Form */}
