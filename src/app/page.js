@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const vehicleTypes = [
   "Sedan",
@@ -110,6 +110,7 @@ const faqs = [
 export default function HomePage() {
   const [faqOpen, setFaqOpen] = useState(Array(faqs.length).fill(false));
   const [sameLocation, setSameLocation] = useState(true);
+  const [scrollY, setScrollY] = useState(0);
   const [form, setForm] = useState({
     vehicleType: vehicleTypes[0],
     pickUp: "",
@@ -119,6 +120,20 @@ export default function HomePage() {
     dropOffDate: "",
     dropOffTime: "",
   });
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    // Add event listener
+    window.addEventListener("scroll", handleScroll);
+    
+    // Remove event listener on cleanup
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []); // Empty dependency array means this runs once on mount
 
   const handleFaqToggle = (idx) => {
     setFaqOpen((prev) =>
@@ -142,23 +157,70 @@ export default function HomePage() {
   return (
     <div className="font-sans bg-white text-gray-900">
       {/* Header */}
-      <header className="fixed top-0 left-0 w-full z-30 bg-white/90 backdrop-blur border-b border-gray-100 shadow-sm">
-        <div className="max-w-7xl mx-auto flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-2 text-2xl font-bold text-blue-600">
-            {/* Logo SVG */}
-            <svg width="32" height="32" fill="none" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#2563eb"/><text x="16" y="21" textAnchor="middle" fontSize="16" fill="#fff" fontFamily="sans-serif">W</text></svg>
-            <span>Whale Xe</span>
+      <header 
+        className="fixed top-0 left-0 w-full z-30 bg-gradient-to-r from-gray-900 to-black text-white transition-opacity duration-300"
+        style={{ 
+          opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
+          // Now starts at 15px scroll and fades completely to 0 over 100px of additional scrolling
+        }}
+      >
+      <div className="max-w-7xl mx-auto px-4">
+        {/* Top bar with contact info and social links */}
+        <div className="flex items-center justify-between py-2 border-b border-gray-800 text-sm">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-2">
+              <span>+208 333 9296</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>contact@rentaly.com</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span>Mon - Fri 08:00 - 18:00</span>
+            </div>
           </div>
-          <nav className="hidden md:flex gap-8 text-base font-medium">
-            <a href="#about" className="hover:text-blue-600 transition">About Us</a>
-            <a href="#renting" className="hover:text-blue-600 transition">Renting Car</a>
-          </nav>
-          <div className="flex gap-2">
-            <button className="px-4 py-2 rounded border border-blue-600 text-blue-600 font-semibold hover:bg-blue-50 transition">Login</button>
-            <button className="px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 transition">Register</button>
+          <div className="flex items-center gap-4">
+            <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
+            <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
+            <a href="#" aria-label="Pinterest"><i className="fab fa-pinterest"></i></a>
+            <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
           </div>
         </div>
-      </header>
+        
+        {/* Main navigation */}
+        <div className="flex items-center justify-between py-4">
+          <div className="flex items-center gap-2">
+            {/* Logo */}
+            <a href="#" className="flex items-center">
+              <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
+              <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
+            </a>
+          </div>
+
+          <nav className="flex items-center gap-6 text-base font-medium">
+            <a href="#" className="text-white hover:text-green-400 transition">Home</a>
+            <a href="#" className="text-white hover:text-green-400 transition">Cars</a>
+            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              Booking <i className="fas fa-chevron-down text-xs"></i>
+            </a>
+            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              My Account <i className="fas fa-chevron-down text-xs"></i>
+            </a>
+            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              Pages <i className="fas fa-chevron-down text-xs"></i>
+            </a>
+            <a href="#" className="text-white hover:text-green-400 transition">Gallery</a>
+            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              News <i className="fas fa-chevron-down text-xs"></i>
+            </a>
+          </nav>
+          
+          <div>
+            <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">Sign In</button>
+          </div>
+        </div>
+      </div>
+    </header>
 
       {/* Hero Section */}
       <section className="pt-28 pb-16 bg-gradient-to-br from-blue-50 to-white">
@@ -353,10 +415,30 @@ export default function HomePage() {
           <div>
             <h3 className="font-bold text-lg mb-2">Social Network</h3>
             <div className="flex gap-4 mt-2">
-              <a href="#" className="hover:text-blue-300"><svg width="24" height="24" fill="currentColor"><circle cx="12" cy="12" r="12" fill="#fff"/><path d="M17 8.5a2.5 2.5 0 0 1-2.5 2.5H14v2h1.5a2.5 2.5 0 0 1 0 5H14v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H12v-2h-1.5A2.5 2.5 0 0 1 8 8.5V7h2v1.5A.5.5 0 0 0 10.5 9H12V7h2v2h1.5A.5.5 0 0 0 15 8.5V7h2v1.5z"/></svg></a>
-              <a href="#" className="hover:text-blue-300"><svg width="24" height="24" fill="currentColor"><circle cx="12" cy="12" r="12" fill="#fff"/><path d="M19 7.5a2.5 2.5 0 0 1-2.5 2.5H16v2h1.5a2.5 2.5 0 0 1 0 5H16v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H14v-2h-1.5A2.5 2.5 0 0 1 10 7.5V6h2v1.5A.5.5 0 0 0 12.5 8H14V6h2v2h1.5A.5.5 0 0 0 17 7.5V6h2v1.5z"/></svg></a>
-              <a href="#" className="hover:text-blue-300"><svg width="24" height="24" fill="currentColor"><circle cx="12" cy="12" r="12" fill="#fff"/><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0-2a6 6 0 1 1 0 12A6 6 0 0 1 12 6z"/></svg></a>
-              <a href="#" className="hover:text-blue-300"><svg width="24" height="24" fill="currentColor"><circle cx="12" cy="12" r="12" fill="#fff"/><path d="M16 8a4 4 0 1 0-8 0v8a4 4 0 1 0 8 0V8z"/></svg></a>
+              <a href="#" className="hover:text-blue-300">
+                <svg width="24" height="24" fill="currentColor">
+                  <circle cx="12" cy="12" r="12" fill="#fff"/>
+                  <path d="M17 8.5a2.5 2.5 0 0 1-2.5 2.5H14v2h1.5a2.5 2.5 0 0 1 0 5H14v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H12v-2h-1.5A2.5 2.5 0 0 1 8 8.5V7h2v1.5A.5.5 0 0 0 10.5 9H12V7h2v2h1.5A.5.5 0 0 0 15 8.5V7h2v1.5z"/>
+                </svg>
+              </a>
+              <a href="#" className="hover:text-blue-300">
+                <svg width="24" height="24" fill="currentColor">
+                  <circle cx="12" cy="12" r="12" fill="#fff"/>
+                  <path d="M19 7.5a2.5 2.5 0 0 1-2.5 2.5H16v2h1.5a2.5 2.5 0 0 1 0 5H16v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H14v-2h-1.5A2.5 2.5 0 0 1 10 7.5V6h2v1.5A.5.5 0 0 0 12.5 8H14V6h2v2h1.5A.5.5 0 0 0 17 7.5V6h2v1.5z"/>
+                </svg>
+              </a>
+              <a href="#" className="hover:text-blue-300">
+                <svg width="24" height="24" fill="currentColor">
+                  <circle cx="12" cy="12" r="12" fill="#fff"/>
+                  <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0-2a6 6 0 1 1 0 12A6 6 0 0 1 12 6z"/>
+                </svg>
+              </a>
+              <a href="#" className="hover:text-blue-300">
+                <svg width="24" height="24" fill="currentColor">
+                  <circle cx="12" cy="12" r="12" fill="#fff"/>
+                  <path d="M16 8a4 4 0 1 0-8 0v8a4 4 0 1 0 8 0V8z"/>
+                </svg>
+              </a>
             </div>
           </div>
         </div>

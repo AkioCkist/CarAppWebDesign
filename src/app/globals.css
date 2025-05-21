@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
@@ -23,4 +26,24 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer components {
+  .header-container {
+    @apply fixed top-0 left-0 w-full z-30 bg-gradient-to-r from-gray-900 to-black text-white;
+  }
+  
+  .top-bar {
+    @apply flex items-center justify-between py-2 border-b border-gray-800 text-sm;
+  }
+  
+  .contact-info {
+    @apply flex items-center gap-6;
+  }
+  
+  /* Other styles here */
+  
+  .sign-in-btn {
+    @apply px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition;
+  }
 }
