@@ -234,15 +234,15 @@ export default function HomePage() {
         }}
       ></div>
 
-      <div className="relative pt-16 pb-16 px-4"> {/* Reduced pt-20 to pt-16 to maintain spacing */}
+      <div className="relative pt-30 pb-16 px-4"> {/* Reduced pt-20 to pt-16 to maintain spacing */}
         <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-white">
+          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
             Whale Xe - More than rentals<br />
             We deliver happiness
           </h1> 
-          
+            
           {/* Search Form */}
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Location Section */}
               <div className="space-y-4">
