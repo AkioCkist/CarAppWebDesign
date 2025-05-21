@@ -158,15 +158,16 @@ export default function HomePage() {
     <div className="font-sans bg-white text-gray-900">
       {/* Header */}
       <header 
-        className="fixed top-0 left-0 w-full z-30 bg-gradient-to-r from-gray-900 to-black text-white transition-opacity duration-300"
+        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-300"
         style={{ 
           opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
-          // Now starts at 15px scroll and fades completely to 0 over 100px of additional scrolling
+          backgroundColor: scrollY > 50 ? 'rgba(17, 24, 39, 0.9)' : 'transparent',
+          transition: 'background-color 0.3s ease, opacity 0.3s ease'
         }}
       >
       <div className="max-w-7xl mx-auto px-4">
         {/* Top bar with contact info and social links */}
-        <div className="flex items-center justify-between py-2 border-b border-gray-800 text-sm">
+        <div className="flex items-center justify-between py-2 text-sm">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
               <span>+208 333 9296</span>
