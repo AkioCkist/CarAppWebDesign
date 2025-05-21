@@ -170,13 +170,13 @@ export default function HomePage() {
         <div className="flex items-center justify-between py-2 text-sm">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <span>+208 333 9296</span>
+              <span>+84 0236 3738 399</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>contact@rentaly.com</span>
+              <span>contact@whalexe.com</span>
             </div>
             <div className="flex items-center gap-2">
-              <span>Mon - Fri 08:00 - 18:00</span>
+              <span>Mon - Fri 08:00 - 19:00</span>
             </div>
           </div>
           <div className="flex items-center gap-4">
@@ -293,9 +293,21 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1">
                     <label className="block text-left font-bold text-base text-gray-700">Pick Up Date & Time</label>
-                    {/* Removed duplicate date input and left-aligned the time input */}
-                    <div className="grid grid-cols-1"> {/* Changed to grid-cols-1 for left alignment */}
-                      <input type="time" className="py-2 font-medium text-black focus:outline-none text-left" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input 
+                        type="date" 
+                        className="py-2 font-medium text-black focus:outline-none text-left"
+                        name="pickUpDate"
+                        value={form.pickUpDate}
+                        onChange={handleFormChange}
+                      />
+                      <input 
+                        type="time" 
+                        className="py-2 font-medium text-black focus:outline-none text-left"
+                        name="pickUpTime"
+                        value={form.pickUpTime}
+                        onChange={handleFormChange}
+                      />
                     </div>
                   </div>
                 </div>
@@ -308,9 +320,21 @@ export default function HomePage() {
                   </div>
                   <div className="flex-1">
                     <label className="block text-left font-bold text-base text-gray-700">Return Date & Time</label>
-                    {/* Removed duplicate date input and left-aligned the time input */}
-                    <div className="grid grid-cols-1"> {/* Changed to grid-cols-1 for left alignment */}
-                      <input type="time" className="py-2 font-medium text-black focus:outline-none text-left" />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input 
+                        type="date" 
+                        className="py-2 font-medium text-black focus:outline-none text-left"
+                        name="dropOffDate"
+                        value={form.dropOffDate}
+                        onChange={handleFormChange}
+                      />
+                      <input 
+                        type="time" 
+                        className="py-2 font-medium text-black focus:outline-none text-left"
+                        name="dropOffTime"
+                        value={form.dropOffTime}
+                        onChange={handleFormChange}
+                      />
                     </div>
                   </div>
                 </div>
@@ -319,7 +343,7 @@ export default function HomePage() {
 
             {/* Search Button - Centered below the form */}
             <div className="mt-6 text-center">
-              <button className="bg-green-500 text-white font-medium py-3 px-8 rounded-lg hover:bg-green-600 transition duration-200">
+              <button className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200">
                 Tìm Xe
               </button>
             </div>
@@ -423,9 +447,9 @@ export default function HomePage() {
           <div>
             <h3 className="font-bold text-lg mb-2">Contact Info</h3>
             <ul className="text-gray-200 text-sm space-y-1">
-              <li>123 Ocean Drive, City, Country</li>
-              <li>+1 234 567 890</li>
-              <li>info@whalexe.com</li>
+              <li>158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</li>
+              <li>+84 0236 3738 399</li>
+              <li>contact@whalexe.com</li>
             </ul>
           </div>
           <div>
