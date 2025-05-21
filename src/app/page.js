@@ -222,85 +222,109 @@ export default function HomePage() {
       </div>
     </header>
 
-      {/* Hero Section */}
-      <section className="pt-28 pb-16 bg-gradient-to-br from-blue-50 to-white">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4">Your Journey Starts Here</h1>
-          <p className="text-lg md:text-xl text-gray-600 mb-8">Find the perfect car for your next adventure with Whale Xe.</p>
-          <form className="bg-white rounded-xl shadow-lg p-6 md:p-8 flex flex-col md:flex-row gap-4 items-center justify-center max-w-3xl mx-auto" onSubmit={e => e.preventDefault()}>
-            <select
-              name="vehicleType"
-              value={form.vehicleType}
-              onChange={handleFormChange}
-              className="w-full md:w-40 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {vehicleTypes.map((type) => (
-                <option key={type} value={type}>{type}</option>
-              ))}
-            </select>
-            <input
-              type="text"
-              name="pickUp"
-              placeholder="Pick Up Location"
-              value={form.pickUp}
-              onChange={handleFormChange}
-              className="w-full md:w-48 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="text"
-              name="dropOff"
-              placeholder="Drop Off Location"
-              value={form.dropOff}
-              onChange={handleFormChange}
-              className="w-full md:w-48 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-              disabled={sameLocation}
-            />
-            <label className="flex items-center gap-2 text-sm text-gray-500">
-              <input
-                type="checkbox"
-                name="sameLocation"
-                checked={sameLocation}
-                onChange={handleFormChange}
-              />
-              Same as Pick Up
-            </label>
-            <input
-              type="date"
-              name="pickUpDate"
-              value={form.pickUpDate}
-              onChange={handleFormChange}
-              className="w-full md:w-36 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="time"
-              name="pickUpTime"
-              value={form.pickUpTime}
-              onChange={handleFormChange}
-              className="w-full md:w-28 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="date"
-              name="dropOffDate"
-              value={form.dropOffDate}
-              onChange={handleFormChange}
-              className="w-full md:w-36 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <input
-              type="time"
-              name="dropOffTime"
-              value={form.dropOffTime}
-              onChange={handleFormChange}
-              className="w-full md:w-28 px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-            <button className="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition mt-2 md:mt-0">Search</button>
-          </form>
+    {/* Hero Section */}
+    <section className="relative pt-24"> {/* Increased pt-20 to pt-24 */}
+      {/* Background Image with Overlay */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: "url('/hero/hero.png')",
+          filter: "brightness(0.7)"
+        }}
+      ></div>
+
+      <div className="relative pt-16 pb-16 px-4"> {/* Reduced pt-20 to pt-16 to maintain spacing */}
+        <div className="max-w-5xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold mb-3 text-white">
+            Mioto - Cùng Bạn<br />
+            Đến Mọi Hành Trình
+          </h1> 
+          
+          {/* Search Form */}
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Location Section */}
+              <div className="space-y-4">
+                <div className="flex items-center border-b pb-4">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-left font-bold text-base text-gray-700">Pick Up Location</label>
+                    <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
+                      <option>Select location</option>
+                      <option>TP. Hồ Chí Minh</option>
+                      <option>Hà Nội</option>
+                      <option>Đà Nẵng</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-left font-bold text-base text-gray-700">Drop Off Location</label>
+                    <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
+                      <option>Same as Pick Up</option>
+                      <option>TP. Hồ Chí Minh</option>
+                      <option>Hà Nội</option>
+                      <option>Đà Nẵng</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Date/Time Section */}
+              <div className="space-y-4">
+                <div className="flex items-center border-b pb-4">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-left font-bold text-base text-gray-700">Pick Up Date & Time</label>
+                    {/* Removed duplicate date input and left-aligned the time input */}
+                    <div className="grid grid-cols-1"> {/* Changed to grid-cols-1 for left alignment */}
+                      <input type="time" className="py-2 font-medium text-black focus:outline-none text-left" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-left font-bold text-base text-gray-700">Return Date & Time</label>
+                    {/* Removed duplicate date input and left-aligned the time input */}
+                    <div className="grid grid-cols-1"> {/* Changed to grid-cols-1 for left alignment */}
+                      <input type="time" className="py-2 font-medium text-black focus:outline-none text-left" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Search Button - Centered below the form */}
+            <div className="mt-6 text-center">
+              <button className="bg-green-500 text-white font-medium py-3 px-8 rounded-lg hover:bg-green-600 transition duration-200">
+                Tìm Xe
+              </button>
+            </div>
+          </div>
         </div>
+      </div>
       </section>
 
       {/* Features Section */}
