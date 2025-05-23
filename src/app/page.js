@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import Link from 'next/link';
 
 const vehicleTypes = [
   "Sedan",
@@ -206,7 +207,11 @@ export default function HomePage() {
           </nav>
           
           <div>
-            <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">Sign In</button>
+            <Link href="/signin_registration">
+              <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
+                Sign In
+              </button>
+            </Link>
           </div>
         </div>
       </div>
