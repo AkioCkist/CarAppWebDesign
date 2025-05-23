@@ -431,17 +431,47 @@ export default function LoginPage() {
                     </button>
                     
                     {/* Divider */}
-                    <div className="mt-6 mb-6">
-                      <div className="relative">
-                        <div className="absolute inset-0 flex items-center">
-                          <div className="w-full border-t border-gray-300" />
-                        </div>
-                        <div className="relative flex justify-center text-sm">
-                          <span className="px-2 bg-black bg-opacity-60 text-white">Or continue with</span>
-                        </div>
-                      </div>
-                    </div>
+                    <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
+                      ↓
+                      <style jsx>{`
+                        .arrow-cycle {
+                          display: inline-block;
+                          animation: arrowSpinBounce 2.5s infinite ease-in-out;
+                          color: #9ca3af; /* Tailwind gray-400 */
+                        }
 
+                        @keyframes arrowSpinBounce {
+                          0% {
+                            transform: rotate(0deg) translateY(0);
+                            opacity: 0.6;
+                            color: #9ca3af; /* gray-400 */
+                          }
+                          10% {
+                            transform: rotate(360deg) translateY(0);
+                            color: #9ca3af;
+                          }
+                          30% {
+                            transform: rotate(0deg) translateY(12px);
+                            opacity: 1;
+                            color: #fff; /* white */
+                          }
+                          60% {
+                            transform: translateY(-6px);
+                            color: #fff;
+                          }
+                          90% {
+                            transform: rotate(360deg) translateY(0);
+                            opacity: 0.8;
+                            color: #9ca3af;
+                          }
+                          100% {
+                            transform: rotate(0deg) translateY(0);
+                            opacity: 0.6;
+                            color: #9ca3af;
+                          }
+                        }
+                      `}</style>
+                    </div>
                     {/* Social Login */}
                     <div className="grid grid-cols-2 gap-3">
                       <button
