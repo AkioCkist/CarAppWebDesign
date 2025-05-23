@@ -168,17 +168,6 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-4">
         {/* Top bar with contact info and social links */}
         <div className="flex items-center justify-between py-2 text-sm">
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <span>+84 0236 3738 399</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>contact@whalexe.com</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>Mon - Fri 08:00 - 19:00</span>
-            </div>
-          </div>
           <div className="flex items-center gap-4">
             <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
             <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
@@ -344,7 +333,7 @@ export default function HomePage() {
             {/* Search Button - Centered below the form */}
             <div className="mt-6 text-center">
               <button className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200">
-                Tìm Xe
+                Search Your Cars
               </button>
             </div>
           </div>
