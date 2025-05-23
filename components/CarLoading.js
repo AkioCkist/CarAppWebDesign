@@ -231,7 +231,6 @@ export const useCarLoading = () => {
       <CarLoadingScreen
         isVisible={isLoading}
         onComplete={() => {
-          stopLoading();
           onComplete?.();
         }}
       />
