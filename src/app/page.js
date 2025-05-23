@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion"; // <-- Add this
+import { motion } from "framer-motion";
 
 const vehicleTypes = [
   "Sedan",
@@ -71,7 +71,7 @@ const news = [
   {
     image: "https://placehold.co/300x200/cccccc/333333?text=News",
     title: "Electric Cars: The Future of Car Rentals",
-    snippet: "Explore the benefits of renting electric vehicles and how they’re changing the industry.",
+    snippet: "Explore the benefits of renting electric vehicles and how they're changing the industry.",
     link: "#",
   },
   {
@@ -86,7 +86,7 @@ const faqs = [
   {
     question: "What documents do I need to rent a car?",
     answer:
-      "You’ll need a valid driver’s license, a credit card, and proof of insurance. International renters may need a passport.",
+      "You'll need a valid driver's license, a credit card, and proof of insurance. International renters may need a passport.",
   },
   {
     question: "Can I return the car to a different location?",
@@ -145,7 +145,7 @@ export default function HomePage() {
 
     // Add event listener
     window.addEventListener("scroll", handleScroll);
-    
+
     // Remove event listener on cleanup
     return () => {
       window.removeEventListener("scroll", handleScroll);
@@ -200,196 +200,207 @@ export default function HomePage() {
           transition: 'background-color 0.3s ease, opacity 0.3s ease'
         }}
       >
-      <div className="max-w-7xl mx-auto px-4">
-        {/* Top bar with contact info and social links */}
-        <div className="flex items-center justify-between py-2 text-sm">
-          <div className="flex items-center gap-4">
-            <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
-            <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
-            <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
-            <a href="#" aria-label="Pinterest"><i className="fab fa-pinterest"></i></a>
-            <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
+        <div className="max-w-7xl mx-auto px-4">
+          {/* Top bar with contact info and social links */}
+          <div className="flex items-center justify-between py-2 text-sm">
+            <div className="flex items-center gap-4">
+              <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
+              <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
+              <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
+              <a href="#" aria-label="Pinterest"><i className="fab fa-pinterest"></i></a>
+              <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
+            </div>
+          </div>
+
+          {/* Main navigation */}
+          <div className="flex items-center justify-between py-4">
+            <div className="flex items-center gap-2">
+              {/* Logo */}
+              <a href="../" className="flex items-center">
+                <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
+                <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
+              </a>
+            </div>
+
+            <nav className="flex items-center gap-6 text-base font-medium">
+              <a href="#" className="text-white hover:text-green-400 transition">Home</a>
+              <a href="#" className="text-white hover:text-green-400 transition">Cars</a>
+              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+                Booking <i className="fas fa-chevron-down text-xs"></i>
+              </a>
+              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+                My Account <i className="fas fa-chevron-down text-xs"></i>
+              </a>
+              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+                Pages <i className="fas fa-chevron-down text-xs"></i>
+              </a>
+              <a href="#" className="text-white hover:text-green-400 transition">Gallery</a>
+              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+                News <i className="fas fa-chevron-down text-xs"></i>
+              </a>
+            </nav>
+
+            <div>
+              <Link href="/signin_registration">
+                <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
+                  Sign In
+                </button>
+              </Link>
+            </div>
           </div>
         </div>
-        
-        {/* Main navigation */}
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            {/* Logo */}
-            <a href="../" className="flex items-center">
-              <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
-              <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
-            </a>
-          </div>
+      </motion.header>
 
-          <nav className="flex items-center gap-6 text-base font-medium">
-            <a href="#" className="text-white hover:text-green-400 transition">Home</a>
-            <a href="#" className="text-white hover:text-green-400 transition">Cars</a>
-            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
-              Booking <i className="fas fa-chevron-down text-xs"></i>
-            </a>
-            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
-              My Account <i className="fas fa-chevron-down text-xs"></i>
-            </a>
-            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
-              Pages <i className="fas fa-chevron-down text-xs"></i>
-            </a>
-            <a href="#" className="text-white hover:text-green-400 transition">Gallery</a>
-            <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
-              News <i className="fas fa-chevron-down text-xs"></i>
-            </a>
-          </nav>
-          
-          <div>
-            <Link href="/signin_registration">
-              <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
-                Sign In
-              </button>
-            </Link>
-          </div>
-        </div>
-      </div>
-    </motion.header>
+      {/* Hero Section */}
+      <motion.section
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={1}
+        className="relative pt-24"
+      >
+        {/* Background Image with Overlay */}
+        <div
+          className="absolute inset-0 bg-cover bg-center pointer-events-none"
+          style={{
+            backgroundImage: "url('/hero/hero.png')",
+            filter: "brightness(0.7)",
+            top: "-48px", // move image up
+            height: "calc(100% + 48px)", // make image taller to cover gap
+            width: "100%",
+            left: 0,
+            zIndex: 0,
+            position: "absolute"
+          }}
+        ></div>
 
-    {/* Hero Section */}
-    <motion.section
-      variants={fadeVariant}
-      initial="hidden"
-      animate="visible"
-      custom={1}
-      className="relative pt-24"
-    >
-      {/* Background Image with Overlay */}
-      <div
-        className="absolute inset-0 bg-cover bg-center pointer-events-none"
-        style={{
-          backgroundImage: "url('/hero/hero.png')",
-          filter: "brightness(0.7)",
-          top: "-48px", // move image up
-          height: "calc(100% + 48px)", // make image taller to cover gap
-          width: "100%",
-          left: 0,
-          zIndex: 0,
-          position: "absolute"
-        }}
-      ></div>
+        <div className="relative pt-30 pb-16 px-4"> {/* Reduced pt-20 to pt-16 to maintain spacing */}
+          <div className="max-w-5xl mx-auto text-center">
+            <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
+              Whale Xe - More than rentals<br />
+              We deliver happiness
+            </h1>
 
-      <div className="relative pt-30 pb-16 px-4"> {/* Reduced pt-20 to pt-16 to maintain spacing */}
-        <div className="max-w-5xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
-            Whale Xe - More than rentals<br />
-            We deliver happiness
-          </h1> 
-            
-          {/* Search Form */}
-          <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Location Section */}
-              <div className="space-y-4">
-                <div className="flex items-center border-b pb-4">
-                  <div className="flex-shrink-0 mr-3">
-                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
+            {/* Search Form */}
+            <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Location Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center border-b pb-4">
+                    <div className="flex-shrink-0 mr-3">
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-left font-bold text-base text-gray-700">Pick Up Location</label>
+                      <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
+                        <option>Select location</option>
+                        <option>TP. Hồ Chí Minh</option>
+                        <option>Hà Nội</option>
+                        <option>Đà Nẵng</option>
+                      </select>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-left font-bold text-base text-gray-700">Pick Up Location</label>
-                    <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
-                      <option>Select location</option>
-                      <option>TP. Hồ Chí Minh</option>
-                      <option>Hà Nội</option>
-                      <option>Đà Nẵng</option>
-                    </select>
-                  </div>
-                </div>
 
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 mr-3">
-                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-left font-bold text-base text-gray-700">Drop Off Location</label>
-                    <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
-                      <option>Same as Pick Up</option>
-                      <option>TP. Hồ Chí Minh</option>
-                      <option>Hà Nội</option>
-                      <option>Đà Nẵng</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              {/* Date/Time Section */}
-              <div className="space-y-4">
-                <div className="flex items-center border-b pb-4">
-                  <div className="flex-shrink-0 mr-3">
-                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-left font-bold text-base text-gray-700">Pick Up Date & Time</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input 
-                        type="date" 
-                        className="py-2 font-medium text-black focus:outline-none text-left"
-                        name="pickUpDate"
-                        value={form.pickUpDate}
-                        onChange={handleFormChange}
-                      />
-                      <input 
-                        type="time" 
-                        className="py-2 font-medium text-black focus:outline-none text-left"
-                        name="pickUpTime"
-                        value={form.pickUpTime}
-                        onChange={handleFormChange}
-                      />
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 mr-3">
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-left font-bold text-base text-gray-700">Drop Off Location</label>
+                      <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
+                        <option>Same as Pick Up</option>
+                        <option>TP. Hồ Chí Minh</option>
+                        <option>Hà Nội</option>
+                        <option>Đà Nẵng</option>
+                      </select>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center">
-                  <div className="flex-shrink-0 mr-3">
-                    <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
+                {/* Date/Time Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center border-b pb-4">
+                    <div className="flex-shrink-0 mr-3">
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-left font-bold text-base text-gray-700">Pick Up Date & Time</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="date"
+                          className="py-2 font-medium text-black focus:outline-none text-left"
+                          name="pickUpDate"
+                          value={form.pickUpDate}
+                          onChange={handleFormChange}
+                        />
+                        <input
+                          type="time"
+                          className="py-2 font-medium text-black focus:outline-none text-left"
+                          name="pickUpTime"
+                          value={form.pickUpTime}
+                          onChange={handleFormChange}
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <label className="block text-left font-bold text-base text-gray-700">Return Date & Time</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input 
-                        type="date" 
-                        className="py-2 font-medium text-black focus:outline-none text-left"
-                        name="dropOffDate"
-                        value={form.dropOffDate}
-                        onChange={handleFormChange}
-                      />
-                      <input 
-                        type="time" 
-                        className="py-2 font-medium text-black focus:outline-none text-left"
-                        name="dropOffTime"
-                        value={form.dropOffTime}
-                        onChange={handleFormChange}
-                      />
+
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0 mr-3">
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-left font-bold text-base text-gray-700">Return Date & Time</label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          type="date"
+                          className="py-2 font-medium text-black focus:outline-none text-left"
+                          name="dropOffDate"
+                          value={form.dropOffDate}
+                          onChange={handleFormChange}
+                        />
+                        <input
+                          type="time"
+                          className="py-2 font-medium text-black focus:outline-none text-left"
+                          name="dropOffTime"
+                          value={form.dropOffTime}
+                          onChange={handleFormChange}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Search Button - Centered below the form */}
-            <div className="mt-6 text-center">
-              <button className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200">
-                Search Your Cars
-              </button>
+              {/* Search Button - Centered below the form */}
+              <div className="mt-6 text-center">
+                <motion.button
+                  whileHover={{
+                    scale: 1.03,
+                    boxShadow: "0 5px 15px rgba(0, 0, 0, 0.1)"
+                  }}
+                  whileTap={{
+                    scale: 0.98,
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
+                    y: 40
+                  }}
+                  className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200"
+                >
+                  Search Your Cars
+                </motion.button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
       </motion.section>
 
       {/* Features Section */}
@@ -405,11 +416,35 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-10">Why Choose Us?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((f, i) => (
-              <div key={i} className="bg-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow hover:shadow-lg transition">
-                <div className="text-4xl mb-3">{f.icon}</div>
+              <motion.div
+                key={i}
+                whileHover={{
+                  scale: 1.05,
+                  y: -5,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                transition={{
+                  type: "tween", // tween animation
+                  ease: "easeOut",
+                  duration: 0.15, // Thời gian animation
+                  stiffness: 300, // Độ cứng cao hơn
+                  damping: 10,
+                  mass: 0.5
+                }}
+                className="bg-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow hover:shadow-lg"
+              >
+                <motion.div
+                  whileHover={{
+                    scale: 1.2,
+                    transition: { duration: 0.15 } // Đồng bộ thời gian với container
+                  }}
+                  className="text-4xl mb-3"
+                >
+                  {f.icon}
+                </motion.div>
                 <h3 className="font-semibold text-xl mb-2">{f.title}</h3>
                 <p className="text-gray-600">{f.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -428,13 +463,39 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {cars.map((car, i) => (
-              <div key={i} className="bg-white rounded-xl shadow p-4 flex flex-col items-center hover:shadow-lg transition">
-                <img src={car.image} alt={car.name} className="h-auto max-w-full rounded mb-4" />
+              <motion.div
+                key={i}
+                whileHover={{
+                  scale: 1.05,
+                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                transition={{
+                  type: "tween",
+                  ease: "easeOut",
+                  duration: 0.15,
+                  stiffness: 300,
+                  damping: 10,
+                  mass: 0.5
+                }}
+                className="bg-white rounded-xl shadow p-4 flex flex-col items-center hover:shadow-lg transition"
+              >
+                <motion.img
+                  whileHover={{ scale: 1.03 }}
+                  src={car.image}
+                  alt={car.name}
+                  className="h-auto max-w-full rounded mb-4"
+                />
                 <h3 className="font-semibold text-lg mb-1">{car.name}</h3>
                 <div className="text-blue-600 font-bold mb-1">{car.price}</div>
                 <div className="text-gray-500 text-sm mb-3">{car.details}</div>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition">Book Now</button>
-              </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition"
+                >
+                  Book Now
+                </motion.button>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -452,12 +513,38 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-10">Latest News</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {news.map((n, i) => (
-              <div key={i} className="bg-gray-50 rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition">
-                <img src={n.image} alt={n.title} className="h-auto max-w-full rounded mb-4" />
+              <motion.div
+                key={i}
+                whileHover={{
+                  scale: 1.03,
+                  y: -5
+                }}
+                transition={{
+                  type: "tween",
+                  ease: "easeOut",
+                  duration: 0.15,
+                  stiffness: 300,
+                  damping: 10,
+                  mass: 0.5
+                }}
+                className="bg-gray-50 rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition"
+              >
+                <motion.img
+                  whileHover={{ scale: 1.02 }}
+                  src={n.image}
+                  alt={n.title}
+                  className="h-auto max-w-full rounded mb-4"
+                />
                 <h3 className="font-semibold text-lg mb-2">{n.title}</h3>
                 <p className="text-gray-600 mb-3">{n.snippet}</p>
-                <a href={n.link} className="text-blue-600 font-semibold hover:underline mt-auto">Read More</a>
-              </div>
+                <motion.a
+                  whileHover={{ x: 5 }}
+                  href={n.link}
+                  className="text-blue-600 font-semibold hover:underline mt-auto"
+                >
+                  Read More
+                </motion.a>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -475,7 +562,14 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {faqs.map((faq, i) => (
-              <div key={i} className="bg-white rounded-xl shadow p-4">
+              <motion.div
+                key={i}
+                whileHover={{
+                  scale: 1.01,
+                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
+                }}
+                className="bg-white rounded-xl shadow p-4"
+              >
                 <button
                   className="w-full flex justify-between items-center text-left font-semibold text-lg focus:outline-none"
                   onClick={() => handleFaqToggle(i)}
@@ -483,21 +577,33 @@ export default function HomePage() {
                   aria-controls={`faq-content-${i}`}
                 >
                   <span>{faq.question}</span>
-                  <svg
-                    className={`w-5 h-5 ml-2 transform transition-transform ${faqOpen[i] ? "rotate-180" : "rotate-0"}`}
+                  <motion.svg
+                    animate={{ rotate: faqOpen[i] ? 180 : 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-5 h-5 ml-2"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  </motion.svg>
                 </button>
-                {faqOpen[i] && (
-                  <div id={`faq-content-${i}`} className="mt-3 text-gray-600 border-t pt-3">
+
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{
+                    height: faqOpen[i] ? "auto" : 0,
+                    opacity: faqOpen[i] ? 1 : 0,
+                    marginTop: faqOpen[i] ? "0.75rem" : 0
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="overflow-hidden text-gray-600 border-t"
+                >
+                  <div id={`faq-content-${i}`}>
                     {faq.answer}
                   </div>
-                )}
-              </div>
+                </motion.div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -538,26 +644,26 @@ export default function HomePage() {
             <div className="flex gap-4 mt-2">
               <a href="#" className="hover:text-blue-300">
                 <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff"/>
-                  <path d="M17 8.5a2.5 2.5 0 0 1-2.5 2.5H14v2h1.5a2.5 2.5 0 0 1 0 5H14v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H12v-2h-1.5A2.5 2.5 0 0 1 8 8.5V7h2v1.5A.5.5 0 0 0 10.5 9H12V7h2v2h1.5A.5.5 0 0 0 15 8.5V7h2v1.5z"/>
+                  <circle cx="12" cy="12" r="12" fill="#fff" />
+                  <path d="M17 8.5a2.5 2.5 0 0 1-2.5 2.5H14v2h1.5a2.5 2.5 0 0 1 0 5H14v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H12v-2h-1.5A2.5 2.5 0 0 1 8 8.5V7h2v1.5A.5.5 0 0 0 10.5 9H12V7h2v2h1.5A.5.5 0 0 0 15 8.5V7h2v1.5z" />
                 </svg>
               </a>
               <a href="#" className="hover:text-blue-300">
                 <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff"/>
-                  <path d="M19 7.5a2.5 2.5 0 0 1-2.5 2.5H16v2h1.5a2.5 2.5 0 0 1 0 5H16v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H14v-2h-1.5A2.5 2.5 0 0 1 10 7.5V6h2v1.5A.5.5 0 0 0 12.5 8H14V6h2v2h1.5A.5.5 0 0 0 17 7.5V6h2v1.5z"/>
+                  <circle cx="12" cy="12" r="12" fill="#fff" />
+                  <path d="M19 7.5a2.5 2.5 0 0 1-2.5 2.5H16v2h1.5a2.5 2.5 0 0 1 0 5H16v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H14v-2h-1.5A2.5 2.5 0 0 1 10 7.5V6h2v1.5A.5.5 0 0 0 12.5 8H14V6h2v2h1.5A.5.5 0 0 0 17 7.5V6h2v1.5z" />
                 </svg>
               </a>
               <a href="#" className="hover:text-blue-300">
                 <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff"/>
-                  <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0-2a6 6 0 1 1 0 12A6 6 0 0 1 12 6z"/>
+                  <circle cx="12" cy="12" r="12" fill="#fff" />
+                  <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0-2a6 6 0 1 1 0 12A6 6 0 0 1 12 6z" />
                 </svg>
               </a>
               <a href="#" className="hover:text-blue-300">
                 <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff"/>
-                  <path d="M16 8a4 4 0 1 0-8 0v8a4 4 0 1 0 8 0V8z"/>
+                  <circle cx="12" cy="12" r="12" fill="#fff" />
+                  <path d="M16 8a4 4 0 1 0-8 0v8a4 4 0 1 0 8 0V8z" />
                 </svg>
               </a>
             </div>
@@ -571,7 +677,7 @@ export default function HomePage() {
           </div>
         </div>
       </motion.footer>
-    </div>
+    </div >
   );
 }
 
