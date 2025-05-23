@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
-
+import { useCarLoading } from '../../components/CarLoading';
 const vehicleTypes = [
   "Sedan",
   "SUV",
@@ -114,6 +114,7 @@ export default function HomePage() {
   const [faqOpen, setFaqOpen] = useState(Array(faqs.length).fill(false));
   const [sameLocation, setSameLocation] = useState(true);
   const [scrollY, setScrollY] = useState(0);
+  const { isLoading, startLoading, CarLoadingScreen } = useCarLoading();
   const [form, setForm] = useState({
     vehicleType: vehicleTypes[0],
     pickUp: "",
@@ -137,6 +138,15 @@ export default function HomePage() {
       router.events?.off?.("routeChangeStart", handleRouteChangeStart);
     };
   }, [router]);
+
+  const handleSignInClick = (e) => {
+    e.preventDefault(); // Ngăn không cho link navigate ngay lập tức
+    startLoading(); // Bắt đầu animation loading
+  };
+  const handleLoadingComplete = () => {
+    // Navigation sang trang signin_registration
+    router.push('/signin_registration');
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -241,13 +251,14 @@ export default function HomePage() {
             </nav>
 
             <div>
-              <Link href="/signin_registration">
-                <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
-                  Sign In
-                </button>
-              </Link>
+              <button
+                onClick={handleSignInClick}
+                className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
+                Sign In
+              </button>
             </div>
           </div>
+          <CarLoadingScreen onComplete={handleLoadingComplete} />
         </div>
       </motion.header>
 
