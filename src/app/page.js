@@ -1,6 +1,8 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from 'next/link';
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion"; // <-- Add this
 
 const vehicleTypes = [
   "Sedan",
@@ -121,6 +123,20 @@ export default function HomePage() {
     dropOffDate: "",
     dropOffTime: "",
   });
+  const [fadeIn, setFadeIn] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setFadeIn(true);
+
+    // Listen for route changes to trigger fade out
+    const handleRouteChangeStart = () => setFadeIn(false);
+    router.events?.on?.("routeChangeStart", handleRouteChangeStart);
+
+    return () => {
+      router.events?.off?.("routeChangeStart", handleRouteChangeStart);
+    };
+  }, [router]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -155,12 +171,30 @@ export default function HomePage() {
     }
   };
 
+  // Animation variants for staggered fade-in
+  const fadeVariant = {
+    hidden: { opacity: 0, y: 40 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.2,
+        duration: 0.7,
+        ease: "easeOut"
+      }
+    })
+  };
+
   return (
     <div className="font-sans bg-white text-gray-900">
       {/* Header */}
-      <header 
+      <motion.header
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={0}
         className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-300"
-        style={{ 
+        style={{
           opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
           backgroundColor: scrollY > 50 ? 'rgba(17, 24, 39, 0.9)' : 'transparent',
           transition: 'background-color 0.3s ease, opacity 0.3s ease'
@@ -182,7 +216,7 @@ export default function HomePage() {
         <div className="flex items-center justify-between py-4">
           <div className="flex items-center gap-2">
             {/* Logo */}
-            <a href="#" className="flex items-center">
+            <a href="../" className="flex items-center">
               <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
               <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
             </a>
@@ -215,16 +249,28 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-    </header>
+    </motion.header>
 
     {/* Hero Section */}
-    <section className="relative pt-24"> {/* Increased pt-20 to pt-24 */}
+    <motion.section
+      variants={fadeVariant}
+      initial="hidden"
+      animate="visible"
+      custom={1}
+      className="relative pt-24"
+    >
       {/* Background Image with Overlay */}
       <div
-        className="absolute inset-0 bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center pointer-events-none"
         style={{
           backgroundImage: "url('/hero/hero.png')",
-          filter: "brightness(0.7)"
+          filter: "brightness(0.7)",
+          top: "-48px", // move image up
+          height: "calc(100% + 48px)", // make image taller to cover gap
+          width: "100%",
+          left: 0,
+          zIndex: 0,
+          position: "absolute"
         }}
       ></div>
 
@@ -344,10 +390,17 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      </section>
+      </motion.section>
 
       {/* Features Section */}
-      <section id="about" className="py-16 bg-white">
+      <motion.section
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={2}
+        id="about"
+        className="py-16 bg-white"
+      >
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Why Choose Us?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -360,10 +413,17 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Car Fleet Section */}
-      <section id="renting" className="py-16 bg-gray-50">
+      <motion.section
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={3}
+        id="renting"
+        className="py-16 bg-gray-50"
+      >
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -378,10 +438,16 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* News Section */}
-      <section className="py-16 bg-white">
+      <motion.section
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={4}
+        className="py-16 bg-white"
+      >
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Latest News</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -395,10 +461,16 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* FAQ Section */}
-      <section className="py-16 bg-gray-50">
+      <motion.section
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={5}
+        className="py-16 bg-gray-50"
+      >
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
           <div className="space-y-4">
@@ -429,10 +501,16 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
-      <footer className="bg-blue-900 text-white py-10 mt-10">
+      <motion.footer
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={6}
+        className="bg-blue-900 text-white py-10 mt-10"
+      >
         <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="font-bold text-lg mb-2">About Us</h3>
@@ -492,7 +570,7 @@ export default function HomePage() {
             <a href="#" className="hover:underline">Privacy Policy</a>
           </div>
         </div>
-      </footer>
+      </motion.footer>
     </div>
   );
 }

@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
+import { motion } from "framer-motion";
 
 export default function LoginPage() {
   const [scrollY, setScrollY] = useState(0);
@@ -104,12 +105,37 @@ export default function LoginPage() {
     setErrors({});
   };
 
+  // Smoother fade+scale animation
+  const fadeVariant = {
+    hidden: { opacity: 0, scale: 1.04, y: 32 },
+    visible: (i = 1) => ({
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        delay: i * 0.15,
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1] // cubic-bezier for smoothness
+      }
+    })
+  };
+
+  // Video fade in from black
+  const videoFade = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 1.2, ease: "easeOut" } }
+  };
+
   return (
-    <div className="font-sans bg-gray-50 text-gray-900 min-h-screen">
+    <div className="font-sans bg-black text-gray-900 min-h-screen">
       {/* Header */}
-      <header 
+      <motion.header
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={0}
         className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-300"
-        style={{ 
+        style={{
           opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
           backgroundColor: scrollY > 50 ? 'rgba(17, 24, 39, 0.9)' : 'transparent',
           transition: 'background-color 0.3s ease, opacity 0.3s ease'
@@ -156,15 +182,24 @@ export default function LoginPage() {
           </nav>
         </div>
       </div>
-    </header>
+    </motion.header>
 
       {/* Login Section */}
-      <section className="pt-32 pb-16 min-h-screen flex items-center justify-center relative">
-        {/* Background video */}
-        <video
+      <motion.section
+        variants={fadeVariant}
+        initial="hidden"
+        animate="visible"
+        custom={1}
+        className="pt-32 pb-16 min-h-screen flex items-center justify-center relative"
+      >
+        {/* Background video with fade-in */}
+        <motion.video
+          variants={videoFade}
+          initial="hidden"
+          animate="visible"
           className="absolute inset-0 w-full h-full object-cover"
-          style={{ zIndex: 0 }}
-          src="/background/loginBackground.webm" // Place your video in public/background/
+          style={{ zIndex: 0, background: "#000" }}
+          src="/background/loginBackground.webm"
           autoPlay
           loop
           muted
@@ -176,7 +211,11 @@ export default function LoginPage() {
           style={{ zIndex: 1 }}
         />
         <div className="relative z-10 w-full max-w-md mx-auto px-4">
-          <div
+          <motion.div
+            variants={fadeVariant}
+            initial="hidden"
+            animate="visible"
+            custom={2}
             className="rounded-2xl shadow-2xl p-8 bg-white/10 backdrop-blur-xl border border-white/30"
             style={{
               boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
@@ -373,9 +412,9 @@ export default function LoginPage() {
                 </button>
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
-      </section>
+      </motion.section>
     </div>
   );
 }
