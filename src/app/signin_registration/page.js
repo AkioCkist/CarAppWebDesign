@@ -105,8 +105,8 @@ export default function LoginPage() {
     setErrors({});
   };
 
-  // Smoother fade+scale animation
-  const fadeVariant = {
+  // Zoom out transition for header and login panel
+  const zoomOutVariant = {
     hidden: { opacity: 0, scale: 1.04, y: 32 },
     visible: (i = 1) => ({
       opacity: 1,
@@ -115,22 +115,28 @@ export default function LoginPage() {
       transition: {
         delay: i * 0.15,
         duration: 0.6,
-        ease: [0.22, 1, 0.36, 1] // cubic-bezier for smoothness
+        ease: [0.22, 1, 0.36, 1]
       }
     })
   };
 
-  // Video fade in from black
-  const videoFade = {
+  // Simple fade in for video only
+  const fadeInVariant = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 1.2, ease: "easeOut" } }
+    visible: { 
+      opacity: 1, 
+      transition: { 
+        duration: 1.2, 
+        ease: "easeOut" 
+      } 
+    }
   };
 
   return (
     <div className="font-sans bg-black text-gray-900 min-h-screen">
-      {/* Header */}
+      {/* Header - Apply zoom out transition */}
       <motion.header
-        variants={fadeVariant}
+        variants={zoomOutVariant}
         initial="hidden"
         animate="visible"
         custom={0}
@@ -185,16 +191,10 @@ export default function LoginPage() {
     </motion.header>
 
       {/* Login Section */}
-      <motion.section
-        variants={fadeVariant}
-        initial="hidden"
-        animate="visible"
-        custom={1}
-        className="pt-32 pb-16 min-h-screen flex items-center justify-center relative"
-      >
-        {/* Background video with fade-in */}
+      <section className="pt-32 pb-16 min-h-screen flex items-center justify-center relative">
+        {/* Background video with fade-in only */}
         <motion.video
-          variants={videoFade}
+          variants={fadeInVariant}
           initial="hidden"
           animate="visible"
           className="absolute inset-0 w-full h-full object-cover"
@@ -205,17 +205,20 @@ export default function LoginPage() {
           muted
           playsInline
         />
+        
         {/* Dark overlay */}
         <div
           className="absolute inset-0 bg-black opacity-50"
           style={{ zIndex: 1 }}
         />
+        
         <div className="relative z-10 w-full max-w-md mx-auto px-4">
+          {/* Login panel - Apply zoom out transition */}
           <motion.div
-            variants={fadeVariant}
+            variants={zoomOutVariant}
             initial="hidden"
             animate="visible"
-            custom={2}
+            custom={1}
             className="rounded-2xl shadow-2xl p-8 bg-white/10 backdrop-blur-xl border border-white/30"
             style={{
               boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
@@ -414,7 +417,7 @@ export default function LoginPage() {
             </div>
           </motion.div>
         </div>
-      </motion.section>
+      </section>
     </div>
   );
 }

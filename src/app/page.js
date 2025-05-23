@@ -114,6 +114,7 @@ export default function HomePage() {
   const [faqOpen, setFaqOpen] = useState(Array(faqs.length).fill(false));
   const [sameLocation, setSameLocation] = useState(true);
   const [scrollY, setScrollY] = useState(0);
+  const [fadeOut, setFadeOut] = useState(false); // Add this state
   const [form, setForm] = useState({
     vehicleType: vehicleTypes[0],
     pickUp: "",
@@ -125,6 +126,18 @@ export default function HomePage() {
   });
   const [fadeIn, setFadeIn] = useState(false);
   const router = useRouter();
+
+  // Updated handleNavigation function with faster transition
+  const handleNavigation = (href) => {
+    setFadeOut(true);
+    setTimeout(() => {
+      if (href.startsWith('/')) {
+        router.push(href);
+      } else {
+        window.location.href = href;
+      }
+    }, 200); // Reduced from 500ms to 200ms for faster transition
+  };
 
   useEffect(() => {
     setFadeIn(true);
@@ -187,66 +200,59 @@ export default function HomePage() {
 
   return (
     <div className="font-sans bg-white text-gray-900">
-      {/* Header */}
+      {/* Fade out overlay - Updated for faster, seamless transition */}
+      <div 
+        className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${
+          fadeOut ? 'opacity-100' : 'opacity-0'
+        }`}
+      />
+
+      {/* Header - Updated opacity transition for seamless fade */}
       <motion.header
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={0}
-        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-300"
+        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-200"
         style={{
-          opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
-          backgroundColor: scrollY > 50 ? 'rgba(17, 24, 39, 0.9)' : 'transparent',
-          transition: 'background-color 0.3s ease, opacity 0.3s ease'
+          opacity: Math.max(1 - scrollY / 50, 0),
+          backgroundColor: 'transparent'
         }}
       >
         <div className="max-w-7xl mx-auto px-4">
-          {/* Top bar with contact info and social links */}
-          <div className="flex items-center justify-between py-2 text-sm">
-            <div className="flex items-center gap-4">
-              <a href="#" aria-label="Facebook"><i className="fab fa-facebook-f"></i></a>
-              <a href="#" aria-label="Twitter"><i className="fab fa-twitter"></i></a>
-              <a href="#" aria-label="YouTube"><i className="fab fa-youtube"></i></a>
-              <a href="#" aria-label="Pinterest"><i className="fab fa-pinterest"></i></a>
-              <a href="#" aria-label="Instagram"><i className="fab fa-instagram"></i></a>
-            </div>
-          </div>
-
           {/* Main navigation */}
           <div className="flex items-center justify-between py-4">
             <div className="flex items-center gap-2">
               {/* Logo */}
-              <a href="../" className="flex items-center">
+              <button onClick={() => handleNavigation('../')} className="flex items-center">
                 <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
                 <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
-              </a>
+              </button>
             </div>
 
             <nav className="flex items-center gap-6 text-base font-medium">
-              <a href="#" className="text-white hover:text-green-400 transition">Home</a>
-              <a href="#" className="text-white hover:text-green-400 transition">Cars</a>
-              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              <button onClick={() => handleNavigation('../')} className="text-white hover:text-green-400 transition">
+                Home
+              </button>
+              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition">
+                Cars
+              </button>
+              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
                 Booking <i className="fas fa-chevron-down text-xs"></i>
-              </a>
-              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              </button>
+              <button onClick={() => handleNavigation('/signin_registration')} className="text-white hover:text-green-400 transition flex items-center gap-1">
                 My Account <i className="fas fa-chevron-down text-xs"></i>
-              </a>
-              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              </button>
+              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
                 Pages <i className="fas fa-chevron-down text-xs"></i>
-              </a>
-              <a href="#" className="text-white hover:text-green-400 transition">Gallery</a>
-              <a href="#" className="text-white hover:text-green-400 transition flex items-center gap-1">
+              </button>
+              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition">
+                Gallery
+              </button>
+              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
                 News <i className="fas fa-chevron-down text-xs"></i>
-              </a>
+              </button>
             </nav>
-
-            <div>
-              <Link href="/signin_registration">
-                <button className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
-                  Sign In
-                </button>
-              </Link>
-            </div>
           </div>
         </div>
       </motion.header>
@@ -446,6 +452,7 @@ export default function HomePage() {
                 <p className="text-gray-600">{f.desc}</p>
               </motion.div>
             ))}
+
           </div>
         </div>
       </motion.section>
