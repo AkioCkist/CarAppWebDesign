@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion"; // <-- Add this
+import { motion } from "framer-motion";
 
 const vehicleTypes = [
   "Sedan",
@@ -71,7 +71,7 @@ const news = [
   {
     image: "https://placehold.co/300x200/cccccc/333333?text=News",
     title: "Electric Cars: The Future of Car Rentals",
-    snippet: "Explore the benefits of renting electric vehicles and how they’re changing the industry.",
+    snippet: "Explore the benefits of renting electric vehicles and how they're changing the industry.",
     link: "#",
   },
   {
@@ -86,7 +86,7 @@ const faqs = [
   {
     question: "What documents do I need to rent a car?",
     answer:
-      "You’ll need a valid driver’s license, a credit card, and proof of insurance. International renters may need a passport.",
+      "You'll need a valid driver's license, a credit card, and proof of insurance. International renters may need a passport.",
   },
   {
     question: "Can I return the car to a different location?",
@@ -416,11 +416,35 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold text-center mb-10">Why Choose Us?</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {features.map((f, i) => (
-              <div key={i} className="bg-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow hover:shadow-lg transition">
-                <div className="text-4xl mb-3">{f.icon}</div>
+              <motion.div
+                key={i}
+                whileHover={{
+                  scale: 1.05,
+                  y: -5,
+                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+                }}
+                transition={{
+                  type: "tween", // tween animation
+                  ease: "easeOut",
+                  duration: 0.15, // Thời gian animation
+                  stiffness: 300, // Độ cứng cao hơn
+                  damping: 10,
+                  mass: 0.5
+                }}
+                className="bg-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow hover:shadow-lg"
+              >
+                <motion.div
+                  whileHover={{
+                    scale: 1.2,
+                    transition: { duration: 0.15 } // Đồng bộ thời gian với container
+                  }}
+                  className="text-4xl mb-3"
+                >
+                  {f.icon}
+                </motion.div>
                 <h3 className="font-semibold text-xl mb-2">{f.title}</h3>
                 <p className="text-gray-600">{f.desc}</p>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
@@ -446,9 +470,11 @@ export default function HomePage() {
                   boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
                 }}
                 transition={{
-                  type: "spring",
-                  stiffness: 200,
-                  damping: 15,
+                  type: "tween",
+                  ease: "easeOut",
+                  duration: 0.15,
+                  stiffness: 300,
+                  damping: 10,
                   mass: 0.5
                 }}
                 className="bg-white rounded-xl shadow p-4 flex flex-col items-center hover:shadow-lg transition"
@@ -495,8 +521,11 @@ export default function HomePage() {
                 }}
                 transition={{
                   type: "tween",
-                  duration: 0.10,
-                  ease: "easeOut"
+                  ease: "easeOut",
+                  duration: 0.15,
+                  stiffness: 300,
+                  damping: 10,
+                  mass: 0.5
                 }}
                 className="bg-gray-50 rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition"
               >
@@ -568,7 +597,7 @@ export default function HomePage() {
                     marginTop: faqOpen[i] ? "0.75rem" : 0
                   }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden text-gray-600 border-t "
+                  className="overflow-hidden text-gray-600 border-t"
                 >
                   <div id={`faq-content-${i}`}>
                     {faq.answer}
@@ -648,7 +677,7 @@ export default function HomePage() {
           </div>
         </div>
       </motion.footer>
-    </div>
+    </div >
   );
 }
 
