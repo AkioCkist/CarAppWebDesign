@@ -85,8 +85,16 @@ const news = [
 const faqs = [
   {
     question: "What documents do I need to rent a car?",
-    answer:
-      "You'll need a valid driver's license, a credit card, and proof of insurance. International renters may need a passport.",
+        answer: (
+      <div>
+        To rent a car in Vietnam, you will need:
+        <br />• A valid driver's license appropriate for the type of vehicle you're renting.
+        <br />• A government-issued ID card (Citizen Identification/ID Card) or a valid passport.
+        <br />• A credit card or deposit as required by the rental company.
+        <br />• Proof of insurance (usually included in the rental price, but should be confirmed).
+        <br /><span className="text-amber-600 font-medium">*Note: Foreigners must present a valid passport and an international driver's license or a Vietnamese driver's license.*</span>
+      </div>
+    )
   },
   {
     question: "Can I return the car to a different location?",
