@@ -662,142 +662,165 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         custom={6}
-        className="bg-gradient-to-b from-blue-600 to-blue-800 text-white py-12 mt-20"
-      >
-        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-10">
-          {/* Logo and About */}
-          <div className="md:col-span-2 lg:col-span-1">
-            <div className="flex items-center mb-4">
-              <div className="mr-3">
-                <Image
-                  src="/logo/logo.png"
-                  alt="Whale Xe Logo"
-                  width={40}
-                  height={40}
-                  className="rounded-full"
-                />
+        className="text-white py-12 mt-20"
+        style={{
+          background: 'linear-gradient(135deg, #1A9C4C 0%, #267243 25%, #00C74C 50%, #244731 75%, #223329 100%)',
+          boxShadow: 'inset 0 0 100px rgba(0, 199, 76, 0.3), inset 0 0 200px rgba(0, 199, 76, 0.1)'
+        }}>
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
+            {/* Logo and About - Takes more space on larger screens */}
+            <div className="lg:col-span-1 space-y-4">
+              <div className="flex items-center mb-4">
+                <div className="mr-3">
+                  <Image
+                    src="/logo/logo.png"
+                    alt="Whale Xe Logo"
+                    width={40}
+                    height={40}
+                    className="rounded-full"
+                  />
+                </div>
+                <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-cyan-300">
+                  Whale Xe
+                </h2>
               </div>
-              <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-blue-300">
-                Whale Xe
-              </h2>
-            </div>
-            <p className="text-blue-100 text-sm mb-4">
-              Whale Xe is dedicated to making your car rental experience smooth, affordable, and enjoyable.
-              Travel with confidence and comfort.
-            </p>
-            <div className="flex space-x-4">
-              {['facebook', 'twitter', 'instagram', 'youtube', 'linkedin'].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="text-blue-100 hover:text-white transition-colors duration-300"
-                  aria-label={social}
-                >
-                  <div className="w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center">
-                    <Image
-                      src={`/social-icons/${social}.svg`}
-                      alt={social}
-                      width={16}
-                      height={16}
-                      className="w-4 h-4 object-contain"
-                    />
-                  </div>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h3 className="text-lg font-bold mb-4 text-white flex items-center">
-              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
-              Quick Links
-            </h3>
-            <ul className="space-y-2">
-              {['Home', 'Rentals', 'Services', 'Blog', 'Contact'].map((item) => (
-                <li key={item}>
+              <p className="text-green-100 text-sm leading-relaxed">
+                Whale Xe is dedicated to making your car rental experience smooth, affordable, and enjoyable.
+                Travel with confidence and comfort.
+              </p>
+              <div className="flex space-x-3 pt-2">
+                {['facebook', 'twitter', 'instagram', 'youtube', 'linkedin'].map((social) => (
                   <a
+                    key={social}
                     href="#"
-                    className="text-blue-100 hover:text-white transition-colors duration-300 text-sm flex items-center">
-                    <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span>
-                    {item}
+                    className="text-teal-50 hover:text-white transition-colors duration-300"
+                    aria-label={social}
+                  >
+                    <div className="w-7 h-7 bg-green-600/50 hover:bg-green-500 rounded-full flex items-center justify-center transition-all duration-300">
+                      <Image
+                        src={`/social-icons/${social}.svg`}
+                        alt={social}
+                        width={14}
+                        height={14}
+                        className="w-3.5 h-3.5 object-contain"
+                      />
+                    </div>
                   </a>
+                ))}
+              </div>
+            </div>
+
+            {/* Quick Links */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white flex items-center mb-4">
+                <span className="w-2.5 h-2.5 bg-green-400 rounded-full mr-2"></span>
+                Quick Links
+              </h3>
+              <ul className="space-y-3">
+                {['Home', 'Rentals', 'Services', 'Blog', 'Contact'].map((item) => (
+                  <li key={item}>
+                    <a
+                      href="#"
+                      className="text-green-100 hover:text-white transition-colors duration-300 text-sm flex items-center group">
+                      <span className="w-1.5 h-1.5 bg-green-300 rounded-full mr-3 group-hover:bg-white transition-colors duration-300"></span>
+                      {item}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Contact Info */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white flex items-center mb-4">
+                <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full mr-2"></span>
+                Contact Us
+              </h3>
+              <ul className="space-y-4 text-green-100 text-sm">
+                <li className="flex items-start">
+                  <div className="mt-0.5 mr-3 w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    <Image src="/icons/map-marker.webp" alt="Address" width={20} height={20} />
+                  </div>
+                  <span className="leading-relaxed">158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</span>
                 </li>
-              ))}
-            </ul>
+                <li className="flex items-center">
+                  <div className="mr-3 w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    <Image src="/icons/phone.webp" alt="Phone" width={16} height={16} />
+                  </div>
+                  <span>+84 0236 3738 399</span>
+                </li>
+                <li className="flex items-center">
+                  <div className="mr-3 w-5 h-5 flex items-center justify-center flex-shrink-0">
+                    <Image src="/icons/mail.webp" alt="Email" width={16} height={16} />
+                  </div>
+                  <span>contact@whalexe.com</span>
+                </li>
+              </ul>
+            </div>
+
+            {/* Newsletter */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-white flex items-center mb-4">
+                <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full mr-2"></span>
+                Newsletter
+              </h3>
+              <p className="text-green-100 text-sm leading-relaxed">
+                Subscribe to our newsletter for the latest offers and news.
+              </p>
+              <div className="space-y-3">
+                <div className="flex">
+                  <input
+                    type="email"
+                    placeholder="Your email"
+                    className="px-3 py-2.5 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 flex-1 text-sm border-0" />
+                  <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-r-lg text-sm font-medium transition-all duration-300 whitespace-nowrap">
+                    <i className="fas fa-paper-plane mr-1"></i> Subscribe
+                  </button>
+                </div>
+                <div className="flex items-start">
+                  <input type="checkbox" id="terms" className="mt-1 mr-2 accent-green-400" />
+                  <label htmlFor="terms" className="text-green-100 text-xs leading-relaxed">
+                    I agree to the <a href="#" className="text-green-300 hover:text-white hover:underline transition-colors duration-300">Privacy Policy</a>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-bold mb-4 text-white flex items-center">
-              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
-              Contact Us
-            </h3>
-            <ul className="space-y-3 text-blue-100 text-sm">
-              <li className="flex items-start">
-                <i className="fas fa-map-marker-alt mt-1 mr-3 text-green-300"></i>
-                <span>158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</span>
-              </li>
-              <li className="flex items-center">
-                <i className="fas fa-phone-alt mr-3 text-green-300"></i>
-                <span>+84 0236 3738 399</span>
-              </li>
-              <li className="flex items-center">
-                <i className="fas fa-envelope mr-3 text-green-300"></i>
-                <span>contact@whalexe.com</span>
-              </li>
-              <li className="flex items-center">
-                <i className="fas fa-clock mr-3 text-green-300"></i>
-                <span>Mon-Sun: 8:00 - 20:00</span>
-              </li>
-            </ul>
-          </div>
+          {/* Copyright Section */}
+          <div className="border-t border-green-400/30 mt-12 pt-8">
+            <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
+              {/* Copyright Text */}
+              <div className="text-green-100 text-sm order-2 lg:order-1">
+                © {new Date().getFullYear()} Whale Xe. All rights reserved.
+              </div>
 
-          {/* Newsletter */}
-          <div className="md:col-span-2 lg:col-span-1">
-            <h3 className="text-lg font-bold mb-4 text-white flex items-center">
-              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
-              Newsletter
-            </h3>
-            <p className="text-blue-100 text-sm mb-4">
-              Subscribe to our newsletter for the latest offers and news.
-            </p>
-            <div className="flex">
-              <input
-                type="email"
-                placeholder="Your email"
-                className="px-4 py-2 rounded-l-lg focus:outline-none text-gray-800 w-full text-sm"
-              />
-              <button className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white px-4 py-2 rounded-r-lg text-sm font-medium transition-all duration-300">
-                <i className="fas fa-paper-plane mr-1"></i> Send
-              </button>
-            </div>
-            <div className="mt-4 flex items-center">
-              <input type="checkbox" id="terms" className="mr-2" />
-              <label htmlFor="terms" className="text-blue-100 text-xs">
-                I agree to the <a href="#" className="text-green-300 hover:underline">Privacy Policy</a>
-              </label>
-            </div>
-          </div>
-        </div>
+              {/* Footer Links */}
+              <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 order-1 lg:order-2">
+                <a href="#" className="text-green-100 hover:text-white text-sm transition-colors duration-300">
+                  Terms & Conditions
+                </a>
+                <a href="#" className="text-green-100 hover:text-white text-sm transition-colors duration-300">
+                  Privacy Policy
+                </a>
+                <a href="#" className="text-green-100 hover:text-white text-sm transition-colors duration-300">
+                  FAQ
+                </a>
+              </div>
 
-        {/* Copyright */}
-        <div className="border-t border-blue-500 mt-10 pt-6">
-          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-blue-100 text-sm mb-4 md:mb-0">
-              © {new Date().getFullYear()} Whale Xe. All rights reserved.
-            </div>
-            <div className="flex space-x-6">
-              <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors duration-300">Terms & Conditions</a>
-              <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors duration-300">Privacy Policy</a>
-              <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors duration-300">FAQ</a>
-            </div>
-            <div className="mt-4 md:mt-0">
-              <div className="flex space-x-2">
-                <Image src="/logo/LogoPaymentFooter/visa.png" alt="Visa" width={24} height={24} className="h-6" />
-                <Image src="/logo/LogoPaymentFooter/logo-momo-png-4.png" alt="Momo" width={24} height={24} className="h-6" />
-                <Image src="/logo/LogoPaymentFooter/paypal.png" alt="Paypal" width={24} height={24} className="h-6" />
-                <img src="/logo/LogoPaymentFooter/deposit.png" alt="Bank Transfer" width={24} height={24} className="h-6" />
+              {/* Payment Methods */}
+              <div className="order-3">
+                <div className="flex items-center space-x-3">
+                  <span className="text-green-100 text-xs mr-2">We accept:</span>
+                  <div className="flex space-x-2">
+                    <Image src="/logo/LogoPaymentFooter/visa.png" alt="Visa" width={32} height={20} className="h-5 object-contain" />
+                    <Image src="/logo/LogoPaymentFooter/logo-momo-png-4.png" alt="Momo" width={32} height={20} className="h-5 object-contain" />
+                    <Image src="/logo/LogoPaymentFooter/paypal.png" alt="Paypal" width={32} height={20} className="h-5 object-contain" />
+                    <Image src="/logo/LogoPaymentFooter/deposit.png" alt="Bank Transfer" width={32} height={20} className="h-5 object-contain" />
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -838,7 +861,7 @@ export default function HomePage() {
           <motion.div
             whileHover={{
               scale: 1.1,
-              boxShadow: "0 20px 25px -5px rgba(34, 197, 94, 0.3), 0 10px 10px -5px rgba(34, 197, 94, 0.2)",
+              boxShadow: "0 20px 25px -5px rgba(22, 235, 100, 0.3), 0 10px 10px -5px rgba(34, 197, 94, 0.2)",
               y: -5
             }}
             whileTap={{ scale: 0.95 }}
