@@ -270,7 +270,10 @@ export default function HomePage() {
               <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
                 Booking <i className="fas fa-chevron-down text-xs"></i>
               </button>
-              <button onClick={() => handleNavigation('/signin_registration')} className="text-white hover:text-green-400 transition flex items-center gap-1">
+              <button
+                onClick={handleSignInClick}
+                className="text-white hover:text-green-400 transition flex items-center gap-1"
+              >
                 My Account <i className="fas fa-chevron-down text-xs"></i>
               </button>
               <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
@@ -284,13 +287,7 @@ export default function HomePage() {
               </button>
             </nav>
 
-            <div>
-              <button
-                onClick={handleSignInClick}
-                className="px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition">
-                Sign In
-              </button>
-            </div>
+            {/* Removed the old Sign In button here */}
           </div>
           <CarLoadingScreen onComplete={handleLoadingComplete} />
         </div>

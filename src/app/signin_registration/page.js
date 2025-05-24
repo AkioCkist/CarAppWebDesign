@@ -4,6 +4,25 @@ import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
 
+// Animation variant for pull-up
+const pullUpVariant = {
+  hidden: { opacity: 0, y: 80 },
+  visible: { 
+    opacity: 1, 
+    y: 0, 
+    transition: { type: "spring", stiffness: 300, damping: 45, delay: 0.5 } // <-- add delay here
+  }
+};
+
+// Modified glassStyle object - remove any backdrop-filter properties
+const glassStyle = {
+  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
+  background: "rgba(255,255,255,0.10)", // semi-transparent background
+  borderRadius: "1rem",
+  border: "1px solid rgba(255,255,255,0.3)"
+  // No backdrop-filter here
+};
+
 export default function LoginPage() {
   const [scrollY, setScrollY] = useState(0);
   const [isLogin, setIsLogin] = useState(true);
@@ -261,8 +280,17 @@ export default function LoginPage() {
         />
         
         <div className="relative z-10 w-full max-w-md mx-auto px-4">
-          {/* Card container with perspective for 3D effect */}
-          <div className="w-full perspective-1000">
+          {/* Card container with pull-up animation - WITHOUT the separate blur div */}
+          <motion.div
+            variants={pullUpVariant}
+            initial="hidden"
+            animate="visible"
+            className="w-full perspective-1000 relative"
+            style={{
+              backdropFilter: "blur(18px)",
+              WebkitBackdropFilter: "blur(18px)",
+            }}
+          >
             {/* Flippable card */}
             <motion.div
               custom={flipDirection}
@@ -272,20 +300,15 @@ export default function LoginPage() {
               className="w-full h-full relative preserve-3d"
               style={{ 
                 transformStyle: "preserve-3d",
-                minHeight: "800px" // Increased minimum height to fit all content
+                minHeight: "800px"
               }}
             >
               {/* Front side (Login) */}
               <motion.div
-                className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 bg-white/10 backdrop-blur-xl border border-white/30"
+                className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 border border-white/30"
                 style={{
+                  ...glassStyle,
                   backfaceVisibility: "hidden",
-                  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-                  background: "rgba(255,255,255,0.10)",
-                  backdropFilter: "blur(18px)",
-                  WebkitBackdropFilter: "blur(18px)",
-                  borderRadius: "1rem",
-                  border: "1px solid rgba(255,255,255,0.3)",
                   display: "flex",
                   flexDirection: "column"
                 }}
@@ -433,45 +456,45 @@ export default function LoginPage() {
                     {/* Divider */}
                     <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
                       ↓
-                      <style jsx>{`
-                        .arrow-cycle {
-                          display: inline-block;
-                          animation: arrowSpinBounce 2.5s infinite ease-in-out;
-                          color: #9ca3af; /* Tailwind gray-400 */
-                        }
-
-                        @keyframes arrowSpinBounce {
-                          0% {
-                            transform: rotate(0deg) translateY(0);
-                            opacity: 0.6;
-                            color: #9ca3af; /* gray-400 */
-                          }
-                          10% {
-                            transform: rotate(360deg) translateY(0);
-                            color: #9ca3af;
-                          }
-                          30% {
-                            transform: rotate(0deg) translateY(12px);
-                            opacity: 1;
-                            color: #fff; /* white */
-                          }
-                          60% {
-                            transform: translateY(-6px);
-                            color: #fff;
-                          }
-                          90% {
-                            transform: rotate(360deg) translateY(0);
-                            opacity: 0.8;
-                            color: #9ca3af;
-                          }
-                          100% {
-                            transform: rotate(0deg) translateY(0);
-                            opacity: 0.6;
-                            color: #9ca3af;
-                          }
-                        }
-                      `}</style>
                     </div>
+                    <style jsx>{`
+                      .arrow-cycle {
+                        display: inline-block;
+                        animation: arrowSpinBounce 2.5s infinite ease-in-out;
+                        color: #9ca3af; /* Tailwind gray-400 */
+                      }
+
+                      @keyframes arrowSpinBounce {
+                        0% {
+                          transform: rotate(0deg) translateY(0);
+                          opacity: 0.6;
+                          color: #9ca3af; /* gray-400 */
+                        }
+                        10% {
+                          transform: rotate(360deg) translateY(0);
+                          color: #9ca3af;
+                        }
+                        30% {
+                          transform: rotate(0deg) translateY(12px);
+                          opacity: 1;
+                          color: #fff; /* white */
+                        }
+                        60% {
+                          transform: translateY(-6px);
+                          color: #fff;
+                        }
+                        90% {
+                          transform: rotate(360deg) translateY(0);
+                          opacity: 0.8;
+                          color: #9ca3af;
+                        }
+                        100% {
+                          transform: rotate(0deg) translateY(0);
+                          opacity: 0.6;
+                          color: #9ca3af;
+                        }
+                      }
+                    `}</style>
                     {/* Social Login */}
                     <div className="grid grid-cols-2 gap-3">
                       <button
@@ -519,16 +542,11 @@ export default function LoginPage() {
               
               {/* Back side (Register) */}
               <motion.div
-                className="absolute w-full h-full backface-hidden rotateY-180 rounded-2xl shadow-2xl p-8 bg-white/10 backdrop-blur-xl border border-white/30"
+                className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 border border-white/30"
                 style={{
+                  ...glassStyle,
                   backfaceVisibility: "hidden",
                   transform: flipDirection === 'horizontal' ? 'rotateY(180deg)' : 'rotateX(180deg)',
-                  boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)",
-                  background: "rgba(255,255,255,0.10)",
-                  backdropFilter: "blur(18px)",
-                  WebkitBackdropFilter: "blur(18px)",
-                  borderRadius: "1rem",
-                  border: "1px solid rgba(255,255,255,0.3)",
                   display: "flex",
                   flexDirection: "column"
                 }}
@@ -665,7 +683,7 @@ export default function LoginPage() {
                 </motion.div>
               </motion.div>
             </motion.div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </div>
