@@ -662,12 +662,20 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         custom={6}
-        className="text-white py-12 mt-20"
-        style={{
-          background: 'linear-gradient(135deg, #1A9C4C 0%, #267243 25%, #00C74C 50%, #244731 75%, #223329 100%)',
-          boxShadow: 'inset 0 0 100px rgba(0, 199, 76, 0.3), inset 0 0 200px rgba(0, 199, 76, 0.1)'
-        }}>
-        <div className="max-w-7xl mx-auto px-6">
+        className="text-white py-12 mt-20 relative overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/background/footer/lightleaks.png"
+            alt="Footer background"
+            layout="fill"
+            objectFit="cover"
+            quality={100}
+            className="opacity-100"/>
+          {/* Overlay for better text readability */}
+          <div className="absolute inset-0 bg-black/30"></div>
+        </div>
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
           {/* Main Footer Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {/* Logo and About - Takes more space on larger screens */}
@@ -679,8 +687,7 @@ export default function HomePage() {
                     alt="Whale Xe Logo"
                     width={40}
                     height={40}
-                    className="rounded-full"
-                  />
+                    className="rounded-full"/>
                 </div>
                 <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-cyan-300">
                   Whale Xe
@@ -696,22 +703,19 @@ export default function HomePage() {
                     key={social}
                     href="#"
                     className="text-teal-50 hover:text-white transition-colors duration-300"
-                    aria-label={social}
-                  >
+                    aria-label={social}>
                     <div className="w-7 h-7 bg-green-600/50 hover:bg-green-500 rounded-full flex items-center justify-center transition-all duration-300">
                       <Image
                         src={`/social-icons/${social}.svg`}
                         alt={social}
                         width={14}
                         height={14}
-                        className="w-3.5 h-3.5 object-contain"
-                      />
+                        className="w-3.5 h-3.5 object-contain"/>
                     </div>
                   </a>
                 ))}
               </div>
             </div>
-
             {/* Quick Links */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white flex items-center mb-4">
@@ -731,7 +735,6 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-
             {/* Contact Info */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white flex items-center mb-4">
@@ -759,7 +762,6 @@ export default function HomePage() {
                 </li>
               </ul>
             </div>
-
             {/* Newsletter */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold text-white flex items-center mb-4">
@@ -788,7 +790,6 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-
           {/* Copyright Section */}
           <div className="border-t border-green-400/30 mt-12 pt-8">
             <div className="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
@@ -796,7 +797,6 @@ export default function HomePage() {
               <div className="text-green-100 text-sm order-2 lg:order-1">
                 © {new Date().getFullYear()} Whale Xe. All rights reserved.
               </div>
-
               {/* Footer Links */}
               <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 order-1 lg:order-2">
                 <a href="#" className="text-green-100 hover:text-white text-sm transition-colors duration-300">
@@ -809,7 +809,6 @@ export default function HomePage() {
                   FAQ
                 </a>
               </div>
-
               {/* Payment Methods */}
               <div className="order-3">
                 <div className="flex items-center space-x-3">
@@ -912,8 +911,7 @@ export default function HomePage() {
               transformOrigin: "bottom right",
               right: "80px",
               bottom: "0px"
-            }}
-          >
+            }}>
             {/* Close button */}
             <button
               onClick={(e) => {
