@@ -64,3 +64,101 @@ body {
 .rotateY-180 {
   transform: rotateY(180deg);
 }
+
+.typing-cursor {
+  animation: blink 1s infinite;
+  color: #10B981;
+  font-weight: bold;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.input-highlight {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: linear-gradient(to right, #10B981, #3B82F6);
+  transition: width 0.1s ease-out;
+}
+
+/* Character ripple effect */
+@keyframes characterRipple {
+  0% {
+    transform: scale(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(20);
+    opacity: 0;
+  }
+}
+
+/* Character ping effect */
+@keyframes characterPing {
+  0% {
+    transform: scale(0.2);
+    opacity: 1;
+  }
+  80%, 100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+
+.field-label {
+  transition: all 0.3s ease;
+}
+
+.field-label.active {
+  transform: translateY(-2px);
+  color: #10B981;
+}
+
+/* Form field height equalization for smoother flipping */
+form {
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Animation for the arrow cycling */
+.arrow-cycle {
+  display: inline-block;
+  animation: arrowSpinBounce 2.5s infinite ease-in-out;
+  color: #9ca3af;
+}
+
+@keyframes arrowSpinBounce {
+  0% {
+    transform: rotate(0deg) translateY(0);
+    opacity: 0.6;
+    color: #9ca3af;
+  }
+  10% {
+    transform: rotate(360deg) translateY(0);
+    color: #9ca3af;
+  }
+  30% {
+    transform: rotate(0deg) translateY(12px);
+    opacity: 1;
+    color: #fff;
+  }
+  60% {
+    transform: translateY(-6px);
+    color: #fff;
+  }
+  90% {
+    transform: rotate(360deg) translateY(0);
+    opacity: 0.8;
+    color: #9ca3af;
+  }
+  100% {
+    transform: rotate(0deg) translateY(0);
+    opacity: 0.6;
+    color: #9ca3af;
+  }
+}

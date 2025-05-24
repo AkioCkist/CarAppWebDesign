@@ -676,7 +676,7 @@ export default function HomePage() {
           <div>
             <h3 className="font-bold text-lg mb-2">Quick Links</h3>
             <ul className="text-gray-200 text-sm space-y-1">
-              <li><a href="#" className="hover:underline">Home</a></li>
+              <li><a href="" className="hover:underline">Home</a></li>
               <li><a href="#renting" className="hover:underline">Rentals</a></li>
               <li><a href="#" className="hover:underline">Blog</a></li>
               <li><a href="#" className="hover:underline">Contact</a></li>
