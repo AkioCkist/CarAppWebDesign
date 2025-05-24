@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useCarLoading } from '../../components/CarLoading';
@@ -661,65 +662,144 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         custom={6}
-        className="bg-blue-900 text-white py-10 mt-10"
+        className="bg-gradient-to-b from-blue-600 to-blue-800 text-white py-12 mt-20"
       >
-        <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div>
-            <h3 className="font-bold text-lg mb-2">About Us</h3>
-            <p className="text-gray-200 text-sm">Whale Xe is dedicated to making your car rental experience smooth, affordable, and enjoyable. Travel with confidence and comfort.</p>
+        <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-10">
+          {/* Logo and About */}
+          <div className="md:col-span-2 lg:col-span-1">
+            <div className="flex items-center mb-4">
+              <div className="mr-3">
+                <Image
+                  src="/logo/logo.png"
+                  alt="Whale Xe Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+              </div>
+              <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-blue-300">
+                Whale Xe
+              </h2>
+            </div>
+            <p className="text-blue-100 text-sm mb-4">
+              Whale Xe is dedicated to making your car rental experience smooth, affordable, and enjoyable.
+              Travel with confidence and comfort.
+            </p>
+            <div className="flex space-x-4">
+              {['facebook', 'twitter', 'instagram', 'youtube', 'linkedin'].map((social) => (
+                <a
+                  key={social}
+                  href="#"
+                  className="text-blue-100 hover:text-white transition-colors duration-300"
+                  aria-label={social}
+                >
+                  <div className="w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center">
+                    <Image
+                      src={`/social-icons/${social}.svg`}
+                      alt={social}
+                      width={16}
+                      height={16}
+                      className="w-4 h-4 object-contain"
+                    />
+                  </div>
+                </a>
+              ))}
+            </div>
           </div>
+
+          {/* Quick Links */}
           <div>
-            <h3 className="font-bold text-lg mb-2">Contact Info</h3>
-            <ul className="text-gray-200 text-sm space-y-1">
-              <li>158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</li>
-              <li>+84 0236 3738 399</li>
-              <li>contact@whalexe.com</li>
+            <h3 className="text-lg font-bold mb-4 text-white flex items-center">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              Quick Links
+            </h3>
+            <ul className="space-y-2">
+              {['Home', 'Rentals', 'Services', 'Blog', 'Contact'].map((item) => (
+                <li key={item}>
+                  <a
+                    href="#"
+                    className="text-blue-100 hover:text-white transition-colors duration-300 text-sm flex items-center">
+                    <span className="w-1.5 h-1.5 bg-blue-300 rounded-full mr-2"></span>
+                    {item}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
+
+          {/* Contact Info */}
           <div>
-            <h3 className="font-bold text-lg mb-2">Quick Links</h3>
-            <ul className="text-gray-200 text-sm space-y-1">
-              <li><a href="#" className="hover:underline">Home</a></li>
-              <li><a href="#renting" className="hover:underline">Rentals</a></li>
-              <li><a href="#" className="hover:underline">Blog</a></li>
-              <li><a href="#" className="hover:underline">Contact</a></li>
+            <h3 className="text-lg font-bold mb-4 text-white flex items-center">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              Contact Us
+            </h3>
+            <ul className="space-y-3 text-blue-100 text-sm">
+              <li className="flex items-start">
+                <i className="fas fa-map-marker-alt mt-1 mr-3 text-green-300"></i>
+                <span>158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</span>
+              </li>
+              <li className="flex items-center">
+                <i className="fas fa-phone-alt mr-3 text-green-300"></i>
+                <span>+84 0236 3738 399</span>
+              </li>
+              <li className="flex items-center">
+                <i className="fas fa-envelope mr-3 text-green-300"></i>
+                <span>contact@whalexe.com</span>
+              </li>
+              <li className="flex items-center">
+                <i className="fas fa-clock mr-3 text-green-300"></i>
+                <span>Mon-Sun: 8:00 - 20:00</span>
+              </li>
             </ul>
           </div>
-          <div>
-            <h3 className="font-bold text-lg mb-2">Social Network</h3>
-            <div className="flex gap-4 mt-2">
-              <a href="#" className="hover:text-blue-300">
-                <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff" />
-                  <path d="M17 8.5a2.5 2.5 0 0 1-2.5 2.5H14v2h1.5a2.5 2.5 0 0 1 0 5H14v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H12v-2h-1.5A2.5 2.5 0 0 1 8 8.5V7h2v1.5A.5.5 0 0 0 10.5 9H12V7h2v2h1.5A.5.5 0 0 0 15 8.5V7h2v1.5z" />
-                </svg>
-              </a>
-              <a href="#" className="hover:text-blue-300">
-                <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff" />
-                  <path d="M19 7.5a2.5 2.5 0 0 1-2.5 2.5H16v2h1.5a2.5 2.5 0 0 1 0 5H16v2h-2v-2h-1.5a2.5 2.5 0 0 1 0-5H14v-2h-1.5A2.5 2.5 0 0 1 10 7.5V6h2v1.5A.5.5 0 0 0 12.5 8H14V6h2v2h1.5A.5.5 0 0 0 17 7.5V6h2v1.5z" />
-                </svg>
-              </a>
-              <a href="#" className="hover:text-blue-300">
-                <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff" />
-                  <path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm0-2a6 6 0 1 1 0 12A6 6 0 0 1 12 6z" />
-                </svg>
-              </a>
-              <a href="#" className="hover:text-blue-300">
-                <svg width="24" height="24" fill="currentColor">
-                  <circle cx="12" cy="12" r="12" fill="#fff" />
-                  <path d="M16 8a4 4 0 1 0-8 0v8a4 4 0 1 0 8 0V8z" />
-                </svg>
-              </a>
+
+          {/* Newsletter */}
+          <div className="md:col-span-2 lg:col-span-1">
+            <h3 className="text-lg font-bold mb-4 text-white flex items-center">
+              <span className="w-3 h-3 bg-green-400 rounded-full mr-2"></span>
+              Newsletter
+            </h3>
+            <p className="text-blue-100 text-sm mb-4">
+              Subscribe to our newsletter for the latest offers and news.
+            </p>
+            <div className="flex">
+              <input
+                type="email"
+                placeholder="Your email"
+                className="px-4 py-2 rounded-l-lg focus:outline-none text-gray-800 w-full text-sm"
+              />
+              <button className="bg-gradient-to-r from-green-400 to-blue-500 hover:from-green-500 hover:to-blue-600 text-white px-4 py-2 rounded-r-lg text-sm font-medium transition-all duration-300">
+                <i className="fas fa-paper-plane mr-1"></i> Send
+              </button>
+            </div>
+            <div className="mt-4 flex items-center">
+              <input type="checkbox" id="terms" className="mr-2" />
+              <label htmlFor="terms" className="text-blue-100 text-xs">
+                I agree to the <a href="#" className="text-green-300 hover:underline">Privacy Policy</a>
+              </label>
             </div>
           </div>
         </div>
-        <div className="border-t border-blue-800 mt-8 pt-6 text-center text-gray-300 text-sm">
-          <div className="mb-2">Copyright 2025 - Whale Xe</div>
-          <div className="space-x-4">
-            <a href="#" className="hover:underline">Terms &amp; Conditions</a>
-            <a href="#" className="hover:underline">Privacy Policy</a>
+
+        {/* Copyright */}
+        <div className="border-t border-blue-500 mt-10 pt-6">
+          <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+            <div className="text-blue-100 text-sm mb-4 md:mb-0">
+              © {new Date().getFullYear()} Whale Xe. All rights reserved.
+            </div>
+            <div className="flex space-x-6">
+              <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors duration-300">Terms & Conditions</a>
+              <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors duration-300">Privacy Policy</a>
+              <a href="#" className="text-blue-100 hover:text-white text-sm transition-colors duration-300">FAQ</a>
+            </div>
+            <div className="mt-4 md:mt-0">
+              <div className="flex space-x-2">
+                <Image src="/logo/LogoPaymentFooter/visa.png" alt="Visa" width={24} height={24} className="h-6" />
+                <Image src="/logo/LogoPaymentFooter/logo-momo-png-4.png" alt="Momo" width={24} height={24} className="h-6" />
+                <Image src="/logo/LogoPaymentFooter/paypal.png" alt="Paypal" width={24} height={24} className="h-6" />
+                <img src="/logo/LogoPaymentFooter/deposit.png" alt="Bank Transfer" width={24} height={24} className="h-6" />
+              </div>
+            </div>
           </div>
         </div>
       </motion.footer>
