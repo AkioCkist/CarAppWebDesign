@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { useCarLoading } from '../../components/CarLoading';
+import SimpleFaqSection from '../../components/SimpleFaqSection';
 const vehicleTypes = [
   "Sedan",
   "SUV",
@@ -83,33 +84,8 @@ const news = [
   },
 ];
 
-const faqs = [
-  {
-    question: "What documents do I need to rent a car?",
-    answer:
-      "You'll need a valid driver's license, a credit card, and proof of insurance. International renters may need a passport.",
-  },
-  {
-    question: "Can I return the car to a different location?",
-    answer:
-      "Yes, we offer one-way rentals between select locations. Additional fees may apply.",
-  },
-  {
-    question: "Is there an age requirement?",
-    answer:
-      "Renters must be at least 21 years old. Drivers under 25 may incur a young driver surcharge.",
-  },
-  {
-    question: "Are there mileage limits?",
-    answer:
-      "Most rentals include unlimited mileage, but some vehicles may have restrictions. Check your rental agreement for details.",
-  },
-  {
-    question: "How do I modify or cancel my booking?",
-    answer:
-      "You can manage your booking online or contact our support team 24/7 for assistance.",
-  },
-];
+
+    
 
 // Notification Dot Components
 const NotificationDot = ({ children, color = "bg-red-500", delay = 0 }) => (
@@ -130,7 +106,6 @@ const NotificationDot = ({ children, color = "bg-red-500", delay = 0 }) => (
 );
 
 export default function HomePage() {
-  const [faqOpen, setFaqOpen] = useState(Array(faqs.length).fill(false));
   const [sameLocation, setSameLocation] = useState(true);
   const [scrollY, setScrollY] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
@@ -659,52 +634,8 @@ export default function HomePage() {
         className="py-16 bg-gray-50"
       >
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-10">Frequently Asked Questions</h2>
           <div className="space-y-4">
-            {faqs.map((faq, i) => (
-              <motion.div
-                key={i}
-                whileHover={{
-                  scale: 1.01,
-                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)"
-                }}
-                className="bg-white rounded-xl shadow p-4"
-              >
-                <button
-                  className="w-full flex justify-between items-center text-left font-semibold text-lg focus:outline-none"
-                  onClick={() => handleFaqToggle(i)}
-                  aria-expanded={faqOpen[i]}
-                  aria-controls={`faq-content-${i}`}
-                >
-                  <span>{faq.question}</span>
-                  <motion.svg
-                    animate={{ rotate: faqOpen[i] ? 180 : 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="w-5 h-5 ml-2"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </motion.svg>
-                </button>
-
-                <motion.div
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{
-                    height: faqOpen[i] ? "auto" : 0,
-                    opacity: faqOpen[i] ? 1 : 0,
-                    marginTop: faqOpen[i] ? "0.75rem" : 0
-                  }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden text-gray-600 border-t"
-                >
-                  <div id={`faq-content-${i}`}>
-                    {faq.answer}
-                  </div>
-                </motion.div>
-              </motion.div>
-            ))}
+            <SimpleFaqSection />
           </div>
         </div>
       </motion.section>
