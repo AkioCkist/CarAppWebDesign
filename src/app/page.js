@@ -238,57 +238,85 @@ export default function HomePage() {
           }`}
       />
 
-      {/* Header - Updated opacity transition for seamless fade */}
+      {/* Header - Updated with gradient background transition */}
       <motion.header
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={0}
-        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-200"
+        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-300"
         style={{
-          opacity: Math.max(1 - scrollY / 50, 0),
-          backgroundColor: 'transparent'
-        }}
-      >
+          opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
+          backgroundColor: scrollY > 50 ? 'rgba(17, 24, 39, 0.9)' : 'transparent',
+          transition: 'background-color 0.3s ease, opacity 0.3s ease'
+        }}>
         <div className="max-w-7xl mx-auto px-4">
           {/* Main navigation */}
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-4 transition-all duration-300">
             <div className="flex items-center gap-2">
-              {/* Logo */}
-              <button onClick={() => handleNavigation('../')} className="flex items-center">
-                <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
-                <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
+              {/* Logo with hover effect */}
+              <button
+                onClick={() => handleNavigation('../')}
+                className="flex items-center group transition-transform duration-200 hover:scale-105">
+                <img
+                  src="/logo/logo.png"
+                  alt="Whale Xe"
+                  className="h-8 transition-all duration-200 group-hover:brightness-110"
+                />
+                <span className="text-2xl font-bold text-white ml-2 transition-all duration-200 group-hover:text-green-400">
+                  Whale Xe
+                </span>
               </button>
             </div>
-
             <nav className="flex items-center gap-6 text-base font-medium">
-              <button onClick={() => handleNavigation('../')} className="text-white hover:text-green-400 transition">
+              <button
+                onClick={() => handleNavigation('../')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group">
                 Home
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition">
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group"              >
                 Cars
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
-                Booking <i className="fas fa-chevron-down text-xs"></i>
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1"              >
+                Booking
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
               <button
                 onClick={handleSignInClick}
-                className="text-white hover:text-green-400 transition flex items-center gap-1"
-              >
-                My Account <i className="fas fa-chevron-down text-xs"></i>
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1"              >
+                My Account
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
-                Pages <i className="fas fa-chevron-down text-xs"></i>
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1"            >
+                Pages
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition">
+
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group">
                 Gallery
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
-                News <i className="fas fa-chevron-down text-xs"></i>
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1">
+                News
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
             </nav>
-
-            {/* Removed the old Sign In button here */}
           </div>
           <CarLoadingScreen onComplete={handleLoadingComplete} />
         </div>
@@ -668,7 +696,7 @@ export default function HomePage() {
             layout="fill"
             objectFit="cover"
             quality={100}
-            className="opacity-100"/>
+            className="opacity-100" />
           {/* Overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
@@ -684,7 +712,7 @@ export default function HomePage() {
                     alt="Whale Xe Logo"
                     width={40}
                     height={40}
-                    className="rounded-full"/>
+                    className="rounded-full" />
                 </div>
                 <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-cyan-300">
                   Whale Xe
@@ -707,7 +735,7 @@ export default function HomePage() {
                         alt={social}
                         width={14}
                         height={14}
-                        className="w-3.5 h-3.5 object-contain"/>
+                        className="w-3.5 h-3.5 object-contain" />
                     </div>
                   </a>
                 ))}
