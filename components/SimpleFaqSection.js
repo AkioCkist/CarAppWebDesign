@@ -6,30 +6,23 @@ export default function SimpleFaqSection({ faqData }) {
   const [faqContent, setFaqContent] = useState('');
 
   useEffect(() => {
-    // If faqData is provided as prop, use it
     if (faqData) {
       setFaqContent(faqData);
       return;
     }
 
-    // Load the markdown file from public folder
     fetch('/faqs.md')
       .then(response => {
-        if (!response.ok) {
-          throw new Error('Failed to fetch FAQ');
-        }
+        if (!response.ok) throw new Error('Failed to fetch FAQ');
         return response.text();
       })
-      .then(content => {
-        setFaqContent(content);
-      })
+      .then(content => setFaqContent(content))
       .catch(error => {
         console.error('Error loading FAQ:', error);
         setFaqContent('# Error loading FAQ content');
       });
   }, [faqData]);
 
-  // Enhanced markdown parser with level 3 support
   const parseMarkdown = (content) => {
     const lines = content.split('\n');
     const sections = [];
@@ -38,7 +31,6 @@ export default function SimpleFaqSection({ faqData }) {
 
     lines.forEach(line => {
       if (line.startsWith('# ')) {
-        // Main title
         if (currentSection) {
           currentSection.content = currentContent.join('\n').trim();
           sections.push(currentSection);
@@ -50,7 +42,6 @@ export default function SimpleFaqSection({ faqData }) {
         };
         currentContent = [];
       } else if (line.startsWith('### ')) {
-        // Level 3 subsection header
         if (currentSection && currentContent.length > 0) {
           currentSection.content = currentContent.join('\n').trim();
           sections.push(currentSection);
@@ -63,7 +54,6 @@ export default function SimpleFaqSection({ faqData }) {
         };
         currentContent = [];
       } else if (line.startsWith('## ')) {
-        // Level 2 section header
         if (currentSection && currentContent.length > 0) {
           currentSection.content = currentContent.join('\n').trim();
           sections.push(currentSection);
@@ -76,12 +66,10 @@ export default function SimpleFaqSection({ faqData }) {
         };
         currentContent = [];
       } else {
-        // Content line
         currentContent.push(line);
       }
     });
 
-    // Add the last section
     if (currentSection) {
       currentSection.content = currentContent.join('\n').trim();
       sections.push(currentSection);
@@ -93,36 +81,29 @@ export default function SimpleFaqSection({ faqData }) {
   const renderContent = (content) => {
     const lines = content.split('\n');
     return lines.map((line, index) => {
-      if (line.trim() === '') {
-        return <br key={index} />;
-      } else if (line.startsWith('- ')) {
+      if (line.trim() === '') return <br key={index} />;
+      if (line.startsWith('- ')) {
         return (
           <div key={index} className="flex items-start mb-2">
             <span className="text-teal-800 mr-3 mt-1 font-bold">•</span>
             <span className="text-gray-700">{line.replace('- ', '')}</span>
           </div>
         );
-      } else {
-        return (
-          <div key={index} className="mb-3 text-gray-700 leading-relaxed">
-            {line}
-          </div>
-        );
       }
+      return (
+        <div key={index} className="mb-3 text-gray-700 leading-relaxed">
+          {line}
+        </div>
+      );
     });
   };
 
   const scrollToSection = (sectionId) => {
     const element = document.getElementById(sectionId);
-    if (element) {
-      const container = document.getElementById('faq-content-container');
-      if (container) {
-        const elementTop = element.offsetTop - container.offsetTop - 20;
-        container.scrollTo({
-          top: elementTop,
-          behavior: 'smooth'
-        });
-      }
+    const container = document.getElementById('faq-content-container');
+    if (element && container) {
+      const elementTop = element.offsetTop - container.offsetTop - 20;
+      container.scrollTo({ top: elementTop, behavior: 'smooth' });
     }
   };
 
@@ -143,23 +124,15 @@ export default function SimpleFaqSection({ faqData }) {
   }
 
   return (
-    <div className="max-w-[90vw] xl:max-w-[1600px] mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
-      {/* Header with centered, larger title */}
+    <div className="max-w-[98vw] xl:max-w-[1800px] mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
       <div className="bg-gradient-to-r from-green-400 to-green-600 border-b border-gray-200 px-12 py-8 text-center">
-        {titleSection ? (
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-3">
-            {titleSection.content}
-          </h1>
-        ) : (
-          <h1 className="text-5xl md:text-6xl font-bold text-white mb-3">
-            Frequently Asked Questions
-          </h1>
-        )}
+        <h1 className="text-5xl md:text-6xl font-bold text-white mb-3">
+          {titleSection ? titleSection.content : 'Frequently Asked Questions'}
+        </h1>
         <p className="text-white text-opacity-80 text-xl">Find answers to common questions</p>
       </div>
 
       <div className="flex">
-        {/* Table of Contents Sidebar with Scroll */}
         <div className="w-[28rem] bg-gray-50 border-r border-gray-200 flex flex-col h-[32rem]">
           <div className="p-8 border-b border-gray-200 flex-shrink-0">
             <h3 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
@@ -169,8 +142,6 @@ export default function SimpleFaqSection({ faqData }) {
               Contents
             </h3>
           </div>
-          
-          {/* Scrollable navigation area */}
           <div className="flex-1 overflow-y-auto p-8">
             <nav className="space-y-3">
               {contentSections.map((section, index) => (
@@ -191,9 +162,8 @@ export default function SimpleFaqSection({ faqData }) {
           </div>
         </div>
 
-        {/* Main Content Area */}
         <div className="flex-1">
-          <div 
+          <div
             id="faq-content-container"
             className="h-[32rem] overflow-y-auto p-12 bg-white"
             style={{
@@ -204,21 +174,20 @@ export default function SimpleFaqSection({ faqData }) {
               backgroundSize: '28px 28px'
             }}
           >
-            {/* FAQ Sections */}
             <div className="space-y-14">
               {contentSections.map((section, index) => (
                 <div key={index} className="scroll-mt-8">
-                  <div 
+                  <div
                     id={section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
                     className={`rounded-lg shadow-sm border p-8 hover:shadow-md transition-shadow duration-200 ${
-                      section.type === 'subsection' 
-                        ? 'bg-blue-50 border-blue-200 ml-12' 
+                      section.type === 'subsection'
+                        ? 'bg-blue-50 border-blue-200 ml-12'
                         : 'bg-white border-gray-200'
                     }`}
                   >
                     <h2 className={`font-bold mb-6 flex items-center ${
-                      section.type === 'subsection' 
-                        ? 'text-2xl text-blue-800' 
+                      section.type === 'subsection'
+                        ? 'text-2xl text-blue-800'
                         : 'text-3xl text-gray-800'
                     }`}>
                       <span className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold mr-4 ${
@@ -226,8 +195,8 @@ export default function SimpleFaqSection({ faqData }) {
                           ? 'w-8 h-8 bg-blue-200 text-blue-900'
                           : 'bg-emerald-100 text-teal-900'
                       }`}>
-                        {section.type === 'subsection' 
-                          ? '•' 
+                        {section.type === 'subsection'
+                          ? '•'
                           : contentSections.filter(s => s.type === 'section').findIndex(s => s === section) + 1 || index + 1
                         }
                       </span>
@@ -242,8 +211,6 @@ export default function SimpleFaqSection({ faqData }) {
                 </div>
               ))}
             </div>
-            
-            {/* Bottom spacing */}
             <div className="h-12"></div>
           </div>
         </div>
