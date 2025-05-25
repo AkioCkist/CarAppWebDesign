@@ -1,38 +1,39 @@
+// components/CarLoading.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CarLoadingScreen = ({ isVisible, onComplete }) => {
   const [progress, setProgress] = useState(0);
-  const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
     if (!isVisible) return;
-    const duration = 2400; // tổng thời gian loading
-    const interval = 16;
+
+    const duration = 2500; // 2.5 seconds
+    const interval = 16; // ~60fps
     const increment = 100 / (duration / interval);
+
     const timer = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + increment;
-        if (next >= 100) {
+      setProgress(prev => {
+        const newProgress = prev + increment;
+        if (newProgress >= 100) {
           clearInterval(timer);
           setTimeout(() => {
-            setIsFadingOut(true);
             onComplete?.();
-          }, 300); //thời gian delay để load page sign
+          }, 400); // Small delay before calling onComplete
           return 100;
         }
-        return next;
+        return newProgress;
       });
     }, interval);
+
     return () => clearInterval(timer);
   }, [isVisible, onComplete]);
 
-  // Reset progress và trạng thái mờ dần khi không hiển thị
+  // Reset progress when component becomes invisible
   useEffect(() => {
     if (!isVisible) {
       setProgress(0);
-      setIsFadingOut(false);
     }
   }, [isVisible]);
 
@@ -40,37 +41,35 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{
-            opacity: isFadingOut ? 0 : 1,
-            y: isFadingOut ? -40 : 0, // Trượt lên khi mờ dần
-          }}
-          exit={{ opacity: 0, y: -40 }}
-          transition={{
-            duration: 1.2,     // thời gian fadeout
-            ease: "easeInOut", // easing mượt
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
           className="fixed inset-0 bg-white z-50 flex items-center justify-center"
-          style={{ pointerEvents: 'all' }}>
+        >
           <div className="w-full max-w-md px-8">
             {/* Logo and Title */}
             <motion.div
               initial={{ y: -30, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2, duration: 0.6 }}
-              className="text-center mb-12">
+              className="text-center mb-12"
+            >
               <div className="flex items-center justify-center mb-4">
                 <img
                   src="/logo/logo.png"
                   alt="Whale Xe"
                   className="h-12 w-12 object-contain"
                   onError={(e) => {
+                    // Fallback if logo doesn't exist
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
-                  }}/>
+                  }}
+                />
                 <div
                   className="w-12 h-12 bg-gradient-to-br from-blue-600 to-green-500 rounded-lg items-center justify-center hidden"
-                  style={{ display: 'none' }}>
+                  style={{ display: 'none' }}
+                >
                   <span className="text-white font-bold text-xl">W</span>
                 </div>
                 <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-green-500 bg-clip-text text-transparent ml-3">
@@ -81,16 +80,19 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.5 }}
-                className="text-gray-600 text-lg">
+                className="text-gray-600 text-lg"
+              >
                 Đang chuyển hướng đến trang đăng ký...
               </motion.p>
             </motion.div>
+
             {/* Progress Bar Container */}
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.5 }}
-              className="relative mb-8">
+              className="relative mb-8"
+            >
               {/* Progress Bar Track */}
               <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden shadow-inner">
                 {/* Progress Bar Fill */}
@@ -98,17 +100,20 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                   className="h-full bg-gradient-to-r from-blue-500 via-blue-600 to-green-500 rounded-full relative"
                   initial={{ width: '0%' }}
                   animate={{ width: `${progress}%` }}
-                  transition={{ duration: 0.1, ease: 'linear' }}>
+                  transition={{ duration: 0.1, ease: 'linear' }}
+                >
                   {/* Shine effect */}
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 animate-pulse"></div>
                 </motion.div>
               </div>
+
               {/* Car SVG */}
               <motion.div
                 className="absolute -top-6 -ml-5"
                 initial={{ left: '0%' }}
                 animate={{ left: `${progress}%` }}
-                transition={{ duration: 0.1, ease: 'linear' }}>
+                transition={{ duration: 0.1, ease: 'linear' }}
+              >
                 <motion.svg
                   width="40"
                   height="28"
@@ -122,23 +127,26 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                   transition={{
                     duration: 0.8,
                     repeat: Infinity,
-                    ease: "easeInOut",
+                    ease: "easeInOut"
                   }}>
                   {/* Car Shadow */}
                   <ellipse cx="20" cy="26" rx="15" ry="2" fill="#000000" opacity="0.1" />
                   {/* Car Body */}
                   <path
                     d="M5 14h30c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2h-2c0 2.2-1.8 4-4 4s-4-1.8-4-4H13c0 2.2-1.8 4-4 4s-4-1.8-4-4H3c-1.1 0-2-.9-2-2v-6c0-1.1.9-2 2-2z"
-                    fill="#3B82F6"/>
+                    fill="#3B82F6"
+                  />
                   {/* Car Top */}
                   <path
                     d="M7 14V9c0-1.1.9-2 2-2h12l6 5v2H7z"
-                    fill="#1E40AF"/>
+                    fill="#1E40AF"
+                  />
                   {/* Windows */}
                   <path
                     d="M9 11h10l4 3H9V11z"
                     fill="#87CEEB"
-                    opacity="0.8"/>
+                    opacity="0.8"
+                  />
                   {/* Wheels */}
                   <circle cx="9" cy="22" r="3" fill="#2D3748" />
                   <circle cx="29" cy="22" r="3" fill="#2D3748" />
@@ -175,7 +183,8 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                         duration: 1.2,
                         repeat: Infinity,
                         delay: i * 0.2,
-                      }}/>
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -183,8 +192,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: progress > 50 ? 0.6 : 0 }}
-                className="mt-3 text-sm text-gray-500"
-              >
+                className="mt-3 text-sm text-gray-500">
                 {Math.round(progress)}%
               </motion.div>
             </motion.div>
@@ -194,20 +202,26 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     </AnimatePresence>
   );
 };
+// Hook để sử dụng loading dễ dàng hơn
 export const useCarLoading = () => {
   const [isLoading, setIsLoading] = useState(false);
+
   const startLoading = () => setIsLoading(true);
   const stopLoading = () => setIsLoading(false);
+
   return {
     isLoading,
     startLoading,
+    stopLoading,
     CarLoadingScreen: ({ onComplete }) => (
       <CarLoadingScreen
         isVisible={isLoading}
         onComplete={() => {
           onComplete?.();
-        }}/>
+        }}
+      />
     ),
   };
 };
+
 export default CarLoadingScreen;
