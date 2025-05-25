@@ -2,11 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
-<<<<<<< HEAD
-import { motion } from "framer-motion";
-=======
 import { motion } from "framer-motion";import { useCarLoading } from '../../components/CarLoading';
->>>>>>> 781387b (add CarList component, lib/seed.js, and update 'our car fleet')
 import VehicleList from '../../components/VehicleList';
 import vehicles from '../../lib/seed';
 
@@ -626,10 +622,7 @@ export default function HomePage() {
             <a href="#" className="hover:underline">Privacy Policy</a>
           </div>
         </div>
-      </motion.footer>
-<<<<<<< HEAD
-    </div>
-=======
+    </motion.footer>
 
 
       {/* Floating Chat Bubbles */}
@@ -906,6 +899,5 @@ export default function HomePage() {
       </div>
     </div >
 
->>>>>>> 781387b (add CarList component, lib/seed.js, and update 'our car fleet')
   );
 }
