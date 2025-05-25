@@ -42,24 +42,24 @@ const cars = [
 
 const features = [
   {
-    icon: "🚗",
-    title: "Easy Booking",
-    desc: "Book your car in just a few clicks with our seamless online process.",
+    icon: "/icons/trophy.svg", // Replace with actual path if different
+    title: "First class services",
+    desc: "Where luxury meets exceptional care, creating unforgettable moments and exceeding your every expectation.",
   },
   {
-    icon: "🛡️",
-    title: "Wide Selection",
-    desc: "Choose from a variety of vehicles to suit every journey and style.",
+    icon: "/icons/road.svg", // Replace with actual path if different
+    title: "24/7 road assistance",
+    desc: "Reliable support when you need it most, keeping you on the move with confidence and peace of mind.",
   },
   {
-    icon: "💬",
-    title: "24/7 Support",
-    desc: "Our team is here to help you anytime, anywhere.",
+    icon: "/icons/tag.svg", // Replace with actual path if different
+    title: "Quality at Minimum Expense",
+    desc: "Unlocking affordable brilliance with elevating quality while minimizing costs for maximum value.",
   },
   {
-    icon: "💰",
-    title: "Best Prices",
-    desc: "Enjoy competitive rates and exclusive deals every day.",
+    icon: "/icons/pin.svg", // Replace with actual path if different
+    title: "Free Pick-Up & Drop-Off",
+    desc: "Enjoy free pickup and drop-off services, adding an extra layer of ease to your car rental experience.",
   },
 ];
 
@@ -509,40 +509,64 @@ export default function HomePage() {
         className="py-16 bg-white"
       >
         <div className="max-w-6xl mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-10">Why Choose Us?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {features.map((f, i) => (
-              <motion.div
-                key={i}
-                whileHover={{
-                  scale: 1.05,
-                  y: -5,
-                  boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                }}
-                transition={{
-                  type: "tween", // tween animation
-                  ease: "easeOut",
-                  duration: 0.15, // Thời gian animation
-                  stiffness: 300, // Độ cứng cao hơn
-                  damping: 10,
-                  mass: 0.5
-                }}
-                className="bg-blue-50 rounded-xl p-6 flex flex-col items-center text-center shadow hover:shadow-lg"
-              >
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold text-center mb-10">Our Features</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
+              Discover a world of convenience, safety, and customization, paving the way for
+              unforgettable adventures and seamless mobility solutions.
+            </p>
+          </div>
+          <div className="flex flex-col md:flex-row items-center">
+            {/* Left and Right Feature Columns */}
+            <div className="w-full md:w-1/4 space-y-8 mb-8 md:mb-0">
+              {features.slice(0, 2).map((f, i) => (
                 <motion.div
-                  whileHover={{
-                    scale: 1.2,
-                    transition: { duration: 0.15 } // Đồng bộ thời gian với container
-                  }}
-                  className="text-4xl mb-3"
+                  key={i}
+                  className="flex items-start"
+                  variants={fadeVariant}
+                  custom={i * 0.2} // Stagger animation
                 >
-                  {f.icon}
+                  <div className="flex-shrink-0 mr-4">
+                    <Image src={f.icon} alt={f.title} width={48} height={48} className="bg-green-100 p-2 rounded-lg" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-1">{f.title}</h3>
+                    <p className="text-gray-600 text-sm">{f.desc}</p>
+                  </div>
                 </motion.div>
-                <h3 className="font-semibold text-xl mb-2">{f.title}</h3>
-                <p className="text-gray-600">{f.desc}</p>
-              </motion.div>
-            ))}
+              ))}
+            </div>
 
+            {/* Car Image - Centered */}
+            <div className="w-full md:w-1/2 px-4 flex justify-center mb-8 md:mb-0">
+              <motion.div
+                variants={fadeVariant}
+                custom={0.4} // Animation for car image
+              >
+                <Image src="/hero/adumatyper.png" alt="Honda Type R" width={600} height={375} className="max-w-full h-auto" /> 
+                {/* Replace with actual car image path */}
+              </motion.div>
+            </div>
+
+            {/* Right Feature Column */}
+            <div className="w-full md:w-1/4 space-y-8">
+              {features.slice(2, 4).map((f, i) => (
+                <motion.div
+                  key={i}
+                  className="flex items-start"
+                  variants={fadeVariant}
+                  custom={(i + 2) * 0.2} // Stagger animation
+                >
+                  <div className="flex-shrink-0 mr-4">
+                    <Image src={f.icon} alt={f.title} width={48} height={48} className="bg-green-100 p-2 rounded-lg" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-1">{f.title}</h3>
+                    <p className="text-gray-600 text-sm">{f.desc}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
           </div>
         </div>
       </motion.section>
