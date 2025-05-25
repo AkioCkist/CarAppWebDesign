@@ -394,62 +394,90 @@ export default function HomePage() {
                   </div>
                 </div>
 
-                {/* Date/Time Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center border-b pb-4">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-left font-bold text-base text-gray-700">Pick Up Date & Time</label>
-                      <div className="grid grid-cols-2 gap-2">
+              {/* Date/Time Section */}
+              <div className="space-y-4">
+                <div className="flex items-center border-b pb-4">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-5 h-5 text-gray-600 transform -translate-y-1/4" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-left font-semibold text-sm text-gray-700 mb-2">Pick Up Date & Time</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
                         <input
                           type="date"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
+                          className="w-full py-2 px-1 pr-8 text-sm font-medium text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                           name="pickUpDate"
                           value={form.pickUpDate}
                           onChange={handleFormChange}
+                          placeholder="dd/mm/yyyy" // Updated placeholder
                         />
+                        <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                      <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                        <svg className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
                         <input
                           type="time"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
+                          className="w-full py-2 pl-8 pr-8 text-sm font-medium text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                           name="pickUpTime"
                           value={form.pickUpTime}
                           onChange={handleFormChange}
                         />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <label className="block text-left font-bold text-base text-gray-700">Return Date & Time</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="date"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
-                          name="dropOffDate"
-                          value={form.dropOffDate}
-                          onChange={handleFormChange}
-                        />
-                        <input
-                          type="time"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
-                          name="dropOffTime"
-                          value={form.dropOffTime}
-                          onChange={handleFormChange}
-                        />
+                        <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
                       </div>
                     </div>
                   </div>
                 </div>
+
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 mr-3">
+                    <svg className="w-5 h-5 text-gray-600 transform -translate-y-1/4" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-left font-semibold text-sm text-gray-700 mb-2">Return Date & Time</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                        <input
+                          type="date"
+                          className="w-full py-2 px-1 pr-8 text-sm font-medium text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          name="dropOffDate"
+                          value={form.dropOffDate}
+                          onChange={handleFormChange}
+                          placeholder="dd/mm/yyyy" // Updated placeholder
+                        />
+                        <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                      <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                        <svg className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <input
+                          type="time"
+                          className="w-full py-2 pl-8 pr-8 text-sm font-medium text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                          name="dropOffTime"
+                          value={form.dropOffTime}
+                          onChange={handleFormChange}
+                        />
+                        <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="1" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
               </div>
 
               {/* Search Button - Centered below the form */}
