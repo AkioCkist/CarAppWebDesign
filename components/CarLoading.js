@@ -1,38 +1,35 @@
+// components/CarLoading.js
 'use client';
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CarLoadingScreen = ({ isVisible, onComplete }) => {
   const [progress, setProgress] = useState(0);
-  const [isFadingOut, setIsFadingOut] = useState(false);
-
   useEffect(() => {
     if (!isVisible) return;
-    const duration = 2400; // tổng thời gian loading
-    const interval = 16;
+    const duration = 2400; // 2 Giây
+    const interval = 16; // ~60fps
     const increment = 100 / (duration / interval);
     const timer = setInterval(() => {
-      setProgress((prev) => {
-        const next = prev + increment;
-        if (next >= 100) {
+      setProgress(prev => {
+        const newProgress = prev + increment;
+        if (newProgress >= 100) {
           clearInterval(timer);
           setTimeout(() => {
-            setIsFadingOut(true);
             onComplete?.();
-          }, 300); //thời gian delay để load page sign
+          }, 400); // delay nhỏ sau khi hoàn thành
           return 100;
         }
-        return next;
+        return newProgress;
       });
     }, interval);
     return () => clearInterval(timer);
   }, [isVisible, onComplete]);
 
-  // Reset progress và trạng thái mờ dần khi không hiển thị
+  //làm mới lại progress khi không còn hiển thị
   useEffect(() => {
     if (!isVisible) {
       setProgress(0);
-      setIsFadingOut(false);
     }
   }, [isVisible]);
 
@@ -40,18 +37,12 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
-          initial={{ opacity: 1, y: 0 }}
-          animate={{
-            opacity: isFadingOut ? 0 : 1,
-            y: isFadingOut ? -40 : 0, // Trượt lên khi mờ dần
-          }}
-          exit={{ opacity: 0, y: -40 }}
-          transition={{
-            duration: 1.2,     // thời gian fadeout
-            ease: "easeInOut", // easing mượt
-          }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
           className="fixed inset-0 bg-white z-50 flex items-center justify-center"
-          style={{ pointerEvents: 'all' }}>
+          style={{ pointerEvents: 'all' }}> // Ngăn chặn tương tác với các phần tử khác
           <div className="w-full max-w-md px-8">
             {/* Logo and Title */}
             <motion.div
@@ -65,6 +56,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                   alt="Whale Xe"
                   className="h-12 w-12 object-contain"
                   onError={(e) => {
+                    // Fallback if logo doesn't exist
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'flex';
                   }}/>
@@ -122,7 +114,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                   transition={{
                     duration: 0.8,
                     repeat: Infinity,
-                    ease: "easeInOut",
+                    ease: "easeInOut"
                   }}>
                   {/* Car Shadow */}
                   <ellipse cx="20" cy="26" rx="15" ry="2" fill="#000000" opacity="0.1" />
@@ -175,7 +167,8 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                         duration: 1.2,
                         repeat: Infinity,
                         delay: i * 0.2,
-                      }}/>
+                      }}
+                    />
                   ))}
                 </div>
               </div>
@@ -194,6 +187,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     </AnimatePresence>
   );
 };
+// Hook để sử dụng loading dễ dàng hơn
 export const useCarLoading = () => {
   const [isLoading, setIsLoading] = useState(false);
   const startLoading = () => setIsLoading(true);
@@ -201,12 +195,14 @@ export const useCarLoading = () => {
   return {
     isLoading,
     startLoading,
+    stopLoading,
     CarLoadingScreen: ({ onComplete }) => (
       <CarLoadingScreen
         isVisible={isLoading}
         onComplete={() => {
           onComplete?.();
-        }}/>
+        }}
+      />
     ),
   };
 };
