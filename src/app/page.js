@@ -3,39 +3,14 @@ import { useState, useEffect } from "react";
 import Link from 'next/link';
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import VehicleList from '../../components/VehicleList';
+import vehicles from '../../lib/seed';
 
 const vehicleTypes = [
   "Sedan",
   "SUV",
   "Electric",
   "Luxury",
-];
-
-const cars = [
-  {
-    name: "Toyota Camry",
-    image: "https://placehold.co/400x250/cccccc/333333?text=Car",
-    price: "$50/day",
-    details: "Seats: 5 | Transmission: Auto",
-  },
-  {
-    name: "Tesla Model 3",
-    image: "https://placehold.co/400x250/cccccc/333333?text=Car",
-    price: "$90/day",
-    details: "Seats: 5 | Transmission: Auto",
-  },
-  {
-    name: "BMW X5",
-    image: "https://placehold.co/400x250/cccccc/333333?text=Car",
-    price: "$120/day",
-    details: "Seats: 5 | Transmission: Auto",
-  },
-  {
-    name: "Honda CR-V",
-    image: "https://placehold.co/400x250/cccccc/333333?text=Car",
-    price: "$60/day",
-    details: "Seats: 5 | Transmission: Auto",
-  },
 ];
 
 const features = [
@@ -468,43 +443,7 @@ export default function HomePage() {
       >
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {cars.map((car, i) => (
-              <motion.div
-                key={i}
-                whileHover={{
-                  scale: 1.05,
-                  boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
-                }}
-                transition={{
-                  type: "tween",
-                  ease: "easeOut",
-                  duration: 0.15,
-                  stiffness: 300,
-                  damping: 10,
-                  mass: 0.5
-                }}
-                className="bg-white rounded-xl shadow p-4 flex flex-col items-center hover:shadow-lg transition"
-              >
-                <motion.img
-                  whileHover={{ scale: 1.03 }}
-                  src={car.image}
-                  alt={car.name}
-                  className="h-auto max-w-full rounded mb-4"
-                />
-                <h3 className="font-semibold text-lg mb-1">{car.name}</h3>
-                <div className="text-blue-600 font-bold mb-1">{car.price}</div>
-                <div className="text-gray-500 text-sm mb-3">{car.details}</div>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="px-4 py-2 bg-blue-600 text-white rounded font-semibold hover:bg-blue-700 transition"
-                >
-                  Book Now
-                </motion.button>
-              </motion.div>
-            ))}
-          </div>
+          <VehicleList vehicles={vehicles} />
         </div>
       </motion.section>
 
@@ -684,7 +623,6 @@ export default function HomePage() {
           </div>
         </div>
       </motion.footer>
-    </div >
+    </div>
   );
 }
-
