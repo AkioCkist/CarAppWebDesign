@@ -61,9 +61,6 @@ const news = [
   },
 ];
 
-
-    
-
 // Notification Dot Components
 const NotificationDot = ({ children, color = "bg-red-500", delay = 0 }) => (
   <motion.div
