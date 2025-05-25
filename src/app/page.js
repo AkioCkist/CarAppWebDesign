@@ -42,22 +42,22 @@ const cars = [
 
 const features = [
   {
-    icon: "/icons/trophy.svg", // Replace with actual path if different
+    icon: "/icons/trophy.svg",
     title: "First class services",
     desc: "Where luxury meets exceptional care, creating unforgettable moments and exceeding your every expectation.",
   },
   {
-    icon: "/icons/road.svg", // Replace with actual path if different
+    icon: "/icons/road.svg", 
     title: "24/7 road assistance",
     desc: "Reliable support when you need it most, keeping you on the move with confidence and peace of mind.",
   },
   {
-    icon: "/icons/tag.svg", // Replace with actual path if different
+    icon: "/icons/tag.svg", 
     title: "Quality at Minimum Expense",
     desc: "Unlocking affordable brilliance with elevating quality while minimizing costs for maximum value.",
   },
   {
-    icon: "/icons/pin.svg", // Replace with actual path if different
+    icon: "/icons/pin.svg", 
     title: "Free Pick-Up & Drop-Off",
     desc: "Enjoy free pickup and drop-off services, adding an extra layer of ease to your car rental experience.",
   },
