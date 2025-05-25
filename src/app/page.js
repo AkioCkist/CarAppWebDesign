@@ -61,9 +61,6 @@ const news = [
   },
 ];
 
-
-    
-
 // Notification Dot Components
 const NotificationDot = ({ children, color = "bg-red-500", delay = 0 }) => (
   <motion.div
@@ -749,7 +746,7 @@ export default function HomePage() {
                   <input
                     type="email"
                     placeholder="Your email"
-                    className="px-3 py-2.5 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-gray-800 flex-1 text-sm border-0" />
+                    className="px-3 py-2.5 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-green-400 text-white-800 flex-1 text-sm border-0 placeholder-white" />
                   <button className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2.5 rounded-r-lg text-sm font-medium transition-all duration-300 whitespace-nowrap">
                     <i className="fas fa-paper-plane mr-1"></i> Subscribe
                   </button>
