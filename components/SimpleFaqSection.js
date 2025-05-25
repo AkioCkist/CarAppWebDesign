@@ -29,7 +29,7 @@ export default function SimpleFaqSection({ faqData }) {
       });
   }, [faqData]);
 
-  // Enhanced markdown parser
+  // Enhanced markdown parser with level 3 support
   const parseMarkdown = (content) => {
     const lines = content.split('\n');
     const sections = [];
@@ -49,8 +49,21 @@ export default function SimpleFaqSection({ faqData }) {
           level: 1
         };
         currentContent = [];
+      } else if (line.startsWith('### ')) {
+        // Level 3 subsection header
+        if (currentSection && currentContent.length > 0) {
+          currentSection.content = currentContent.join('\n').trim();
+          sections.push(currentSection);
+        }
+        currentSection = {
+          type: 'subsection',
+          title: line.replace('### ', ''),
+          content: '',
+          level: 3
+        };
+        currentContent = [];
       } else if (line.startsWith('## ')) {
-        // Section header
+        // Level 2 section header
         if (currentSection && currentContent.length > 0) {
           currentSection.content = currentContent.join('\n').trim();
           sections.push(currentSection);
@@ -85,7 +98,7 @@ export default function SimpleFaqSection({ faqData }) {
       } else if (line.startsWith('- ')) {
         return (
           <div key={index} className="flex items-start mb-2">
-            <span className="text-green-300 mr-3 mt-1 font-bold">•</span>
+            <span className="text-teal-800 mr-3 mt-1 font-bold">•</span>
             <span className="text-gray-700">{line.replace('- ', '')}</span>
           </div>
         );
@@ -115,7 +128,7 @@ export default function SimpleFaqSection({ faqData }) {
 
   const sections = parseMarkdown(faqContent);
   const titleSection = sections.find(s => s.type === 'title');
-  const contentSections = sections.filter(s => s.type === 'section');
+  const contentSections = sections.filter(s => s.type === 'section' || s.type === 'subsection');
 
   if (!faqContent) {
     return (
@@ -146,25 +159,36 @@ export default function SimpleFaqSection({ faqData }) {
       </div>
 
       <div className="flex">
-        {/* Table of Contents Sidebar */}
-        <div className="w-80 bg-gray-50 border-r border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-            <svg className="w-5 h-5 mr-2 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            Contents
-          </h3>
-          <nav className="space-y-2">
-            {contentSections.map((section, index) => (
-              <button
-                key={index}
-                onClick={() => scrollToSection(section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}
-                className="w-full text-left p-3 rounded-lg text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 border border-transparent hover:border-blue-200"
-              >
-                <span className="font-medium">{section.title}</span>
-              </button>
-            ))}
-          </nav>
+        {/* Table of Contents Sidebar with Scroll */}
+        <div className="w-80 bg-gray-50 border-r border-gray-200 flex flex-col h-96">
+          <div className="p-6 border-b border-gray-200 flex-shrink-0">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+              <svg className="w-5 h-5 mr-2 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Contents
+            </h3>
+          </div>
+          
+          {/* Scrollable navigation area */}
+          <div className="flex-1 overflow-y-auto p-6">
+            <nav className="space-y-2">
+              {contentSections.map((section, index) => (
+                <button
+                  key={index}
+                  onClick={() => scrollToSection(section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}
+                  className={`w-full text-left p-3 rounded-lg text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 border border-transparent hover:border-blue-200 ${
+                    section.type === 'subsection' ? 'ml-4 text-xs bg-gray-100' : ''
+                  }`}
+                >
+                  <span className={`font-medium ${section.type === 'subsection' ? 'text-gray-600' : ''}`}>
+                    {section.type === 'subsection' && '└ '}
+                    {section.title}
+                  </span>
+                </button>
+              ))}
+            </nav>
+          </div>
         </div>
 
         {/* Main Content Area */}
@@ -186,15 +210,32 @@ export default function SimpleFaqSection({ faqData }) {
                 <div key={index} className="scroll-mt-6">
                   <div 
                     id={section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
+                    className={`rounded-lg shadow-sm border p-6 hover:shadow-md transition-shadow duration-200 ${
+                      section.type === 'subsection' 
+                        ? 'bg-blue-50 border-blue-200 ml-8' 
+                        : 'bg-white border-gray-200'
+                    }`}
                   >
-                    <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                      <span className="w-8 h-8 bg-emerald-100 text-teal-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">
-                        {index + 1}
+                    <h2 className={`font-bold mb-4 flex items-center ${
+                      section.type === 'subsection' 
+                        ? 'text-xl text-blue-800' 
+                        : 'text-2xl text-gray-800'
+                    }`}>
+                      <span className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold mr-3 ${
+                        section.type === 'subsection'
+                          ? 'w-6 h-6 bg-blue-200 text-blue-900'
+                          : 'bg-emerald-100 text-teal-900'
+                      }`}>
+                        {section.type === 'subsection' 
+                          ? '•' 
+                          : contentSections.filter(s => s.type === 'section').findIndex(s => s === section) + 1 || index + 1
+                        }
                       </span>
                       {section.title}
                     </h2>
-                    <div className="ml-11 text-gray-700 leading-relaxed">
+                    <div className={`text-gray-700 leading-relaxed ${
+                      section.type === 'subsection' ? 'ml-9' : 'ml-11'
+                    }`}>
                       {renderContent(section.content)}
                     </div>
                   </div>
