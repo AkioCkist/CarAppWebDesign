@@ -18,5 +18,17 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "tailwindcss": "^4"
-  }
+  },
+  "description": "![Whale Xe](public/logo/logo.png)",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AkioCkist/CarAppWebDesign.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AkioCkist/CarAppWebDesign/issues"
+  },
+  "homepage": "https://github.com/AkioCkist/CarAppWebDesign#readme"
 }
