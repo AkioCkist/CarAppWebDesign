@@ -1,4 +1,6 @@
-# CARAPPWEBDESIGN
+# Whale Xe - Car Rental Application
+
+![Whale Xe](public/logo/logo.png)
 
 *Drive Your Journey with Effortless Car Rentals*
 
@@ -38,9 +40,9 @@ Built with the tools and technologies:
 
 ## Overview
 
-CarAppWebDesign is a cutting-edge web application designed for car rentals, offering a seamless and engaging user experience through its intuitive interface and robust backend architecture.
+Whale Xe is a modern, responsive web application for car rentals built with Next.js and Tailwind CSS. The platform allows users to search for vehicles, compare options, and make reservations seamlessly. Our goal is to provide a delightful car rental experience with an intuitive interface and comprehensive features.
 
-### Why CarAppWebDesign?
+### Why Whale Xe?
 
 This project simplifies the vehicle rental process while providing developers with a powerful toolset.  
 The core features include:
