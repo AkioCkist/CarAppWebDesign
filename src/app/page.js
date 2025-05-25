@@ -4,11 +4,16 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import { useCarLoading } from '../../components/CarLoading';
+import SimpleFaqSection from '../../components/SimpleFaqSection';
+import VehicleList from "../../components/VehicleList";
+import vehicles from "../../lib/seed";
+
 
 const vehicleTypes = [
   "Sedan",
   "SUV",
-  "Electric",
+  "Electric", 
   "Luxury",
 ];
 
