@@ -84,19 +84,33 @@ export default function SimpleFaqSection({ faqData }) {
         return <br key={index} />;
       } else if (line.startsWith('- ')) {
         return (
-          <div key={index} className="flex items-start mb-1">
-            <span className="text-gray-400 mr-2 mt-1">•</span>
-            <span>{line.replace('- ', '')}</span>
+          <div key={index} className="flex items-start mb-2">
+            <span className="text-green-300 mr-3 mt-1 font-bold">•</span>
+            <span className="text-gray-700">{line.replace('- ', '')}</span>
           </div>
         );
       } else {
         return (
-          <div key={index} className="mb-2">
+          <div key={index} className="mb-3 text-gray-700 leading-relaxed">
             {line}
           </div>
         );
       }
     });
+  };
+
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const container = document.getElementById('faq-content-container');
+      if (container) {
+        const elementTop = element.offsetTop - container.offsetTop - 20;
+        container.scrollTo({
+          top: elementTop,
+          behavior: 'smooth'
+        });
+      }
+    }
   };
 
   const sections = parseMarkdown(faqContent);
@@ -105,90 +119,91 @@ export default function SimpleFaqSection({ faqData }) {
 
   if (!faqContent) {
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-8 text-center">
+      <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-200 p-8 text-center">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-300 rounded w-1/4 mx-auto mb-4"></div>
-          <div className="h-3 bg-gray-300 rounded w-1/2 mx-auto"></div>
+          <div className="h-6 bg-gray-300 rounded w-1/3 mx-auto mb-6"></div>
+          <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto mb-3"></div>
+          <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-gray-50 border border-gray-200 rounded-lg overflow-hidden">
-      {/* Header */}
-      <div className="bg-gray-100 border-b border-gray-200 px-6 py-3">
-        <div className="flex items-center space-x-2">
-          <svg className="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 0v12h8V4H6z" clipRule="evenodd" />
-          </svg>
-          <span className="text-sm font-medium text-gray-700">README.md</span>
-        </div>
+    <div className="max-w-4xl mx-auto bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+      {/* Header with centered, larger title */}
+      <div className="bg-gradient-to-r from-green-400 to-green-600 border-b border-gray-200 px-8 py-6 font-bold text-center">
+        {titleSection ? (
+          <h1 className="text-7xl font-bold text-gray-800 mb-4">
+            {titleSection.content}
+          </h1>
+        ) : (
+          <h1 className="text-7xl font-bold text-gray-800 mb-4">
+            Frequently Asked Questions
+          </h1>
+        )}
+        <p className="text-gray-600 text-lg">Frequently Asked Questions</p>
       </div>
 
-      {/* Content area with scroll */}
-      <div className="max-h-96 overflow-y-auto">
-        <div className="px-6 py-6">
-          {/* Title */}
-          {titleSection && (
-            <h1 className="text-2xl font-bold text-gray-900 mb-8 pb-2 border-b border-gray-200">
-              {titleSection.content}
-            </h1>
-          )}
-
-          {/* Table of Contents */}
-          <div className="mb-8">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Table of Contents</h2>
-            <ul className="space-y-1">
-              {contentSections.map((section, index) => (
-                <li key={index}>
-                  <a 
-                    href={`#${section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                    className="text-blue-600 hover:text-blue-800 text-sm hover:underline"
-                  >
-                    {section.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* FAQ Sections */}
-          <div className="space-y-8">
+      <div className="flex">
+        {/* Table of Contents Sidebar */}
+        <div className="w-80 bg-gray-50 border-r border-gray-200 p-6">
+          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+            <svg className="w-5 h-5 mr-2 text-green-800" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            Contents
+          </h3>
+          <nav className="space-y-2">
             {contentSections.map((section, index) => (
-              <div key={index} className="scroll-mt-4">
-                <h2 
-                  id={section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
-                  className="text-xl font-semibold text-gray-900 mb-4 flex items-center group"
-                >
-                  <a 
-                    href={`#${section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity mr-2 text-gray-400 hover:text-blue-600"
-                  >
-                    #
-                  </a>
-                  {section.title}
-                </h2>
-                <div className="text-gray-700 leading-relaxed">
-                  {renderContent(section.content)}
-                </div>
-              </div>
+              <button
+                key={index}
+                onClick={() => scrollToSection(section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-'))}
+                className="w-full text-left p-3 rounded-lg text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors duration-200 border border-transparent hover:border-blue-200"
+              >
+                <span className="font-medium">{section.title}</span>
+              </button>
             ))}
-          </div>
+          </nav>
+        </div>
 
-          {/* Footer */}
-          <div className="mt-12 pt-6 border-t border-gray-200">
-            <div className="text-sm text-gray-500 text-center">
-              <p>Last updated: {new Date().toLocaleDateString()}</p>
-              <p className="mt-1">
-                <span className="inline-flex items-center space-x-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                  <span>Need help? Contact our support team</span>
-                </span>
-              </p>
+        {/* Main Content Area */}
+        <div className="flex-1">
+          <div 
+            id="faq-content-container"
+            className="h-96 overflow-y-auto p-8 bg-white"
+            style={{
+              backgroundImage: `
+                linear-gradient(to right, #e5e7eb 1px, transparent 1px),
+                linear-gradient(to bottom, #f3f4f6 1px, transparent 1px)
+              `,
+              backgroundSize: '24px 24px'
+            }}
+          >
+            {/* FAQ Sections */}
+            <div className="space-y-10">
+              {contentSections.map((section, index) => (
+                <div key={index} className="scroll-mt-6">
+                  <div 
+                    id={section.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}
+                    className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow duration-200"
+                  >
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                      <span className="w-8 h-8 bg-emerald-100 text-teal-900 rounded-full flex items-center justify-center text-sm font-bold mr-3">
+                        {index + 1}
+                      </span>
+                      {section.title}
+                    </h2>
+                    <div className="ml-11 text-gray-700 leading-relaxed">
+                      {renderContent(section.content)}
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
+            
+            {/* Bottom spacing */}
+            <div className="h-8"></div>
           </div>
         </div>
       </div>

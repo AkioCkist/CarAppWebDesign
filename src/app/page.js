@@ -213,57 +213,85 @@ export default function HomePage() {
           }`}
       />
 
-      {/* Header - Updated opacity transition for seamless fade */}
+      {/* Header - Updated with gradient background transition */}
       <motion.header
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={0}
-        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-200"
+        className="fixed top-0 left-0 w-full z-30 text-white transition-opacity duration-300"
         style={{
-          opacity: Math.max(1 - scrollY / 50, 0),
-          backgroundColor: 'transparent'
-        }}
-      >
+          opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
+          backgroundColor: scrollY > 50 ? 'rgba(17, 24, 39, 0.9)' : 'transparent',
+          transition: 'background-color 0.3s ease, opacity 0.3s ease'
+        }}>
         <div className="max-w-7xl mx-auto px-4">
           {/* Main navigation */}
-          <div className="flex items-center justify-between py-4">
+          <div className="flex items-center justify-between py-4 transition-all duration-300">
             <div className="flex items-center gap-2">
-              {/* Logo */}
-              <button onClick={() => handleNavigation('../')} className="flex items-center">
-                <img src="/logo/logo.png" alt="Whale Xe" className="h-8" />
-                <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
+              {/* Logo with hover effect */}
+              <button
+                onClick={() => handleNavigation('../')}
+                className="flex items-center group transition-transform duration-200 hover:scale-105">
+                <img
+                  src="/logo/logo.png"
+                  alt="Whale Xe"
+                  className="h-8 transition-all duration-200 group-hover:brightness-110"
+                />
+                <span className="text-2xl font-bold text-white ml-2 transition-all duration-200 group-hover:text-green-400">
+                  Whale Xe
+                </span>
               </button>
             </div>
-
             <nav className="flex items-center gap-6 text-base font-medium">
-              <button onClick={() => handleNavigation('../')} className="text-white hover:text-green-400 transition">
+              <button
+                onClick={() => handleNavigation('../')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group">
                 Home
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition">
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group"              >
                 Cars
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
-                Booking <i className="fas fa-chevron-down text-xs"></i>
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1"              >
+                Booking
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
               <button
                 onClick={handleSignInClick}
-                className="text-white hover:text-green-400 transition flex items-center gap-1"
-              >
-                My Account <i className="fas fa-chevron-down text-xs"></i>
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1"              >
+                My Account
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
-                Pages <i className="fas fa-chevron-down text-xs"></i>
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1"            >
+                Pages
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition">
+
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group">
                 Gallery
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
-              <button onClick={() => handleNavigation('')} className="text-white hover:text-green-400 transition flex items-center gap-1">
-                News <i className="fas fa-chevron-down text-xs"></i>
+              <button
+                onClick={() => handleNavigation('')}
+                className="text-white hover:text-green-400 transition-all duration-200 relative group flex items-center gap-1">
+                News
+                <i className="fas fa-chevron-down text-xs transition-transform duration-200 group-hover:rotate-180"></i>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-green-400 transition-all duration-200 group-hover:w-full"></span>
               </button>
             </nav>
-
-            {/* Removed the old Sign In button here */}
           </div>
           <CarLoadingScreen onComplete={handleLoadingComplete} />
         </div>
@@ -299,29 +327,41 @@ export default function HomePage() {
               We deliver happiness
             </h1>
 
-            {/* Search Form */}
+{/* Search Form */}
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Location Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center border-b pb-4">
+                <div className="space-y-6">
+                  {/* Pick Up Location */}
+                  <div className="flex items-center border-b border-gray-200 pb-4">
                     <div className="flex-shrink-0 mr-3">
                       <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       </svg>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-left font-bold text-base text-gray-700">Pick Up Location</label>
-                      <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
-                        <option>Select location</option>
-                        <option>TP. Hồ Chí Minh</option>
-                        <option>Hà Nội</option>
-                        <option>Đà Nẵng</option>
-                      </select>
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-left font-bold text-base text-gray-700 mb-1">Pick Up Location</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full py-2 pr-8 font-bold text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
+                          name="pickUpLocation"
+                          value={form.pickUpLocation}
+                          onChange={handleFormChange}
+                        >
+                          <option>Select location</option>
+                          <option>TP. Hồ Chí Minh</option>
+                          <option>Hà Nội</option>
+                          <option>Đà Nẵng</option>
+                        </select>
+                        <svg className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
                     </div>
                   </div>
 
+                  {/* Drop Off Location */}
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-3">
                       <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -329,70 +369,108 @@ export default function HomePage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                       </svg>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-left font-bold text-base text-gray-700">Drop Off Location</label>
-                      <select className="w-full py-2 font-medium text-black focus:outline-none text-left">
-                        <option>Same as Pick Up</option>
-                        <option>TP. Hồ Chí Minh</option>
-                        <option>Hà Nội</option>
-                        <option>Đà Nẵng</option>
-                      </select>
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-left font-bold text-base text-gray-700 mb-1">Drop Off Location</label>
+                      <div className="relative">
+                        <select 
+                          className="w-full py-2 pr-8 font-bold text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
+                          name="dropOffLocation"
+                          value={form.dropOffLocation}
+                          onChange={handleFormChange}
+                        >
+                          <option>Same as Pick Up</option>
+                          <option>TP. Hồ Chí Minh</option>
+                          <option>Hà Nội</option>
+                          <option>Đà Nẵng</option>
+                        </select>
+                        <svg className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Date/Time Section */}
-                <div className="space-y-4">
-                  <div className="flex items-center border-b pb-4">
+                <div className="space-y-6">
+                  {/* Pick Up Date & Time */}
+                  <div className="flex items-center border-b border-gray-200 pb-4">
                     <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                       </svg>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-left font-bold text-base text-gray-700">Pick Up Date & Time</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="date"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
-                          name="pickUpDate"
-                          value={form.pickUpDate}
-                          onChange={handleFormChange}
-                        />
-                        <input
-                          type="time"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
-                          name="pickUpTime"
-                          value={form.pickUpTime}
-                          onChange={handleFormChange}
-                        />
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-left font-bold text-base text-gray-700 mb-2">Pick Up Date & Time</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                          <input
+                            type="date"
+                            className="w-full py-2 px-1 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            name="pickUpDate"
+                            value={form.pickUpDate}
+                            onChange={handleFormChange}
+                          />
+                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                          <svg className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <input
+                            type="time"
+                            className="w-full py-2 pl-8 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            name="pickUpTime"
+                            value={form.pickUpTime}
+                            onChange={handleFormChange}
+                          />
+                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>
 
+                  {/* Return Date & Time */}
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                       </svg>
                     </div>
-                    <div className="flex-1">
-                      <label className="block text-left font-bold text-base text-gray-700">Return Date & Time</label>
-                      <div className="grid grid-cols-2 gap-2">
-                        <input
-                          type="date"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
-                          name="dropOffDate"
-                          value={form.dropOffDate}
-                          onChange={handleFormChange}
-                        />
-                        <input
-                          type="time"
-                          className="py-2 font-medium text-black focus:outline-none text-left"
-                          name="dropOffTime"
-                          value={form.dropOffTime}
-                          onChange={handleFormChange}
-                        />
+                    <div className="flex-1 min-w-0">
+                      <label className="block text-left font-bold text-base text-gray-700 mb-2">Return Date & Time</label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                          <input
+                            type="date"
+                            className="w-full py-2 px-1 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            name="dropOffDate"
+                            value={form.dropOffDate}
+                            onChange={handleFormChange}
+                          />
+                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
+                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
+                          <svg className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                          </svg>
+                          <input
+                            type="time"
+                            className="w-full py-2 pl-8 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            name="dropOffTime"
+                            value={form.dropOffTime}
+                            onChange={handleFormChange}
+                          />
+                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
+                          </svg>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -599,7 +677,7 @@ export default function HomePage() {
             layout="fill"
             objectFit="cover"
             quality={100}
-            className="opacity-100"/>
+            className="opacity-100" />
           {/* Overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
@@ -615,7 +693,7 @@ export default function HomePage() {
                     alt="Whale Xe Logo"
                     width={40}
                     height={40}
-                    className="rounded-full"/>
+                    className="rounded-full" />
                 </div>
                 <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-cyan-300">
                   Whale Xe
@@ -638,7 +716,7 @@ export default function HomePage() {
                         alt={social}
                         width={14}
                         height={14}
-                        className="w-3.5 h-3.5 object-contain"/>
+                        className="w-3.5 h-3.5 object-contain" />
                     </div>
                   </a>
                 ))}
