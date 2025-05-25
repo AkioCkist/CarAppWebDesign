@@ -4,9 +4,9 @@
 
 *Drive Your Journey with Effortless Car Rentals*
 
-![Last Commit](https://img.shields.io/github/last-commit/YourUsername/CarAppWebDesign?style=flat-square)
+![Last Commit](https://img.shields.io/github/last-commit/AkioCkist/CarAppWebDesign?style=flat-square)
 ![JavaScript](https://img.shields.io/badge/javascript-99.4%25-yellow?style=flat-square)
-![Languages](https://img.shields.io/github/languages/count/YourUsername/CarAppWebDesign?style=flat-square)
+![Languages](https://img.shields.io/github/languages/count/AkioCkist/CarAppWebDesign?style=flat-square)
 
 Built with the tools and technologies:
 
@@ -223,11 +223,11 @@ Please ensure your code is linted and tested.
 
 ## License
 
-CarAppWebDesign is licensed under the **MIT License**.
+Whale Xe is licensed under the **MIT License**.
 See the [LICENSE](LICENSE) file for details.
 
 ---
 
-*This README was crafted with ❤️ by the CarAppWebDesign team.*
+Let me know if you'd like this tailored further for deployment services (e.g., Vercel), database options (MongoDB, Supabase), or CI/CD setup.
 
-```
+*This README was crafted with ❤️ by the Whale Xe team.*
