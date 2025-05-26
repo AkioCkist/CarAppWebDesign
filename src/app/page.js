@@ -186,9 +186,7 @@ export default function HomePage() {
       {/* Fade out overlay - Updated for faster, seamless transition */}
       <div
         className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${fadeOut ? 'opacity-100' : 'opacity-0'
-          }`}
-      />
-
+          }`}/>
       {/* Header - Updated with gradient background transition */}
       <motion.header
         variants={fadeVariant}
