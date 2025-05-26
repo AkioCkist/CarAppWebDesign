@@ -13,7 +13,7 @@ import vehicles from "../../lib/seed";
 const vehicleTypes = [
   "Sedan",
   "SUV",
-  "Electric", 
+  "Electric",
   "Luxury",
 ];
 
@@ -24,17 +24,17 @@ const features = [
     desc: "Where luxury meets exceptional care, creating unforgettable moments and exceeding your every expectation.",
   },
   {
-    icon: "/icons/road.svg", 
+    icon: "/icons/road.svg",
     title: "24/7 road assistance",
     desc: "Reliable support when you need it most, keeping you on the move with confidence and peace of mind.",
   },
   {
-    icon: "/icons/tag.svg", 
+    icon: "/icons/tag.svg",
     title: "Quality at Minimum Expense",
     desc: "Unlocking affordable brilliance with elevating quality while minimizing costs for maximum value.",
   },
   {
-    icon: "/icons/pin.svg", 
+    icon: "/icons/pin.svg",
     title: "Free Pick-Up & Drop-Off",
     desc: "Enjoy free pickup and drop-off services, adding an extra layer of ease to your car rental experience.",
   },
@@ -179,7 +179,9 @@ export default function HomePage() {
     })
   };
 
-  return (
+  return isLoading ? (
+    <CarLoadingScreen onComplete={handleLoadingComplete} />
+  ) : (
     <div className="font-sans bg-white text-gray-900">
       {/* Fade out overlay - Updated for faster, seamless transition */}
       <div
@@ -301,7 +303,7 @@ export default function HomePage() {
               We deliver happiness
             </h1>
 
-{/* Search Form */}
+            {/* Search Form */}
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Location Section */}
@@ -317,7 +319,7 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0">
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Pick Up Location</label>
                       <div className="relative">
-                        <select 
+                        <select
                           className="w-full py-2 pr-8 font-bold text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
                           name="pickUpLocation"
                           value={form.pickUpLocation}
@@ -346,7 +348,7 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0">
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Drop Off Location</label>
                       <div className="relative">
-                        <select 
+                        <select
                           className="w-full py-2 pr-8 font-bold text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
                           name="dropOffLocation"
                           value={form.dropOffLocation}
@@ -517,7 +519,7 @@ export default function HomePage() {
                 variants={fadeVariant}
                 custom={0.4} // Animation for car image
               >
-                <Image src="/hero/adumatyper.png" alt="Honda Type R" width={600} height={375} className="max-w-full h-auto" /> 
+                <Image src="/hero/adumatyper.png" alt="Honda Type R" width={600} height={375} className="max-w-full h-auto" />
                 {/* Replace with actual car image path */}
               </motion.div>
             </div>
@@ -1069,6 +1071,5 @@ export default function HomePage() {
         </motion.div>
       </div>
     </div >
-
   );
 }

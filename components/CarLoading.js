@@ -1,10 +1,12 @@
 // components/CarLoading.js
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const CarLoadingScreen = ({ isVisible, onComplete }) => {
   const [progress, setProgress] = useState(0);
+  const originalOverflowRef = useRef('');
+  const originalPositionRef = useRef('');
 
   useEffect(() => {
     if (!isVisible) return;
@@ -30,6 +32,62 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     return () => clearInterval(timer);
   }, [isVisible, onComplete]);
 
+  // Handle body scroll lock
+  useEffect(() => {
+    if (isVisible) {
+      // Save current styles
+      originalOverflowRef.current = document.body.style.overflow;
+      originalPositionRef.current = document.body.style.position;
+
+      // Lock scroll and prevent interactions
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.body.style.height = '100%';
+      document.body.style.top = '0';
+      document.body.style.left = '0';
+
+      // Disable pointer events on all elements except loading screen
+      const allElements = document.querySelectorAll('body > *:not([data-loading-screen])');
+      allElements.forEach(el => {
+        el.style.pointerEvents = 'none';
+        el.style.userSelect = 'none';
+      });
+
+      // Prevent scroll events
+      const preventDefault = (e) => e.preventDefault();
+      document.addEventListener('wheel', preventDefault, { passive: false });
+      document.addEventListener('touchmove', preventDefault, { passive: false });
+      document.addEventListener('keydown', (e) => {
+        // Prevent arrow keys, space, page up/down
+        if ([32, 33, 34, 35, 36, 37, 38, 39, 40].includes(e.keyCode)) {
+          e.preventDefault();
+        }
+      });
+
+      return () => {
+        // Restore body styles
+        document.body.style.overflow = originalOverflowRef.current;
+        document.body.style.position = originalPositionRef.current;
+        document.body.style.width = '';
+        document.body.style.height = '';
+        document.body.style.top = '';
+        document.body.style.left = '';
+
+        // Restore pointer events
+        const allElements = document.querySelectorAll('body > *:not([data-loading-screen])');
+        allElements.forEach(el => {
+          el.style.pointerEvents = '';
+          el.style.userSelect = '';
+        });
+
+        // Remove event listeners
+        document.removeEventListener('wheel', preventDefault);
+        document.removeEventListener('touchmove', preventDefault);
+      };
+    }
+  }, [isVisible]);
+
   // Reset progress when component becomes invisible
   useEffect(() => {
     if (!isVisible) {
@@ -41,11 +99,22 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     <AnimatePresence>
       {isVisible && (
         <motion.div
+          data-loading-screen="true"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 bg-white z-50 flex items-center justify-center"
+          className="fixed inset-0 bg-white z-[9999] flex items-center justify-center"
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 9999,
+            pointerEvents: 'all',
+            touchAction: 'none'
+          }}
         >
           <div className="w-full max-w-md px-8">
             {/* Logo and Title */}
@@ -202,11 +271,19 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
     </AnimatePresence>
   );
 };
-// Hook để sử dụng loading dễ dàng hơn
+
+// Enhanced Hook với loading state management
 export const useCarLoading = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const startLoading = () => setIsLoading(true);
+  const startLoading = () => {
+    setIsLoading(true);
+    // Additional cleanup if needed
+    if (typeof window !== 'undefined') {
+      window.scrollTo(0, 0);
+    }
+  };
+
   const stopLoading = () => setIsLoading(false);
 
   return {
