@@ -42,22 +42,22 @@ const features = [
 
 const news = [
   {
-    image: "https://placehold.co/300x200/cccccc/333333?text=News",
-    title: "How to Choose the Right Rental Car for Your Trip",
-    snippet: "Discover tips and tricks for selecting the perfect vehicle for your next adventure.",
-    link: "#",
+    image: "https://www.hertz.com/content/dam/hertz/global/blog-articles/automotive/how-to-pick-a-rental-car-for-your-next-trip/Evening-drive.jpg",
+    title: "How to Pick the Right Rental Car for Your Next Trip",
+    snippet: "Whether you’re going on vacation, exploring the unknown, or traveling for business purposes, picking the perfect rental car is key to planning a smooth and pleasant journey.",
+    link: "https://www.hertz.com/us/en/blog/automotive/how-to-pick-a-rental-car-for-your-next-trip",
   },
   {
-    image: "https://placehold.co/300x200/cccccc/333333?text=News",
-    title: "Electric Cars: The Future of Car Rentals",
-    snippet: "Explore the benefits of renting electric vehicles and how they're changing the industry.",
-    link: "#",
+    image: "https://energycentral.com/sites/default/files/styles/article_body/public/ece/node_main/2024/10/energycentral-carrentalimage.png?itok=JnrJQWuu",
+    title: "Electric Vehicles and the Future of Car Rentals",
+    snippet: "EVs are changing car rentals with lower costs and eco benefits. Companies are growing EV fleets and adapting to charging needs.",
+    link: "https://energycentral.com/c/cp/electric-vehicles-and-future-car-rentals",
   },
   {
-    image: "https://placehold.co/300x200/cccccc/333333?text=News",
-    title: "Travel Safe: Our COVID-19 Measures",
-    snippet: "Learn about our enhanced cleaning protocols and safety measures for your peace of mind.",
-    link: "#",
+    image: "https://www.hertz.com/content/dam/hertz/global/blog-articles/automotive/how-ww2-changed-the-automative-industry/Traffic-in-NY-1943---header.jpg",
+    title: "Life During Wartime: How World War II Changed the Auto Industry",
+    snippet: "During WWII, U.S. car makers stopped civilian production to build military gear, leading to major tech advances and postwar auto growth.",
+    link: "https://www.hertz.com/us/en/blog/automotive/life-during-wartime-how-world-war-ii-changed-the-auto-industry",
   },
 ];
 
@@ -594,7 +594,7 @@ export default function HomePage() {
                   whileHover={{ scale: 1.02 }}
                   src={n.image}
                   alt={n.title}
-                  className="h-auto max-w-full rounded mb-4"
+                  className="w-full h-48 object-cover rounded mb-4" // <-- uniform size here
                 />
                 <h3 className="font-semibold text-lg mb-2">{n.title}</h3>
                 <p className="text-gray-600 mb-3">{n.snippet}</p>
