@@ -2,6 +2,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from 'lucide-react';
 import VehicleList from "../../../components/VehicleList";
+import Header from "../../../components/Header";
+import Footer from "../../../components/Footer";
 
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -290,7 +292,12 @@ const CarListingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
+      {/* Navigation Header */}
+      <Header />
+      {/* Spacer để header chiếm chỗ, chỉnh h-20 cho đúng chiều cao Header */}
+      <div className="h-15 bg-gray-800"></div>
+
+      {/* Location & Time Bar */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
@@ -365,8 +372,8 @@ const CarListingPage = () => {
               <button
                 onClick={handleDiscountToggle}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors ${filters.discount
-                    ? 'border-blue-600 bg-blue-50 text-blue-600'
-                    : 'border-gray-300 hover:bg-gray-50'
+                  ? 'border-blue-600 bg-blue-50 text-blue-600'
+                  : 'border-gray-300 hover:bg-gray-50'
                   }`}
               >
                 Giảm Giá
@@ -441,6 +448,9 @@ const CarListingPage = () => {
           onClose={closePopup}
         />
       )}
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 };
