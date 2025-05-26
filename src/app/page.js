@@ -318,7 +318,7 @@ export default function HomePage() {
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Pick Up Location</label>
                       <div className="relative">
                         <select
-                          className="w-full py-2 pr-8 font-bold text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
+                          className="w-full py-2 pr-8 text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
                           name="pickUpLocation"
                           value={form.pickUpLocation}
                           onChange={handleFormChange}
@@ -347,7 +347,7 @@ export default function HomePage() {
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Drop Off Location</label>
                       <div className="relative">
                         <select
-                          className="w-full py-2 pr-8 font-bold text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
+                          className="w-full py-2 pr-8 text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
                           name="dropOffLocation"
                           value={form.dropOffLocation}
                           onChange={handleFormChange}
@@ -380,7 +380,7 @@ export default function HomePage() {
                         <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
                           <input
                             type="date"
-                            className="w-full py-2 px-1 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="w-full py-2 px-1 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="pickUpDate"
                             value={form.pickUpDate}
                             onChange={handleFormChange}
@@ -395,7 +395,7 @@ export default function HomePage() {
                           </svg>
                           <input
                             type="time"
-                            className="w-full py-2 pl-8 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="pickUpTime"
                             value={form.pickUpTime}
                             onChange={handleFormChange}
@@ -421,7 +421,7 @@ export default function HomePage() {
                         <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector('input').showPicker?.()}>
                           <input
                             type="date"
-                            className="w-full py-2 px-1 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="w-full py-2 px-1 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="dropOffDate"
                             value={form.dropOffDate}
                             onChange={handleFormChange}
@@ -436,7 +436,7 @@ export default function HomePage() {
                           </svg>
                           <input
                             type="time"
-                            className="w-full py-2 pl-8 pr-8 text-sm font-bold text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="dropOffTime"
                             value={form.dropOffTime}
                             onChange={handleFormChange}
