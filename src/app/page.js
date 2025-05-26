@@ -186,7 +186,7 @@ export default function HomePage() {
       {/* Fade out overlay - Updated for faster, seamless transition */}
       <div
         className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${fadeOut ? 'opacity-100' : 'opacity-0'
-          }`}/>
+          }`} />
       {/* Header - Updated with gradient background transition */}
       <motion.header
         variants={fadeVariant}
@@ -632,7 +632,8 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         custom={6}
-        className="text-white py-12 mt-20 relative overflow-hidden">
+        className="text-white py-12 mt-20 relative overflow-hidden"
+      >
         {/* Background Image */}
         <div className="absolute inset-0 z-0">
           <Image
@@ -641,11 +642,13 @@ export default function HomePage() {
             layout="fill"
             objectFit="cover"
             quality={100}
-            className="opacity-100" />
+            className="opacity-100"
+          />
           {/* Overlay for better text readability */}
           <div className="absolute inset-0 bg-black/30"></div>
         </div>
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
+        {/* Sửa dòng dưới: thêm max-w-6xl mx-auto px-4 cho giống các section khác */}
+        <div className="max-w-6xl mx-auto px-4 relative z-10">
           {/* Main Footer Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12">
             {/* Logo and About - Takes more space on larger screens */}
