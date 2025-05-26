@@ -84,7 +84,7 @@ export default function HomePage() {
   const [fadeOut, setFadeOut] = useState(false);
   const [showPhoneBubble, setShowPhoneBubble] = useState(false);
   const [showEmailBubble, setShowEmailBubble] = useState(false);
-  const { isLoading, CarLoadingScreen } = useCarLoading();
+  const { isLoading, CarLoadingScreen, startLoading, stopLoading } = useCarLoading();
   const [form, setForm] = useState({
     vehicleType: vehicleTypes[0],
     pickUp: "",
@@ -302,7 +302,7 @@ export default function HomePage() {
                             className="w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="dropOffTime"
                             value={form.dropOffTime}
-                            onChange={handleFormChange}/>
+                            onChange={handleFormChange} />
                           <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
                           </svg>
@@ -323,7 +323,14 @@ export default function HomePage() {
                     boxShadow: "0 2px 8px rgba(0, 0, 0, 0.2)",
                     y: 40,
                   }}
-                  className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200">
+                  className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200"
+                  onClick={() => {
+                    startLoading();
+                    setTimeout(() => {
+                      router.push("/finding_car");
+                    }, 2600); // Thời gian khớp với CarLoadingScreen (2.5s + 0.1s buffer)
+                  }}
+                >
                   Search Your Cars
                 </motion.button>
               </div>
@@ -497,7 +504,7 @@ export default function HomePage() {
           <motion.div
             whileHover={{
               scale: 1.1,
-              boxShadow: "0 20px 25px -5px rgba(22, 235, 100, 0.3), 0 10px 10px -5px rgba(34, 197, 94, 0.2)",
+              boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(34, 197, 94, 0.2)",
               y: -5,
             }}
             whileTap={{ scale: 0.95 }}

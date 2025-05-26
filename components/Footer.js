@@ -103,19 +103,19 @@ export default function Footer() {
                         <ul className="space-y-4 text-green-100 text-sm">
                             <li className="flex items-start">
                                 <div className="mt-0.5 mr-3 w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                    <Image src="/icons/map-marker.webp" alt="Address" width={20} height={20} />
+                                    <Image src="/icons/FooterIconSocial/map-marker.webp" alt="Address" width={20} height={20} />
                                 </div>
                                 <span className="leading-relaxed">158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</span>
                             </li>
                             <li className="flex items-center">
                                 <div className="mr-3 w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                    <Image src="/icons/phone.webp" alt="Phone" width={16} height={16} />
+                                    <Image src="/icons/FooterIconSocial/phone.webp" alt="Phone" width={16} height={16} />
                                 </div>
                                 <span>+84 0236 3738 399</span>
                             </li>
                             <li className="flex items-center">
                                 <div className="mr-3 w-5 h-5 flex items-center justify-center flex-shrink-0">
-                                    <Image src="/icons/mail.webp" alt="Email" width={16} height={16} />
+                                    <Image src="/icons/FooterIconSocial/mail.webp" alt="Email" width={16} height={16} />
                                 </div>
                                 <span>contact@whalexe.com</span>
                             </li>
