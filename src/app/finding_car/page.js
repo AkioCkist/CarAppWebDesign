@@ -216,7 +216,7 @@ const CarListingPage = () => {
   };
 
   const PopupOverlay = ({ children, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
         {children}
       </div>
@@ -227,8 +227,8 @@ const CarListingPage = () => {
     <PopupOverlay onClose={onClose}>
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <h3 className="text-lg font-bold text-black">{title}</h3>
+          <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -242,7 +242,7 @@ const CarListingPage = () => {
                 onChange={() => handleFilterToggle(category, option)}
                 className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
               />
-              <span className="text-gray-700">{option}</span>
+              <span className="text-black">{option}</span>
             </label>
           ))}
         </div>
@@ -315,11 +315,11 @@ const CarListingPage = () => {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-3">
-            <span className="text-sm text-gray-600 mr-4">Bộ Lọc:</span>
+            <span className="text-sm text-black font-semibold mr-4">Bộ Lọc:</span>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivePopup('carType')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal"
               >
                 Loại Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
@@ -329,11 +329,9 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={() => setActivePopup('brand')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
-              >
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Hãng Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.brand.length > 0 && (
@@ -342,11 +340,9 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={() => setActivePopup('seats')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
-              >
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Số Chỗ
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.seats.length > 0 && (
@@ -355,11 +351,9 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={() => setActivePopup('fuel')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
-              >
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.fuel.length > 0 && (
@@ -368,14 +362,12 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={handleDiscountToggle}
-                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors ${filters.discount
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
                   ? 'border-blue-600 bg-blue-50 text-blue-600'
                   : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-              >
+                  }`}>
                 Giảm Giá
                 {filters.discount && (
                   <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -383,9 +375,8 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <div className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full">
-                <span className="text-gray-500">Giá:</span>
+                <span className="text-black font-normal">Giá:</span>
                 <span className="ml-2 text-gray-700">0 ——————— 10000000</span>
               </div>
             </div>
@@ -403,7 +394,7 @@ const CarListingPage = () => {
               placeholder="Tìm kiếm xe theo tên, hãng..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-black"
             />
           </div>
         </div>
