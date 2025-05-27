@@ -20,6 +20,8 @@ const CarListingPage = () => {
   });
   const [displayedCount, setDisplayedCount] = useState(8); // Initial number of vehicles to display
   const loaderRef = useRef(null);
+  const [priceMin, setPriceMin] = useState(0);
+  const [priceMax, setPriceMax] = useState(10000000);
 
   // Sample car data adapted for VehicleList
   const cars = [
@@ -268,6 +270,111 @@ const CarListingPage = () => {
     </PopupOverlay>
   );
 
+  const PricePopup = ({ onClose }) => {
+    const minLimit = 0;
+    const maxLimit = 10000000;
+    const step = 100000;
+
+    // Đảm bảo min không lớn hơn max và ngược lại
+    const handleMinChange = (e) => {
+      const value = Math.min(Number(e.target.value), priceMax - step);
+      setPriceMin(value);
+    };
+    const handleMaxChange = (e) => {
+      const value = Math.max(Number(e.target.value), priceMin + step);
+      setPriceMax(value);
+    };
+
+    // Khi kéo thanh slider
+    const handleSliderMin = (e) => {
+      const value = Math.min(Number(e.target.value), priceMax - step);
+      setPriceMin(value);
+    };
+    const handleSliderMax = (e) => {
+      const value = Math.max(Number(e.target.value), priceMin + step);
+      setPriceMax(value);
+    };
+
+    return (
+      <PopupOverlay onClose={onClose}>
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
+            <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex items-center space-x-4 mb-6">
+            <input
+              type="number"
+              min={minLimit}
+              max={priceMax - step}
+              step={step}
+              value={priceMin}
+              onChange={handleMinChange}
+              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
+              placeholder="Từ"
+            />
+            <span className="text-gray-500">—</span>
+            <input
+              type="number"
+              min={priceMin + step}
+              max={maxLimit}
+              step={step}
+              value={priceMax}
+              onChange={handleMaxChange}
+              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
+              placeholder="Đến"
+            />
+          </div>
+          {/* Thanh kéo đôi custom */}
+          <div className="relative w-full mb-6" style={{ height: 40 }}>
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              step={step}
+              value={priceMin}
+              onChange={handleSliderMin}
+              className="absolute pointer-events-none w-full accent-blue-600"
+              style={{ zIndex: priceMin > maxLimit - 100000 ? 5 : 6 }}
+            />
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              step={step}
+              value={priceMax}
+              onChange={handleSliderMax}
+              className="absolute pointer-events-none w-full accent-blue-600"
+              style={{ zIndex: 7 }}
+            />
+            {/* Thanh màu giữa hai đầu */}
+            <div
+              className="absolute h-1 bg-blue-500 rounded"
+              style={{
+                left: `${((priceMin - minLimit) / (maxLimit - minLimit)) * 100}%`,
+                width: `${((priceMax - priceMin) / (maxLimit - minLimit)) * 100}%`,
+                top: 16,
+                zIndex: 1,
+              }}
+            />
+          </div>
+          <div className="flex justify-between w-full text-xs text-gray-500 mt-1 mb-4">
+            <span>0</span>
+            <span>10.000.000</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Áp dụng
+          </button>
+        </div>
+      </PopupOverlay>
+    );
+  };
+
   // Infinite scrolling logic
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -375,10 +482,13 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-              <div className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full">
-                <span className="text-black font-normal">Giá:</span>
-                <span className="ml-2 text-gray-700">0 ——————— 10000000</span>
-              </div>
+              <button
+                onClick={() => setActivePopup('price')}
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full text-black font-normal hover:bg-gray-50"
+              >
+                <span>Giá:</span>
+                <span className="ml-2 text-gray-700">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -438,6 +548,9 @@ const CarListingPage = () => {
           category="fuel"
           onClose={closePopup}
         />
+      )}
+      {activePopup === 'price' && (
+        <PricePopup onClose={closePopup} />
       )}
 
       {/* Footer */}
