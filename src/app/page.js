@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCarLoading } from "../../components/CarLoading";
 import SimpleFaqSection from "../../components/SimpleFaqSection";
 import VehicleList from "../../components/VehicleList";
@@ -44,7 +44,7 @@ const news = [
   {
     image: "https://www.hertz.com/content/dam/hertz/global/blog-articles/automotive/how-to-pick-a-rental-car-for-your-next-trip/Evening-drive.jpg",
     title: "How to Pick the Right Rental Car for Your Next Trip",
-    snippet: "Whether you’re going on vacation, exploring the unknown, or traveling for business purposes, picking the perfect rental car is key to planning a smooth and pleasant journey.",
+    snippet: "Whether you're going on vacation, exploring the unknown, or traveling for business purposes, picking the perfect rental car is key to planning a smooth and pleasant journey.",
     link: "https://www.hertz.com/us/en/blog/automotive/how-to-pick-a-rental-car-for-your-next-trip",
   },
   {
@@ -59,6 +59,21 @@ const news = [
     snippet: "During WWII, U.S. car makers stopped civilian production to build military gear, leading to major tech advances and postwar auto growth.",
     link: "https://www.hertz.com/us/en/blog/automotive/life-during-wartime-how-world-war-ii-changed-the-auto-industry",
   },
+];
+
+// Location options for dropdowns
+const locationOptions = [
+  { value: "", label: "Select location", disabled: true },
+  { value: "hcm", label: "TP. Hồ Chí Minh" },
+  { value: "hanoi", label: "Hà Nội" },
+  { value: "danang", label: "Đà Nẵng" },
+];
+
+const dropoffOptions = [
+  { value: "same", label: "Same as Pick Up", disabled: false },
+  { value: "hcm", label: "TP. Hồ Chí Minh" },
+  { value: "hanoi", label: "Hà Nội" },
+  { value: "danang", label: "Đà Nẵng" },
 ];
 
 // Notification Dot Components
@@ -79,16 +94,119 @@ const NotificationDot = ({ children, color = "bg-red-500", delay = 0 }) => (
   </motion.div>
 );
 
+// Custom Dropdown Component
+const AnimatedDropdown = ({ 
+  options, 
+  value, 
+  onChange, 
+  placeholder, 
+  name, 
+  isOpen, 
+  onToggle, 
+  onFocus, 
+  onBlur,
+  isFocused,
+  zIndex = 50 // Add zIndex prop with default value
+}) => {
+  const selectedOption = options.find(opt => opt.value === value);
+  
+  return (
+    <div className="relative w-full">
+      <motion.div
+        onClick={onToggle}
+        onFocus={onFocus}
+        onBlur={onBlur}
+        className="w-full py-2 pr-8 text-gray-800 bg-transparent border-0 focus:outline-none cursor-pointer flex items-center justify-between"
+        tabIndex={0}
+      >
+        <span className={selectedOption?.value ? "text-gray-800" : "text-gray-500"}>
+          {selectedOption?.label || placeholder}
+        </span>
+      </motion.div>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0, y: -10 }}
+            animate={{ opacity: 1, height: "auto", y: 0 }}
+            exit={{ opacity: 0, height: 0, y: -10 }}
+            transition={{ 
+              duration: 0.3,
+              ease: "easeOut"
+            }}
+            className={`absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden`}
+            style={{ 
+              marginTop: "4px",
+              zIndex: zIndex // Use dynamic z-index
+            }}
+          >
+            {options.map((option, index) => (
+              <motion.div
+                key={option.value}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ 
+                  delay: index * 0.05,
+                  duration: 0.2,
+                  ease: "easeOut"
+                }}
+                onClick={() => {
+                  if (!option.disabled) {
+                    onChange({ target: { name, value: option.value } });
+                    onToggle();
+                  }
+                }}
+                className={`px-4 py-3 cursor-pointer transition-colors ${
+                  option.disabled 
+                    ? "text-gray-400 cursor-not-allowed bg-gray-50" 
+                    : "text-gray-800 hover:bg-green-50 hover:text-green-700"
+                } ${value === option.value ? "bg-green-100 text-green-800 font-medium" : ""}`}
+              >
+                <motion.div
+                  whileHover={!option.disabled ? { x: 5 } : {}}
+                  transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                  className="flex items-center"
+                >
+                  {!option.disabled && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ delay: index * 0.05 + 0.1 }}
+                      className="w-2 h-2 bg-green-500 rounded-full mr-3"
+                    />
+                  )}
+                  {option.label}
+                </motion.div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 export default function HomePage() {
   const [sameLocation, setSameLocation] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const [showPhoneBubble, setShowPhoneBubble] = useState(false);
   const [showEmailBubble, setShowEmailBubble] = useState(false);
+  const [isPickupDateFocused, setIsPickupDateFocused] = useState(false);
+  const [isPickupTimeFocused, setIsPickupTimeFocused] = useState(false);
+  const [isDropoffDateFocused, setIsDropoffDateFocused] = useState(false);
+  const [isDropoffTimeFocused, setIsDropoffTimeFocused] = useState(false);
+  // Add location focus states
+  const [isPickupLocationFocused, setIsPickupLocationFocused] = useState(false);
+  const [isDropoffLocationFocused, setIsDropoffLocationFocused] = useState(false);
+  // Add dropdown open states
+  const [isPickupDropdownOpen, setIsPickupDropdownOpen] = useState(false);
+  const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
+  
   const { isLoading, CarLoadingScreen, startLoading, stopLoading } = useCarLoading();
   const [form, setForm] = useState({
     vehicleType: vehicleTypes[0],
-    pickUp: "",
-    dropOff: "",
+    pickUpLocation: "",
+    dropOffLocation: "same",
     pickUpDate: "",
     pickUpTime: "",
     dropOffDate: "",
@@ -114,8 +232,19 @@ export default function HomePage() {
     const handleRouteChangeStart = () => setFadeIn(false);
     router.events?.on?.("routeChangeStart", handleRouteChangeStart);
 
+    // Close dropdowns when clicking outside
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.dropdown-container')) {
+        setIsPickupDropdownOpen(false);
+        setIsDropoffDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
     return () => {
       router.events?.off?.("routeChangeStart", handleRouteChangeStart);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [router]);
 
@@ -123,11 +252,11 @@ export default function HomePage() {
     const { name, value, type, checked } = e.target;
     if (name === "sameLocation") {
       setSameLocation(checked);
-      setForm((f) => ({ ...f, dropOff: checked ? f.pickUp : f.dropOff }));
+      setForm((f) => ({ ...f, dropOffLocation: checked ? "same" : f.dropOffLocation }));
     } else {
       setForm((f) => ({ ...f, [name]: value }));
-      if (name === "pickUp" && sameLocation) {
-        setForm((f) => ({ ...f, dropOff: value }));
+      if (name === "pickUpLocation" && sameLocation) {
+        setForm((f) => ({ ...f, dropOffLocation: "same" }));
       }
     }
   };
@@ -143,6 +272,89 @@ export default function HomePage() {
         ease: "easeOut",
       },
     }),
+  };
+
+  // Animation variants for date/time pickers
+  const pickerVariants = {
+    idle: { 
+      scale: 1, 
+      boxShadow: "0 0 0 0px rgba(34, 197, 94, 0)",
+      backgroundColor: "rgba(255, 255, 255, 1)"
+    },
+    focused: { 
+      scale: 1.02,
+      boxShadow: "0 0 0 3px rgba(34, 197, 94, 0.1)",
+      backgroundColor: "rgba(240, 253, 244, 1)",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    },
+    clicked: {
+      scale: 0.98,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    }
+  };
+
+  // Animation variants for location selects
+  const locationVariants = {
+    idle: { 
+      scale: 1, 
+      boxShadow: "0 0 0 0px rgba(34, 197, 94, 0)",
+      backgroundColor: "rgba(255, 255, 255, 1)",
+      borderBottomColor: "rgba(229, 231, 235, 1)" // gray-200
+    },
+    focused: { 
+      scale: 1.01,
+      boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.1)",
+      backgroundColor: "rgba(240, 253, 244, 1)",
+      borderBottomColor: "rgba(34, 197, 94, 0.3)", // green accent
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    },
+    clicked: {
+      scale: 0.99,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    }
+  };
+
+  const iconVariants = {
+    idle: { 
+      rotate: 0,
+      scale: 1,
+      color: "#6B7280"
+    },
+    focused: { 
+      rotate: 5,
+      scale: 1.1,
+      color: "#22C55E",
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 20
+      }
+    },
+    clicked: {
+      rotate: -5,
+      scale: 0.9,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 25
+      }
+    }
   };
 
   return isLoading ? (
@@ -182,131 +394,373 @@ export default function HomePage() {
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <div className="flex items-center border-b border-gray-200 pb-4">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <motion.div 
+                    variants={locationVariants}
+                    animate={isPickupLocationFocused || isPickupDropdownOpen ? "focused" : "idle"}
+                    whileTap="clicked"
+                    className="relative z-20 flex items-center border-b pb-4 rounded-md overflow-visible dropdown-container"
+                  >
+                    <AnimatePresence>
+                      {(isPickupLocationFocused || isPickupDropdownOpen) && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                          className="absolute inset-0 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md"
+                        />
+                      )}
+                    </AnimatePresence>
+                    <div className="flex-shrink-0 mr-3 relative z-10">
+                      <motion.svg 
+                        variants={iconVariants}
+                        animate={isPickupLocationFocused || isPickupDropdownOpen ? "focused" : "idle"}
+                        className="w-6 h-6" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
+                      </motion.svg>
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 relative z-10">
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Pick Up Location</label>
                       <div className="relative">
-                        <select
-                          className="w-full py-2 pr-8 text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
-                          name="pickUpLocation"
+                        <AnimatedDropdown
+                          options={locationOptions}
                           value={form.pickUpLocation}
-                          onChange={handleFormChange}>
-                          <option>Select location</option>
-                          <option>TP. Hồ Chí Minh</option>
-                          <option>Hà Nội</option>
-                          <option>Đà Nẵng</option>
-                        </select>
-                        <svg className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                        </svg>
+                          onChange={handleFormChange}
+                          placeholder="Select location"
+                          name="pickUpLocation"
+                          isOpen={isPickupDropdownOpen}
+                          onToggle={() => {
+                            setIsPickupDropdownOpen((open) => !open);
+                            setIsDropoffDropdownOpen(false);
+                          }}
+                          onFocus={() => setIsPickupLocationFocused(true)}
+                          onBlur={() => setIsPickupLocationFocused(false)}
+                          isFocused={isPickupLocationFocused}
+                          zIndex={60} // Higher z-index for pickup
+                        />
+                        <motion.svg 
+                          variants={iconVariants}
+                          animate={isPickupLocationFocused || isPickupDropdownOpen ? "focused" : "idle"}
+                          className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          viewBox="0 0 24 24"
+                        >
+                          <motion.path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            d="M19 9l-7 7-7-7"
+                            animate={{ rotate: isPickupDropdownOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        </motion.svg>
                       </div>
                     </div>
-                  </div>
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  </motion.div>
+                  <motion.div 
+                    variants={locationVariants}
+                    animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
+                    whileTap="clicked"
+                    className="relative z-10 flex items-center rounded-md overflow-visible dropdown-container"
+                  >
+                    <AnimatePresence>
+                      {(isDropoffLocationFocused || isDropoffDropdownOpen) && (
+                        <motion.div
+                          initial={{ scale: 0, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          exit={{ scale: 0, opacity: 0 }}
+                          transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                          className="absolute inset-0 bg-gradient-to-r from-green-50 to-emerald-50 rounded-md"
+                        />
+                      )}
+                    </AnimatePresence>
+                    <div className="flex-shrink-0 mr-3 relative z-10">
+                      <motion.svg 
+                        variants={iconVariants}
+                        animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
+                        className="w-6 h-6" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                      </svg>
+                      </motion.svg>
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 relative z-10">
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Drop Off Location</label>
                       <div className="relative">
-                        <select
-                          className="w-full py-2 pr-8 text-gray-800 bg-transparent border-0 focus:outline-none appearance-none cursor-pointer"
-                          name="dropOffLocation"
+                        <AnimatedDropdown
+                          options={dropoffOptions}
                           value={form.dropOffLocation}
-                          onChange={handleFormChange}>
-                          <option>Same as Pick Up</option>
-                          <option>TP. Hồ Chí Minh</option>
-                          <option>Hà Nội</option>
-                          <option>Đà Nẵng</option>
-                        </select>
-                        <svg className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                        </svg>
+                          onChange={handleFormChange}
+                          placeholder="Same as Pick Up"
+                          name="dropOffLocation"
+                          isOpen={isDropoffDropdownOpen}
+                          onToggle={() => {
+                            setIsDropoffDropdownOpen((open) => !open);
+                            setIsPickupDropdownOpen(false);
+                          }}
+                          onFocus={() => setIsDropoffLocationFocused(true)}
+                          onBlur={() => setIsDropoffLocationFocused(false)}
+                          isFocused={isDropoffLocationFocused}
+                          zIndex={50} // Lower z-index for dropoff
+                        />
+                        <motion.svg 
+                          variants={iconVariants}
+                          animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
+                          className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" 
+                          fill="none" 
+                          stroke="currentColor" 
+                          strokeWidth="2" 
+                          viewBox="0 0 24 24"
+                        >
+                          <motion.path 
+                            strokeLinecap="round" 
+                            strokeLinejoin="round" 
+                            d="M19 9l-7 7-7-7"
+                            animate={{ rotate: isDropoffDropdownOpen ? 180 : 0 }}
+                            transition={{ duration: 0.2 }}
+                          />
+                        </motion.svg>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
                 <div className="space-y-6">
                   <div className="flex items-center border-b border-gray-200 pb-4">
                     <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <motion.svg 
+                        variants={iconVariants}
+                        animate={isPickupDateFocused || isPickupTimeFocused ? "focused" : "idle"}
+                        className="w-6 h-6" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                      </svg>
+                      </motion.svg>
                     </div>
                     <div className="flex-1 min-w-0">
                       <label className="block text-left font-bold text-base text-gray-700 mb-2">Pick Up Date & Time</label>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector("input").showPicker?.()}>
+                        <motion.div 
+                          variants={pickerVariants}
+                          animate={isPickupDateFocused ? "focused" : "idle"}
+                          whileTap="clicked"
+                          className="relative cursor-pointer rounded-md overflow-hidden"
+                          onClick={(e) => {
+                            e.currentTarget.querySelector("input").showPicker?.();
+                            e.currentTarget.querySelector("input").focus();
+                          }}
+                        >
+                          <AnimatePresence>
+                            {isPickupDateFocused && (
+                              <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 rounded-md"
+                              />
+                            )}
+                          </AnimatePresence>
                           <input
                             type="date"
-                            className="w-full py-2 px-1 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="relative z-10 w-full py-2 px-1 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="pickUpDate"
                             value={form.pickUpDate}
-                            onChange={handleFormChange} />
-                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            onChange={handleFormChange}
+                            onFocus={() => setIsPickupDateFocused(true)}
+                            onBlur={() => setIsPickupDateFocused(false)}
+                          />
+                          <motion.svg 
+                            variants={iconVariants}
+                            animate={isPickupDateFocused ? "focused" : "idle"}
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            viewBox="0 0 24 24"
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector("input").showPicker?.()}>
-                          <svg className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          </motion.svg>
+                        </motion.div>
+                        <motion.div 
+                          variants={pickerVariants}
+                          animate={isPickupTimeFocused ? "focused" : "idle"}
+                          whileTap="clicked"
+                          className="relative cursor-pointer rounded-md overflow-hidden"
+                          onClick={(e) => {
+                            e.currentTarget.querySelector("input").showPicker?.();
+                            e.currentTarget.querySelector("input").focus();
+                          }}
+                        >
+                          <AnimatePresence>
+                            {isPickupTimeFocused && (
+                              <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 rounded-md"
+                              />
+                            )}
+                          </AnimatePresence>
+                          <motion.svg 
+                            variants={iconVariants}
+                            animate={isPickupTimeFocused ? "focused" : "idle"}
+                            className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            viewBox="0 0 24 24"
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
+                          </motion.svg>
                           <input
                             type="time"
-                            className="w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="relative z-10 w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="pickUpTime"
                             value={form.pickUpTime}
-                            onChange={handleFormChange} />
-                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            onChange={handleFormChange}
+                            onFocus={() => setIsPickupTimeFocused(true)}
+                            onBlur={() => setIsPickupTimeFocused(false)}
+                          />
+                          <motion.svg 
+                            variants={iconVariants}
+                            animate={isPickupTimeFocused ? "focused" : "idle"}
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            viewBox="0 0 24 24"
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
+                          </motion.svg>
+                        </motion.div>
                       </div>
                     </div>
                   </div>
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-3">
-                      <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <motion.svg 
+                        variants={iconVariants}
+                        animate={isDropoffDateFocused || isDropoffTimeFocused ? "focused" : "idle"}
+                        className="w-6 h-6" 
+                        fill="none" 
+                        stroke="currentColor" 
+                        strokeWidth="2" 
+                        viewBox="0 0 24 24"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                      </svg>
+                      </motion.svg>
                     </div>
                     <div className="flex-1 min-w-0">
                       <label className="block text-left font-bold text-base text-gray-700 mb-2">Return Date & Time</label>
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector("input").showPicker?.()}>
+                        <motion.div 
+                          variants={pickerVariants}
+                          animate={isDropoffDateFocused ? "focused" : "idle"}
+                          whileTap="clicked"
+                          className="relative cursor-pointer rounded-md overflow-hidden"
+                          onClick={(e) => {
+                            e.currentTarget.querySelector("input").showPicker?.();
+                            e.currentTarget.querySelector("input").focus();
+                          }}
+                        >
+                          <AnimatePresence>
+                            {isDropoffDateFocused && (
+                              <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 rounded-md"
+                              />
+                            )}
+                          </AnimatePresence>
                           <input
                             type="date"
-                            className="w-full py-2 px-1 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="relative z-10 w-full py-2 px-1 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="dropOffDate"
                             value={form.dropOffDate}
-                            onChange={handleFormChange} />
-                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            onChange={handleFormChange}
+                            onFocus={() => setIsDropoffDateFocused(true)}
+                            onBlur={() => setIsDropoffDateFocused(false)}
+                          />
+                          <motion.svg 
+                            variants={iconVariants}
+                            animate={isDropoffDateFocused ? "focused" : "idle"}
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            viewBox="0 0 24 24"
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
-                        <div className="relative cursor-pointer" onClick={(e) => e.currentTarget.querySelector("input").showPicker?.()}>
-                          <svg className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                          </motion.svg>
+                        </motion.div>
+                        <motion.div 
+                          variants={pickerVariants}
+                          animate={isDropoffTimeFocused ? "focused" : "idle"}
+                          whileTap="clicked"
+                          className="relative cursor-pointer rounded-md overflow-hidden"
+                          onClick={(e) => {
+                            e.currentTarget.querySelector("input").showPicker?.();
+                            e.currentTarget.querySelector("input").focus();
+                          }}
+                        >
+                          <AnimatePresence>
+                            {isDropoffTimeFocused && (
+                              <motion.div
+                                initial={{ scale: 0, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                exit={{ scale: 0, opacity: 0 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                                className="absolute inset-0 bg-gradient-to-r from-green-100 to-emerald-100 rounded-md"
+                              />
+                            )}
+                          </AnimatePresence>
+                          <motion.svg 
+                            variants={iconVariants}
+                            animate={isDropoffTimeFocused ? "focused" : "idle"}
+                            className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            viewBox="0 0 24 24"
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                          </svg>
+                          </motion.svg>
                           <input
                             type="time"
-                            className="w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
+                            className="relative z-10 w-full py-2 pl-8 pr-8 text-sm text-gray-800 bg-transparent border-0 focus:outline-none focus:ring-0 uppercase [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:cursor-pointer"
                             name="dropOffTime"
                             value={form.dropOffTime}
-                            onChange={handleFormChange} />
-                          <svg className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-500 pointer-events-none" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                            onChange={handleFormChange}
+                            onFocus={() => setIsDropoffTimeFocused(true)}
+                            onBlur={() => setIsDropoffTimeFocused(false)}
+                          />
+                          <motion.svg 
+                            variants={iconVariants}
+                            animate={isDropoffTimeFocused ? "focused" : "idle"}
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            strokeWidth="2" 
+                            viewBox="0 0 24 24"
+                          >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
-                          </svg>
-                        </div>
+                          </motion.svg>
+                        </motion.div>
                       </div>
                     </div>
                   </div>
