@@ -271,18 +271,6 @@ export default function Header() {
                                                 animate="visible"
                                                 exit="exit"
                                             >
-                                                {/* User Info Section */}
-                                                <motion.div 
-                                                    className="px-4 py-3 text-sm text-gray-900 bg-gray-50"
-                                                    variants={itemVariants}
-                                                    initial="hidden"
-                                                    animate="visible"
-                                                    custom={0}
-                                                >
-                                                    <div className="font-semibold">{userInfo.name}</div>
-                                                    <div className="font-medium truncate text-gray-600">{userInfo.phone}</div>
-                                                </motion.div>
-
                                                 {/* Menu Items */}
                                                 <ul className="py-2 text-sm text-gray-700" aria-labelledby="avatarButton">
                                                     <motion.li
