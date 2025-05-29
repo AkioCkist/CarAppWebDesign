@@ -123,6 +123,33 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Add this debug function above your handleSubmit
+  const debugApiRequest = async (url, options) => {
+    console.log("API Request URL:", url);
+    console.log("API Request Options:", options);
+
+    try {
+      const response = await fetch(url, options);
+      console.log("API Response Status:", response.status);
+
+      const text = await response.text();
+      console.log("API Raw Response Text:", text);
+
+      let json;
+      try {
+        json = JSON.parse(text);
+        console.log("API Parsed JSON:", json);
+      } catch (e) {
+        console.warn("API Response is not valid JSON.");
+        json = null;
+      }
+      return { response, json, text };
+    } catch (err) {
+      console.error("API Fetch Error:", err);
+      throw err;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -132,34 +159,51 @@ export default function LoginPage() {
     setLoginError(""); // Clear previous error
 
     if (isLogin) {
-      // Call your PHP API for login
       try {
-        const response = await fetch("http://127.0.0.1/myapi/login.php", {
+        const url = "http://127.0.0.1/myapi/login.php";
+        const options = {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             phone_number: formData.phone,
             password: formData.password,
           }),
-        });
-        const result = await response.json();
+        };
 
-        if (result.success) {
+        const { json: result } = await debugApiRequest(url, options);
+
+        if (result && result.success) {
           console.log("Login successful!", result.user);
-          // You can redirect or do something here
+
+          // Use your custom avatar URL if user.avatar is not set
+          const defaultAvatar = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_items_boosted&w=740";
+          // If "Remember me" is checked, save cookies for 7 days, else session cookies (no max-age)
+          const cookieOptions = formData.rememberMe ? "; path=/; max-age=" + (60 * 60 * 24 * 7) : "; path=/";
+          document.cookie = `user_id=${result.user.account_id}${cookieOptions}`;
+          document.cookie = `user_name=${result.user.username || result.user.name || 'User'}${cookieOptions}`;
+          document.cookie = `user_phone=${result.user.phone_number}${cookieOptions}`;
+          document.cookie = `user_avatar=${result.user.avatar || defaultAvatar}${cookieOptions}`;
+          document.cookie = `is_logged_in=true${cookieOptions}`;
+
+          // Show loading screen, then navigate and reload to update header avatar
+          if (typeof startLoading === "function") startLoading();
+          setTimeout(() => {
+            window.location.href = "/"; // Full reload to update header avatar
+          }, 1800);
+          return;
         } else {
           setLoginError("Phone number or password is incorrect.");
         }
       } catch (err) {
         setLoginError("Unable to connect to server. Please try again.");
       }
+      setIsLoading(false); // Only set loading false if login failed
     } else {
       // Registration logic (if needed)
       await new Promise((resolve) => setTimeout(resolve, 1500));
       alert("Account created successfully!");
+      setIsLoading(false);
     }
-
-    setIsLoading(false);
   };
 
   const handleSocialLogin = (provider) => {

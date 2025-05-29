@@ -2,14 +2,39 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useCarLoading } from './CarLoading';
 
 export default function Header() {
     const [scrollY, setScrollY] = useState(0);
     const [fadeOut, setFadeOut] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const [userInfo, setUserInfo] = useState({});
+    const [showDropdown, setShowDropdown] = useState(false);
     const { startLoading, CarLoadingScreen } = useCarLoading();
     const router = useRouter();
+
+    // Check if user is logged in on component mount
+    useEffect(() => {
+        const checkLoginStatus = () => {
+            const cookies = document.cookie.split(';').reduce((acc, cookie) => {
+                const [key, value] = cookie.trim().split('=');
+                acc[key] = value;
+                return acc;
+            }, {});
+
+            if (cookies.is_logged_in === 'true') {
+                setIsLoggedIn(true);
+                setUserInfo({
+                    name: cookies.user_name || 'User',
+                    phone: cookies.user_phone || '',
+                    avatar: cookies.user_avatar || '/default-avatar.png'
+                });
+            }
+        };
+
+        checkLoginStatus();
+    }, []);
 
     const handleNavigation = (href) => {
         setFadeOut(true);
@@ -29,6 +54,25 @@ export default function Header() {
 
     const handleLoadingComplete = () => {
         router.push("/signin_registration");
+    };
+
+    // Add this function to clear all account-related cookies (call on timeout or logout)
+    function clearAccountCookies() {
+      document.cookie = 'user_id=; path=/; max-age=0';
+      document.cookie = 'user_name=; path=/; max-age=0';
+      document.cookie = 'user_phone=; path=/; max-age=0';
+      document.cookie = 'user_avatar=; path=/; max-age=0';
+      document.cookie = 'is_logged_in=; path=/; max-age=0';
+    }
+
+    const handleLogout = () => {
+        clearAccountCookies();
+        setIsLoggedIn(false);
+        setUserInfo({});
+        setShowDropdown(false);
+        
+        // Refresh page or redirect to home
+        window.location.reload();
     };
 
     useEffect(() => {
@@ -53,6 +97,50 @@ export default function Header() {
                 ease: "easeOut",
             },
         },
+    };
+
+    // Animation variants for dropdown
+    const dropdownVariants = {
+        hidden: {
+            opacity: 0,
+            scale: 0.95,
+            y: -10,
+            transition: {
+                duration: 0.3,
+                ease: "easeOut"
+            }
+        },
+        visible: {
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            transition: {
+                duration: 0.3,
+                ease: "easeOut"
+            }
+        },
+        exit: {
+            opacity: 0,
+            scale: 0.95,
+            y: -10,
+            transition: {
+                duration: 0.2,
+                ease: "easeIn"
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, x: -10 },
+        visible: (i) => ({
+            opacity: 1,
+            x: 0,
+            transition: {
+                delay: i * 0.05,
+                duration: 0.2,
+                ease: "easeOut"
+            }
+        })
     };
 
     return (
@@ -125,14 +213,125 @@ export default function Header() {
                             </nav>
                         </div>
 
-                        {/* Right side - Sign In Button */}
-                        <div className="flex items-center">
-                            <button
-                                onClick={handleSignInClick}
-                                className="px-4 py-2 text-white border border-green-400 rounded-lg hover:bg-green-400 hover:text-black transition-all duration-200 font-medium"
-                            >
-                                Sign in
-                            </button>
+                        {/* Right side - Sign In Button or User Avatar */}
+                        <div className="flex items-center relative">
+                            {isLoggedIn ? (
+                                <div className="relative">
+                                    {/* Avatar Button */}
+                                    <motion.img
+                                        id="avatarButton"
+                                        type="button"
+                                        onClick={() => setShowDropdown(!showDropdown)}
+                                        className="w-10 h-10 rounded-full cursor-pointer border-2 border-green-400 object-cover"
+                                        src={userInfo.avatar}
+                                        alt="User dropdown"
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        onError={e => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_items_boosted&w=740";
+                                        }}
+                                    />
+
+                                    {/* Animated Dropdown menu */}
+                                    <AnimatePresence>
+                                        {showDropdown && (
+                                            <motion.div
+                                                id="userDropdown"
+                                                className="absolute right-0 mt-2 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 overflow-hidden"
+                                                variants={dropdownVariants}
+                                                initial="hidden"
+                                                animate="visible"
+                                                exit="exit"
+                                            >
+                                                {/* User Info Section */}
+                                                <motion.div 
+                                                    className="px-4 py-3 text-sm text-gray-900 bg-gray-50"
+                                                    variants={itemVariants}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                    custom={0}
+                                                >
+                                                    <div className="font-semibold">{userInfo.name}</div>
+                                                    <div className="font-medium truncate text-gray-600">{userInfo.phone}</div>
+                                                </motion.div>
+
+                                                {/* Menu Items */}
+                                                <ul className="py-2 text-sm text-gray-700" aria-labelledby="avatarButton">
+                                                    <motion.li
+                                                        variants={itemVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                        custom={1}
+                                                    >
+                                                        <a 
+                                                            href="#" 
+                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-150"
+                                                        >
+                                                            <i className="fas fa-tachometer-alt mr-3 text-gray-500"></i>
+                                                            Dashboard
+                                                        </a>
+                                                    </motion.li>
+                                                    <motion.li
+                                                        variants={itemVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                        custom={2}
+                                                    >
+                                                        <a 
+                                                            href="#" 
+                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-150"
+                                                        >
+                                                            <i className="fas fa-cog mr-3 text-gray-500"></i>
+                                                            Settings
+                                                        </a>
+                                                    </motion.li>
+                                                    <motion.li
+                                                        variants={itemVariants}
+                                                        initial="hidden"
+                                                        animate="visible"
+                                                        custom={3}
+                                                    >
+                                                        <a 
+                                                            href="#" 
+                                                            className="flex items-center px-4 py-2 hover:bg-gray-100 transition-colors duration-150"
+                                                        >
+                                                            <i className="fas fa-car mr-3 text-gray-500"></i>
+                                                            My Bookings
+                                                        </a>
+                                                    </motion.li>
+                                                </ul>
+
+                                                {/* Sign Out Button */}
+                                                <motion.div 
+                                                    className="py-1"
+                                                    variants={itemVariants}
+                                                    initial="hidden"
+                                                    animate="visible"
+                                                    custom={4}
+                                                >
+                                                    <button
+                                                        onClick={handleLogout}
+                                                        className="flex items-center w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors duration-150"
+                                                    >
+                                                        <i className="fas fa-sign-out-alt mr-3"></i>
+                                                        Sign out
+                                                    </button>
+                                                </motion.div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+                                </div>
+                            ) : (
+                                <motion.button
+                                    onClick={handleSignInClick}
+                                    className="px-4 py-2 text-white border border-green-400 rounded-lg hover:bg-green-400 hover:text-black transition-all duration-200 font-medium"
+                                    whileHover={{ scale: 1.05 }}
+                                    whileTap={{ scale: 0.95 }}
+                                >
+                                    Sign in
+                                </motion.button>
+                            )}
                         </div>
                     </div>
                     <CarLoadingScreen onComplete={handleLoadingComplete} />
