@@ -20,6 +20,8 @@ const CarListingPage = () => {
   });
   const [displayedCount, setDisplayedCount] = useState(8); // Initial number of vehicles to display
   const loaderRef = useRef(null);
+  const [priceMin, setPriceMin] = useState(0);
+  const [priceMax, setPriceMax] = useState(10000000);
 
   // Sample car data adapted for VehicleList
   const cars = [
@@ -216,7 +218,7 @@ const CarListingPage = () => {
   };
 
   const PopupOverlay = ({ children, onClose }) => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
         {children}
       </div>
@@ -227,8 +229,8 @@ const CarListingPage = () => {
     <PopupOverlay onClose={onClose}>
       <div className="p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+          <h3 className="text-lg font-bold text-black">{title}</h3>
+          <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -242,7 +244,7 @@ const CarListingPage = () => {
                 onChange={() => handleFilterToggle(category, option)}
                 className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
               />
-              <span className="text-gray-700">{option}</span>
+              <span className="text-black">{option}</span>
             </label>
           ))}
         </div>
@@ -267,6 +269,111 @@ const CarListingPage = () => {
       </div>
     </PopupOverlay>
   );
+
+  const PricePopup = ({ onClose }) => {
+    const minLimit = 0;
+    const maxLimit = 10000000;
+    const step = 100000;
+
+    // Đảm bảo min không lớn hơn max và ngược lại
+    const handleMinChange = (e) => {
+      const value = Math.min(Number(e.target.value), priceMax - step);
+      setPriceMin(value);
+    };
+    const handleMaxChange = (e) => {
+      const value = Math.max(Number(e.target.value), priceMin + step);
+      setPriceMax(value);
+    };
+
+    // Khi kéo thanh slider
+    const handleSliderMin = (e) => {
+      const value = Math.min(Number(e.target.value), priceMax - step);
+      setPriceMin(value);
+    };
+    const handleSliderMax = (e) => {
+      const value = Math.max(Number(e.target.value), priceMin + step);
+      setPriceMax(value);
+    };
+
+    return (
+      <PopupOverlay onClose={onClose}>
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
+            <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex items-center space-x-4 mb-6">
+            <input
+              type="number"
+              min={minLimit}
+              max={priceMax - step}
+              step={step}
+              value={priceMin}
+              onChange={handleMinChange}
+              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
+              placeholder="Từ"
+            />
+            <span className="text-gray-500">—</span>
+            <input
+              type="number"
+              min={priceMin + step}
+              max={maxLimit}
+              step={step}
+              value={priceMax}
+              onChange={handleMaxChange}
+              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
+              placeholder="Đến"
+            />
+          </div>
+          {/* Thanh kéo đôi custom */}
+          <div className="relative w-full mb-6" style={{ height: 40 }}>
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              step={step}
+              value={priceMin}
+              onChange={handleSliderMin}
+              className="absolute pointer-events-none w-full accent-blue-600"
+              style={{ zIndex: priceMin > maxLimit - 100000 ? 5 : 6 }}
+            />
+            <input
+              type="range"
+              min={minLimit}
+              max={maxLimit}
+              step={step}
+              value={priceMax}
+              onChange={handleSliderMax}
+              className="absolute pointer-events-none w-full accent-blue-600"
+              style={{ zIndex: 7 }}
+            />
+            {/* Thanh màu giữa hai đầu */}
+            <div
+              className="absolute h-1 bg-blue-500 rounded"
+              style={{
+                left: `${((priceMin - minLimit) / (maxLimit - minLimit)) * 100}%`,
+                width: `${((priceMax - priceMin) / (maxLimit - minLimit)) * 100}%`,
+                top: 16,
+                zIndex: 1,
+              }}
+            />
+          </div>
+          <div className="flex justify-between w-full text-xs text-gray-500 mt-1 mb-4">
+            <span>0</span>
+            <span>10.000.000</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            Áp dụng
+          </button>
+        </div>
+      </PopupOverlay>
+    );
+  };
 
   // Infinite scrolling logic
   useEffect(() => {
@@ -315,11 +422,11 @@ const CarListingPage = () => {
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-3">
-            <span className="text-sm text-gray-600 mr-4">Bộ Lọc:</span>
+            <span className="text-sm text-black font-semibold mr-4">Bộ Lọc:</span>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivePopup('carType')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal"
               >
                 Loại Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
@@ -329,11 +436,9 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={() => setActivePopup('brand')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
-              >
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Hãng Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.brand.length > 0 && (
@@ -342,11 +447,9 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={() => setActivePopup('seats')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
-              >
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Số Chỗ
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.seats.length > 0 && (
@@ -355,11 +458,9 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={() => setActivePopup('fuel')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors"
-              >
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.fuel.length > 0 && (
@@ -368,14 +469,12 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
               <button
                 onClick={handleDiscountToggle}
-                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors ${filters.discount
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
                   ? 'border-blue-600 bg-blue-50 text-blue-600'
                   : 'border-gray-300 hover:bg-gray-50'
-                  }`}
-              >
+                  }`}>
                 Giảm Giá
                 {filters.discount && (
                   <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -383,11 +482,13 @@ const CarListingPage = () => {
                   </span>
                 )}
               </button>
-
-              <div className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full">
-                <span className="text-gray-500">Giá:</span>
-                <span className="ml-2 text-gray-700">0 ——————— 10000000</span>
-              </div>
+              <button
+                onClick={() => setActivePopup('price')}
+                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full text-black font-normal hover:bg-gray-50"
+              >
+                <span>Giá:</span>
+                <span className="ml-2 text-gray-700">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
+              </button>
             </div>
           </div>
         </div>
@@ -403,7 +504,7 @@ const CarListingPage = () => {
               placeholder="Tìm kiếm xe theo tên, hãng..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-black"
             />
           </div>
         </div>
@@ -447,6 +548,9 @@ const CarListingPage = () => {
           category="fuel"
           onClose={closePopup}
         />
+      )}
+      {activePopup === 'price' && (
+        <PricePopup onClose={closePopup} />
       )}
 
       {/* Footer */}
