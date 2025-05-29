@@ -44,7 +44,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
-    email: '',
+    phone: '', // changed from email
     password: '',
     confirmPassword: '',
     name: '',
@@ -53,6 +53,7 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [flipDirection, setFlipDirection] = useState('horizontal');
+  const [loginError, setLoginError] = useState(""); // Add this state for error message
 
   const { focusedInput, handleFocus, handleBlur } = useFocusState();
 
@@ -83,47 +84,82 @@ export default function LoginPage() {
     }
   };
 
+  // Prevent non-numeric input for phone number fields
+  const handlePhoneInput = (e) => {
+    const { value } = e.target;
+    // Allow only digits and optional leading '+'
+    if (/^[+]?\d*$/.test(value)) {
+      handleInputChange(e);
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
-    
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email';
+
+    // Phone validation for login
+    if (!formData.phone) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\+?\d{10,15}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
-    
+
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
+
     if (!isLogin) {
       if (!formData.name) {
         newErrors.name = 'Name is required';
       }
-      
+
       if (formData.password !== formData.confirmPassword) {
         newErrors.confirmPassword = 'Passwords do not match';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    setLoginError(""); // Clear previous error
+
+    if (isLogin) {
+      // Call your PHP API for login
+      try {
+        const response = await fetch("http://127.0.0.1/myapi/login.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            phone_number: formData.phone,
+            password: formData.password,
+          }),
+        });
+        const result = await response.json();
+
+        if (result.success) {
+          console.log("Login successful!", result.user);
+          // You can redirect or do something here
+        } else {
+          setLoginError("Phone number or password is incorrect.");
+        }
+      } catch (err) {
+        setLoginError("Unable to connect to server. Please try again.");
+      }
+    } else {
+      // Registration logic (if needed)
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      alert("Account created successfully!");
+    }
+
     setIsLoading(false);
-    alert(isLogin ? 'Login successful!' : 'Account created successfully!');
   };
 
   const handleSocialLogin = (provider) => {
@@ -135,7 +171,7 @@ export default function LoginPage() {
     setFlipDirection(Math.random() > 0.5 ? 'horizontal' : 'vertical');
     setIsLogin(!isLogin);
     setFormData({
-      email: '',
+      phone: '', // changed from email
       password: '',
       confirmPassword: '',
       name: '',
@@ -392,30 +428,7 @@ export default function LoginPage() {
                         animate="visible"
                       >
                         {isLogin ? 'Welcome Back' : 'Create Account'}
-                      </motion.h2>
-                      
-                      <div className="h-8 text-white">
-                        <TypeAnimation
-                          sequence={[
-                            isLogin 
-                              ? 'Sign in to your account to continue' 
-                              : 'Join us for the best car rental experience',
-                            1000,
-                            isLogin 
-                              ? 'Access your reservations and profile' 
-                              : 'Get exclusive deals and promotions',
-                            1000,
-                            isLogin 
-                              ? 'Manage your car rentals with ease' 
-                              : 'Save your preferences for faster booking',
-                            1000,
-                          ]}
-                          wrapper="p"
-                          cursor={true}
-                          repeat={Infinity}
-                          style={{ fontSize: '1rem' }}
-                        />
-                      </div>
+                      </motion.h2>                     
                     </div>
 
                     {/* Form with extended bottom padding */}
@@ -438,6 +451,7 @@ export default function LoginPage() {
                         )
                       }
 
+                      {/* Phone number input for login */}
                       <motion.div
                         variants={inputVariants}
                         initial="hidden"
@@ -445,27 +459,29 @@ export default function LoginPage() {
                         custom={1}
                       >
                         <div>
-                          <label className="block text-sm font-medium text-white mb-2">Email Address</label>
+                          <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
                           <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            onFocus={() => handleFocus("email")}
+                            type="tel"
+                            name="phone"
+                            value={formData.phone}
+                            onChange={handlePhoneInput}
+                            onFocus={() => handleFocus("phone")}
                             onBlur={handleBlur}
                             className={`w-full px-4 py-3 border rounded-lg transition-all duration-300 ${
-                              errors.email ? 'border-red-500' : 
-                              focusedInput === "email" ? 'border-green-500 ring-2 ring-green-500 ring-opacity-50' : 'border-gray-300'
+                              errors.phone ? 'border-red-500' : 
+                              focusedInput === "phone" ? 'border-green-500 ring-2 ring-green-500 ring-opacity-50' : 'border-gray-300'
                             } bg-white bg-opacity-80 text-gray-900`}
-                            placeholder="Enter your email"
+                            placeholder="Enter your phone number"
+                            pattern="^\+?\d{10,15}$"
+                            inputMode="tel"
                           />
                           <motion.div
                             className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-green-500 to-blue-500"
                             initial={{ width: "0%" }}
-                            animate={{ width: focusedInput === "email" ? "100%" : "0%" }}
+                            animate={{ width: focusedInput === "phone" ? "100%" : "0%" }}
                             transition={{ duration: 0.3 }}
                           />
-                          {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+                          {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                         </div>
                       </motion.div>
 
@@ -571,6 +587,13 @@ export default function LoginPage() {
                         )}
                       </motion.button>
                       
+                      {/* Error message for login failure */}
+                      {loginError && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-center transition-all duration-300">
+                          {loginError}
+                        </div>
+                      )}
+
                       {/* Divider */}
                       <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
                         ↓
@@ -685,27 +708,7 @@ export default function LoginPage() {
                       </div>
                       <h2 className="text-3xl font-bold text-white mb-2">
                         Create Account
-                      </h2>
-                      
-                      {/* Replace this static paragraph with TypeAnimation */}
-                      <div className="h-8 text-white">
-                        <TypeAnimation
-                          sequence={[
-                            'Join us for the best car rental experience',
-                            1000,
-                            'Get exclusive deals and promotions',
-                            1000,
-                            'Save your preferences for faster booking',
-                            1000,
-                            'Access premium vehicles and services',
-                            1000,
-                          ]}
-                          wrapper="p"
-                          cursor={true}
-                          repeat={Infinity}
-                          style={{ fontSize: '1rem' }}
-                        />
-                      </div>
+                      </h2>                                  
                     </div>
 
                     {/* Form with consistent height */}
@@ -726,18 +729,20 @@ export default function LoginPage() {
                       </div>
 
                       <div>
-                        <label className="block text-sm font-medium text-white mb-2">Email Address</label>
+                        <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
                         <input
-                          type="email"
-                          name="email"
-                          value={formData.email}
-                          onChange={handleInputChange}
+                          type="tel"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handlePhoneInput}
                           className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
-                            errors.email ? 'border-red-500' : 'border-gray-300'
+                            errors.phone ? 'border-red-500' : 'border-gray-300'
                           } bg-white bg-opacity-80 text-gray-900`}
-                          placeholder="Enter your email"
+                          placeholder="Enter your phone number"
+                          pattern="^\+?\d{10,15}$"
+                          inputMode="tel"
                         />
-                        {errors.email && <p className="text-red-400 text-sm mt-1">{errors.email}</p>}
+                        {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                       </div>
 
                       <div>
