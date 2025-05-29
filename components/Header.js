@@ -217,28 +217,55 @@ export default function Header() {
                         <div className="flex items-center relative">
                             {isLoggedIn ? (
                                 <div className="relative">
-                                    {/* Avatar Button */}
-                                    <motion.img
-                                        id="avatarButton"
-                                        type="button"
+                                    {/* Avatar Button with Text */}
+                                    <motion.div
                                         onClick={() => setShowDropdown(!showDropdown)}
-                                        className="w-10 h-10 rounded-full cursor-pointer border-2 border-green-400 object-cover"
-                                        src={userInfo.avatar}
-                                        alt="User dropdown"
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        onError={e => {
-                                            e.target.onerror = null;
-                                            e.target.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_items_boosted&w=740";
-                                        }}
-                                    />
+                                        className="flex items-center gap-3 cursor-pointer group"
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                    >
+                                        <motion.img
+                                            id="avatarButton"
+                                            className="w-10 h-10 rounded-full border-2 border-green-400 object-cover"
+                                            src={userInfo.avatar}
+                                            alt="User avatar"
+                                            whileHover={{ scale: 1.05 }}
+                                            onError={e => {
+                                                e.target.onerror = null;
+                                                e.target.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_items_boosted&w=740";
+                                            }}
+                                        />
+                                        <motion.div 
+                                            className="font-medium text-white hidden md:block"
+                                            animate={{ 
+                                                opacity: showDropdown ? 0.7 : 1,
+                                                x: showDropdown ? -5 : 0 
+                                            }}
+                                            transition={{ duration: 0.2 }}
+                                        >
+                                            <div className="group-hover:text-green-400 transition-colors duration-200">
+                                                {userInfo.name}
+                                            </div>
+                                            <div className="text-sm text-gray-300 group-hover:text-green-300 transition-colors duration-200">
+                                                {userInfo.phone}
+                                            </div>
+                                        </motion.div>
+                                        <motion.i 
+                                            className="fas fa-chevron-down text-xs text-white ml-1 hidden md:block"
+                                            animate={{ 
+                                                rotate: showDropdown ? 180 : 0,
+                                                opacity: showDropdown ? 0.7 : 1 
+                                            }}
+                                            transition={{ duration: 0.2 }}
+                                        />
+                                    </motion.div>
 
                                     {/* Animated Dropdown menu */}
                                     <AnimatePresence>
                                         {showDropdown && (
                                             <motion.div
                                                 id="userDropdown"
-                                                className="absolute right-0 mt-2 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-44 overflow-hidden"
+                                                className="absolute right-0 mt-2 z-50 bg-white divide-y divide-gray-100 rounded-lg shadow-lg w-48 overflow-hidden"
                                                 variants={dropdownVariants}
                                                 initial="hidden"
                                                 animate="visible"
