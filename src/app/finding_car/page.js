@@ -4,6 +4,18 @@ import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
+import CarRentalModal from "../../../components/CarRentalModal"; // import component
+
+const carAmenities = {
+  1: ['bluetooth', 'camera', 'airbag', 'etc'],
+  2: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode'],
+  3: ['bluetooth', 'camera', 'airbag', 'etc', 'tablet'],
+  4: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode', 'camera360'],
+  5: ['bluetooth', 'camera', 'airbag', 'etc', 'map'],
+  6: ['bluetooth', 'camera', 'airbag', 'etc', 'rotateCcw', 'circle'],
+  7: ['bluetooth', 'camera', 'airbag', 'etc', 'package', 'shield'],
+  8: ['bluetooth', 'camera', 'airbag', 'etc', 'radar', 'sunroof'],
+};
 
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -217,9 +229,21 @@ const CarListingPage = () => {
     setActivePopup(null);
   };
 
+  // Thêm useEffect để khóa scroll khi popup mở
+  useEffect(() => {
+    if (activePopup) {
+      document.body.classList.add('overflow-hidden');
+    } else {
+      document.body.classList.remove('overflow-hidden');
+    }
+    return () => {
+      document.body.classList.remove('overflow-hidden');
+    };
+  }, [activePopup]);
+
   const PopupOverlay = ({ children, onClose }) => (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-96 overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-lg shadow-xl max-w-xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         {children}
       </div>
     </div>
@@ -375,6 +399,9 @@ const CarListingPage = () => {
     );
   };
 
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [showRentalModal, setShowRentalModal] = useState(false);
+
   // Infinite scrolling logic
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -512,7 +539,13 @@ const CarListingPage = () => {
 
       {/* Car Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <VehicleList vehicles={filteredCars.slice(0, displayedCount)} />
+        <VehicleList
+          vehicles={filteredCars.slice(0, displayedCount)}
+          onRentClick={(car) => {
+            setSelectedCar(car);
+            setShowRentalModal(true);
+          }}
+        />
         <div ref={loaderRef} className="h-10"></div>
       </div>
 
