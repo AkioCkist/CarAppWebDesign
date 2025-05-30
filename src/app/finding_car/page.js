@@ -4,6 +4,18 @@ import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
+import CarRentalModal from "../../../components/CarRentalModal"; // import component
+
+const carAmenities = {
+  1: ['bluetooth', 'camera', 'airbag', 'etc'],
+  2: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode'],
+  3: ['bluetooth', 'camera', 'airbag', 'etc', 'tablet'],
+  4: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode', 'camera360'],
+  5: ['bluetooth', 'camera', 'airbag', 'etc', 'map'],
+  6: ['bluetooth', 'camera', 'airbag', 'etc', 'rotateCcw', 'circle'],
+  7: ['bluetooth', 'camera', 'airbag', 'etc', 'package', 'shield'],
+  8: ['bluetooth', 'camera', 'airbag', 'etc', 'radar', 'sunroof'],
+};
 
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -375,6 +387,9 @@ const CarListingPage = () => {
     );
   };
 
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [showRentalModal, setShowRentalModal] = useState(false);
+
   // Infinite scrolling logic
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -512,7 +527,13 @@ const CarListingPage = () => {
 
       {/* Car Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <VehicleList vehicles={filteredCars.slice(0, displayedCount)} />
+        <VehicleList
+          vehicles={filteredCars.slice(0, displayedCount)}
+          onRentClick={(car) => {
+            setSelectedCar(car);
+            setShowRentalModal(true);
+          }}
+        />
         <div ref={loaderRef} className="h-10"></div>
       </div>
 

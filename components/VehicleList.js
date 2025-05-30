@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
+import CarRentalModal from "./CarRentalModal"; // Import CarRentalModal
 
 // VehicleCard subcomponent for each vehicle
-function VehicleCard({ vehicle }) {
+function VehicleCard({ vehicle, onBookClick }) {
   const [isHovered, setIsHovered] = useState(false);
-  const [isFavorite, setIsFavorite] = useState(false); // Khởi tạo với false thay vì vehicle.isFavorite
+  const [isFavorite, setIsFavorite] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Đợi component mount xong mới set giá trị thực từ props
   useEffect(() => {
     setIsMounted(true);
     setIsFavorite(vehicle.isFavorite || false);
@@ -17,11 +17,13 @@ function VehicleCard({ vehicle }) {
     setIsFavorite(!isFavorite);
   };
 
-  // Không render animation cho đến khi component được mount
+  const handleBookClick = () => {
+    onBookClick(vehicle); // Gọi callback với thông tin xe
+  };
+
   if (!isMounted) {
     return (
       <div className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col border border-gray-200 relative">
-        {/* Favorite icon */}
         <button
           onClick={handleFavoriteClick}
           className="absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg"
@@ -35,7 +37,6 @@ function VehicleCard({ vehicle }) {
           </svg>
         </button>
 
-        {/* Car image placeholder */}
         <div className="relative w-full h-44 overflow-hidden">
           <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
             <svg className="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
@@ -45,14 +46,12 @@ function VehicleCard({ vehicle }) {
         </div>
 
         <div className="p-4 flex flex-col flex-1">
-          {/* Vehicle name */}
           <div className="flex items-center gap-2 mb-2">
             <span className="font-semibold text-base text-gray-900">
               {vehicle.name}
             </span>
           </div>
 
-          {/* Vehicle details */}
           <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 gap-x-4 gap-y-1">
             <span className="flex items-center gap-2">
               <img
@@ -82,7 +81,6 @@ function VehicleCard({ vehicle }) {
             </span>
           </div>
 
-          {/* Location */}
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <span className="flex items-center gap-2">
               <img
@@ -94,7 +92,6 @@ function VehicleCard({ vehicle }) {
             </span>
           </div>
 
-          {/* Rating and trips */}
           <div className="flex items-center text-sm text-gray-600 mb-3">
             <span className="flex items-center text-yellow-500 gap-1">
               <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -113,7 +110,6 @@ function VehicleCard({ vehicle }) {
             </span>
           </div>
 
-          {/* Price */}
           <div className="flex items-center gap-2 mb-2">
             <span className="text-green-600 font-bold text-lg">
               {vehicle.priceDisplay}
@@ -125,7 +121,6 @@ function VehicleCard({ vehicle }) {
             )}
           </div>
 
-          {/* Discount badge */}
           {vehicle.priceDiscount && (
             <div className="flex items-center gap-2 mb-2">
               <span className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">
@@ -134,13 +129,14 @@ function VehicleCard({ vehicle }) {
             </div>
           )}
 
-          {/* Description */}
           <div className="text-xs text-gray-700 mb-3 line-clamp-2">
             {vehicle.description}
           </div>
 
-          {/* Book button */}
-          <button className="mt-auto px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold w-full">
+          <button 
+            onClick={handleBookClick}
+            className="mt-auto px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold w-full"
+          >
             <span className="flex items-center justify-center gap-2">
               Đặt xe ngay
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -160,7 +156,6 @@ function VehicleCard({ vehicle }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Favorite icon with animation */}
       <button
         onClick={handleFavoriteClick}
         className={`absolute top-3 right-3 z-10 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-lg transition-all duration-300 ${isHovered ? 'scale-110' : ''
@@ -176,7 +171,6 @@ function VehicleCard({ vehicle }) {
         </svg>
       </button>
 
-      {/* Car image with loading animation */}
       <div className="relative w-full h-44 overflow-hidden">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
@@ -193,7 +187,6 @@ function VehicleCard({ vehicle }) {
           onLoad={() => setImageLoaded(true)}
         />
 
-        {/* Gradient overlay on hover */}
         <div
           className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent transition-opacity duration-300 ${isHovered ? 'opacity-100' : 'opacity-0'
             }`}
@@ -201,7 +194,6 @@ function VehicleCard({ vehicle }) {
       </div>
 
       <div className="p-4 flex flex-col flex-1">
-        {/* Vehicle name with animation */}
         <div className="flex items-center gap-2 mb-2">
           <span
             className={`font-semibold text-base text-gray-900 transition-colors duration-300 ${isHovered ? 'text-blue-600' : ''
@@ -211,7 +203,6 @@ function VehicleCard({ vehicle }) {
           </span>
         </div>
 
-        {/* Vehicle details with custom icons */}
         <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 gap-x-4 gap-y-1">
           <span
             className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
@@ -250,7 +241,6 @@ function VehicleCard({ vehicle }) {
           </span>
         </div>
 
-        {/* Location */}
         <div
           className={`flex items-center text-sm text-gray-600 mb-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
             }`}
@@ -265,7 +255,6 @@ function VehicleCard({ vehicle }) {
           </span>
         </div>
 
-        {/* Rating and trips */}
         <div
           className={`flex items-center text-sm text-gray-600 mb-3 transition-all duration-300 ${isHovered ? 'transform translate-x-1' : ''
             }`}
@@ -287,7 +276,6 @@ function VehicleCard({ vehicle }) {
           </span>
         </div>
 
-        {/* Price with animation */}
         <div
           className={`flex items-center gap-2 mb-2 transition-all duration-300 ${isHovered ? 'transform scale-105' : ''
             }`}
@@ -302,7 +290,6 @@ function VehicleCard({ vehicle }) {
           )}
         </div>
 
-        {/* Discount badge */}
         {vehicle.priceDiscount && (
           <div
             className={`flex items-center gap-2 mb-2 transition-all duration-300 ${isHovered ? 'transform scale-105' : ''
@@ -314,13 +301,12 @@ function VehicleCard({ vehicle }) {
           </div>
         )}
 
-        {/* Description */}
         <div className="text-xs text-gray-700 mb-3 line-clamp-2">
           {vehicle.description}
         </div>
 
-        {/* Book button with enhanced animation */}
         <button
+          onClick={handleBookClick}
           className={`mt-auto px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 w-full transform ${isHovered
               ? 'shadow-lg scale-105 from-blue-700 to-blue-800'
               : 'hover:from-blue-700 hover:to-blue-800 hover:shadow-md'
@@ -344,32 +330,66 @@ function VehicleCard({ vehicle }) {
   );
 }
 
-// Main VehicleList component with safer animation
+// Main VehicleList component with Modal integration
 export default function VehicleList({ vehicles }) {
   const [isMounted, setIsMounted] = useState(false);
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Dữ liệu tiện nghi mẫu cho các xe (bạn có thể customize theo dữ liệu thực)
+  const carAmenities = {
+    1: ['bluetooth', 'camera', 'airbag', 'etc'],
+    2: ['sunroof', 'sportMode', 'tablet', 'camera360'],
+    3: ['map', 'rotateCcw', 'circle', 'package'],
+    4: ['shield', 'radar', 'bluetooth', 'camera'],
+    // Thêm các ID xe khác...
+  };
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  const handleBookClick = (vehicle) => {
+    setSelectedCar(vehicle);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCar(null);
+  };
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-      {vehicles.map((vehicle, idx) => (
-        <div
-          key={vehicle.id || idx} // Sử dụng ID unique thay vì index nếu có
-          className={isMounted ? "animate-fade-in-up" : ""}
-          style={
-            isMounted
-              ? {
-                animationDelay: `${idx * 100}ms`,
-                animationFillMode: 'both'
-              }
-              : {}
-          }
-        >
-          <VehicleCard vehicle={vehicle} />
-        </div>
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        {vehicles.map((vehicle, idx) => (
+          <div
+            key={vehicle.id || idx}
+            className={isMounted ? "animate-fade-in-up" : ""}
+            style={
+              isMounted
+                ? {
+                  animationDelay: `${idx * 100}ms`,
+                  animationFillMode: 'both'
+                }
+                : {}
+            }
+          >
+            <VehicleCard 
+              vehicle={vehicle} 
+              onBookClick={handleBookClick}
+            />
+          </div>
+        ))}
+      </div>
+
+      {/* CarRentalModal */}
+      <CarRentalModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        carData={selectedCar}
+        carAmenities={carAmenities}
+      />
+    </>
   );
 }
