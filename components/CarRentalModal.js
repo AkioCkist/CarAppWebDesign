@@ -93,7 +93,7 @@ const CarRentalModal = ({
 
     return (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-            <div className="relative w-full max-w-6xl mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-y-auto">
+            <div className="relative w-full max-w-[1440px] mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-y-auto">
                 {/* Close Button */}
                 <button
                     className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-gray-100"
@@ -104,9 +104,9 @@ const CarRentalModal = ({
                 {/* Main Content */}
                 <div>
                     {/* Photo Gallery - Full Width */}
-                    <div className="w-full h-80 flex gap-2 p-4">
+                    <div className="w-full h-[480px] flex gap-2 p-4">
                         {/* Main Image */}
-                        <div className="flex-1 relative rounded-lg overflow-hidden">
+                        <div className="relative rounded-lg overflow-hidden basis-[70%]">
                             <img
                                 src={gallery[selectedImage]}
                                 alt={carData.name}
@@ -119,7 +119,7 @@ const CarRentalModal = ({
                             </button>
                         </div>
                         {/* Side Images */}
-                        <div className="w-48 flex flex-col gap-2">
+                        <div className="flex flex-col gap-2 basis-[30%]">
                             {gallery.slice(1, 4).map((img, idx) => (
                                 <button
                                     key={idx + 1}
@@ -156,28 +156,28 @@ const CarRentalModal = ({
                                 <div className="font-semibold text-lg text-gray-900 mb-3">Đặc điểm</div>
                                 <div className="grid grid-cols-2 gap-4 mb-3">
                                     <div className="flex items-center gap-2">
-                                        <Cog className="w-5 h-5 text-blue-600" />
+                                        <img src="/icons/IconDetailCarCard/Transmission.svg" alt="Truyền động" className="w-5 h-5 text-blue-600" />
                                         <div>
                                             <div className="text-xs text-gray-500">Truyền động</div>
                                             <div className="text-sm">{carData.transmission}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Users className="w-5 h-5 text-blue-600" />
+                                        <img src="/icons/IconDetailCarCard/seat.svg" alt="Số ghế" className="w-5 h-5 text-blue-600" />
                                         <div>
                                             <div className="text-xs text-gray-500">Số ghế</div>
                                             <div className="text-sm">{carData.seats} chỗ</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Fuel className="w-5 h-5 text-blue-600" />
+                                        <img src="/icons/IconDetailCarCard/fuel.svg" alt="Nhiên liệu" className="w-5 h-5 text-blue-600" />
                                         <div>
                                             <div className="text-xs text-gray-500">Nhiên liệu</div>
                                             <div className="text-sm">{carData.fuel}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Gauge className="w-5 h-5 text-blue-600" />
+                                        <img src="/icons/IconDetailCarCard/fuelconsumption.svg" alt="Tiêu hao" className="w-5 h-5 text-blue-600" />
                                         <div>
                                             <div className="text-xs text-gray-500">Tiêu hao</div>
                                             <div className="text-sm">7L/100km</div>
