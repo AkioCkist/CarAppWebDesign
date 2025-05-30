@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
 import { TypeAnimation } from 'react-type-animation';
+import { signIn } from "next-auth/react";
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -152,52 +153,25 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     setIsLoading(true);
-    setLoginError(""); // Clear previous error
+    setLoginError("");
 
     if (isLogin) {
-      try {
-        const url = "http://127.0.0.1/myapi/login.php";
-        const options = {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            phone_number: formData.phone,
-            password: formData.password,
-          }),
-        };
+      // Use NextAuth signIn
+      const res = await signIn("credentials", {
+        redirect: false,
+        phone: formData.phone,
+        password: formData.password
+      });
 
-        const { json: result } = await debugApiRequest(url, options);
-
-        if (result && result.success) {
-          console.log("Login successful!", result.user);
-
-          // Use your custom avatar URL if user.avatar is not set
-          const defaultAvatar = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg?semt=ais_items_boosted&w=740";
-          // If "Remember me" is checked, save cookies for 7 days, else session cookies (no max-age)
-          const cookieOptions = formData.rememberMe ? "; path=/; max-age=" + (60 * 60 * 24 * 7) : "; path=/";
-          document.cookie = `user_id=${result.user.account_id}${cookieOptions}`;
-          document.cookie = `user_name=${result.user.username || result.user.name || 'User'}${cookieOptions}`;
-          document.cookie = `user_phone=${result.user.phone_number}${cookieOptions}`;
-          document.cookie = `user_avatar=${result.user.avatar || defaultAvatar}${cookieOptions}`;
-          document.cookie = `is_logged_in=true${cookieOptions}`;
-
-          // Show loading screen, then navigate and reload to update header avatar
-          if (typeof startLoading === "function") startLoading();
-          setTimeout(() => {
-            window.location.href = "/"; // Full reload to update header avatar
-          }, 1800);
-          return;
-        } else {
-          setLoginError("Phone number or password is incorrect.");
-        }
-      } catch (err) {
-        setLoginError("Unable to connect to server. Please try again.");
+      if (res.ok && !res.error) {
+        window.location.href = "/";
+        return;
+      } else {
+        setLoginError("Phone number or password is incorrect.");
       }
-      setIsLoading(false); // Only set loading false if login failed
+      setIsLoading(false);
     } else {
       // Registration logic (if needed)
       await new Promise((resolve) => setTimeout(resolve, 1500));
