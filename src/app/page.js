@@ -376,7 +376,7 @@ export default function HomePage() {
         // Animate fleet horizontally during vertical scroll
         scroll(
           animate(".fleet-group", {
-            transform: ["none", `translateX(-${(items.length - 1) * 60}vw)`],
+            transform: ["none", `translateX(-${(items.length - 1) * 100}vw)`],
           }),
           { target: fleetContainerRef.current }
         );
@@ -957,7 +957,7 @@ export default function HomePage() {
                           {vehicle.type}
                         </div>
                       </div>
-                      <div className="p-4 md:p-6">
+                      <div className="p-6 md:p-8">
                         <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
                           {vehicle.name}
                         </h3>
@@ -993,7 +993,7 @@ export default function HomePage() {
                         </div>
                       </div>
                     </motion.div>
-                    <div className="mt-6">
+                    <div className="mt-8">
                     </div>
                   </div>
                 </li>
@@ -1005,6 +1005,18 @@ export default function HomePage() {
         {/* Progress Bar */}
         <div 
           className="fleet-progress"
+          style={{
+            position: 'fixed',
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #10b981, #059669)',
+            bottom: '100px',
+            transform: 'scaleX(0)',
+            transformOrigin: 'left',
+            zIndex: 30,
+            visibility: 'hidden',
+          }}
         />
       </motion.section>
 
