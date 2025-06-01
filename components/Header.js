@@ -106,11 +106,15 @@ export default function Header() {
           // Nếu ở trang finding_car thì luôn có background cố định
           backgroundColor: isCarFindingPage
             ? "rgba(17, 24, 39, 0.95)"
-            : scrollY > 50 ? "rgba(17, 24, 39, 0.9)" : "transparent",
+            : scrollY > 50
+              ? "rgba(17, 24, 39, 0.9)"
+              : "rgba(17, 24, 39, " + bgOpacity + ")",
           // Nếu ở trang finding_car thì luôn opacity là 1, không có hiệu ứng fade
           opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
           // Không có transition cho trang finding_car
-          transition: isCarFindingPage ? "none" : "all 0.3s ease",
+          transition: isCarFindingPage
+            ? "none"
+            : "background-color 0.5s cubic-bezier(0.4,0,0.2,1)",
           // Thêm backdrop-filter để header rõ ràng hơn trên trang finding_car
           backdropFilter: isCarFindingPage ? "blur(10px)" : "none",
         }}

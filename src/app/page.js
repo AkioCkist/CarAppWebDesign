@@ -157,11 +157,10 @@ const AnimatedDropdown = ({
                     onToggle();
                   }
                 }}
-                className={`px-4 py-3 cursor-pointer transition-colors ${
-                  option.disabled
-                    ? "text-gray-400 cursor-not-allowed bg-gray-50"
-                    : "text-gray-800 hover:bg-green-50 hover:text-green-700"
-                } ${value === option.value ? "bg-green-100 text-green-800 font-medium" : ""}`}
+                className={`px-4 py-3 cursor-pointer transition-colors ${option.disabled
+                  ? "text-gray-400 cursor-not-allowed bg-gray-50"
+                  : "text-gray-800 hover:bg-green-50 hover:text-green-700"
+                  } ${value === option.value ? "bg-green-100 text-green-800 font-medium" : ""}`}
               >
                 <motion.div
                   whileHover={!option.disabled ? { x: 5 } : {}}
@@ -370,7 +369,7 @@ export default function HomePage() {
   useEffect(() => {
     if (typeof window !== 'undefined' && fleetContainerRef.current) {
       const items = document.querySelectorAll(".fleet-item");
-      
+
       if (items.length > 0) {
         // Animate fleet horizontally during vertical scroll
         scroll(
@@ -848,7 +847,7 @@ export default function HomePage() {
             <div className="w-full md:w-1/4 space-y-8 mb-8 md:mb-0">
               {features.slice(0, 2).map((f, i) => (
                 <motion.div
-                  key={i}
+                  key={f.title}
                   className="flex items-start"
                   variants={fadeVariant}
                   custom={i * 0.2}>
@@ -870,7 +869,7 @@ export default function HomePage() {
             <div className="w-full md:w-1/4 space-y-8">
               {features.slice(2, 4).map((f, i) => (
                 <motion.div
-                  key={i}
+                  key={f.title}
                   className="flex items-start"
                   variants={fadeVariant}
                   custom={(i + 2) * 0.2}>
@@ -899,9 +898,9 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4 py-16 text-center">
           <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
         </div>
-        
+
         {/* Fleet Gallery Container */}
-        <div 
+        <div
           ref={fleetContainerRef}
           className="fleet-group-container"
           style={{
@@ -924,8 +923,8 @@ export default function HomePage() {
               listStyle: 'none'
             }}>
               {vehicles.slice(0, 5).map((vehicle, index) => (
-                <li 
-                  key={vehicle.id}
+                <li
+                  key={vehicle.id || index}
                   className="fleet-item"
                   style={{
                     display: 'flex',
@@ -1002,7 +1001,7 @@ export default function HomePage() {
         </div>
 
         {/* Progress Bar */}
-        <div 
+        <div
           className="fleet-progress"
         />
       </motion.section>
@@ -1017,9 +1016,9 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Latest News</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {news.map((n, i) => (
+            {news.map((n) => (
               <motion.div
-                key={i}
+                key={n.title}
                 whileHover={{
                   scale: 1.03,
                   y: -5,
