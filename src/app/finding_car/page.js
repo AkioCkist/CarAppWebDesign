@@ -102,7 +102,7 @@ const CarListingPage = () => {
       oldPrice: 16810000,
       pricePer: 'ngày',
       priceDiscount: 'Giảm 11%',
-      description: 'Siêu xe độc nhất với thiết kế ấn tượng.',
+      description: 'Siêu xe độc nhất với thiết kế ấn tượng.yeyeyeyyeyeyeeeeeeeeeeeeeeeeeeeeeeeeeeeeê',
       isFavorite: false
     },
     {
@@ -402,6 +402,20 @@ const CarListingPage = () => {
   const [selectedCar, setSelectedCar] = useState(null);
   const [showRentalModal, setShowRentalModal] = useState(false);
 
+  // Thêm state favorites
+  const [favorites, setFavorites] = useState([]);
+
+  // Thêm hàm xử lý favorite toggle
+  const handleFavoriteToggle = (vehicleId) => {
+    setFavorites(prev => {
+      if (prev.includes(vehicleId)) {
+        return prev.filter(id => id !== vehicleId);
+      } else {
+        return [...prev, vehicleId];
+      }
+    });
+  };
+
   // Infinite scrolling logic
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -429,7 +443,7 @@ const CarListingPage = () => {
       {/* Navigation Header */}
       <Header />
       {/* Spacer để header chiếm chỗ, chỉnh h-20 cho đúng chiều cao Header */}
-      <div className="h-15 bg-gray-800"></div>
+      <div className="h-21 bg-gray-800/95"></div>
 
       {/* Location & Time Bar */}
       <div className="bg-white shadow-sm border-b">
@@ -541,7 +555,9 @@ const CarListingPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <VehicleList
           vehicles={filteredCars.slice(0, displayedCount)}
-          onRentClick={(car) => {
+          onFavoriteToggle={handleFavoriteToggle}
+          favorites={favorites}
+          onBookClick={(car) => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}

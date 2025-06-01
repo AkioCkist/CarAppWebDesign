@@ -10,10 +10,21 @@ export default function Header() {
   const router = useRouter();
   const { data: session } = useSession();
   const { startLoading, CarLoadingScreen } = useCarLoading();
-
+  const [showDropdown, setShowDropdown] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
+
+  // Thêm state để kiểm tra xem có đang ở trang finding_car hay không
+  const isCarFindingPage = router.pathname === '/finding_car';
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleNavigation = (href) => {
     setFadeOut(true);
@@ -34,15 +45,6 @@ export default function Header() {
   const handleLoadingComplete = () => {
     router.push("/signin_registration");
   };
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrollY(window.scrollY);
-    };
-
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
 
   const fadeVariant = {
     hidden: { opacity: 0, y: 40 },
@@ -70,8 +72,14 @@ export default function Header() {
         animate="visible"
         className="fixed top-0 left-0 w-full z-30 text-white"
         style={{
-          opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
-          backgroundColor: scrollY > 50 ? "rgba(17, 24, 39, 0.9)" : "transparent",
+          // Nếu ở trang finding_car thì luôn có background cố định
+          backgroundColor: isCarFindingPage
+            ? "rgba(17, 24, 39, 0.9)"
+            : scrollY > 50 ? "rgba(17, 24, 39, 0.9)" : "transparent",
+          // Nếu ở trang finding_car thì luôn opacity là 1, không có hiệu ứng fade
+          opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
+          // Thêm transition chỉ cho các trang không phải finding_car
+          transition: isCarFindingPage ? "none" : "all 0.3s ease"
         }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">

@@ -151,7 +151,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                 transition={{ delay: 0.5 }}
                 className="text-gray-600 text-lg"
               >
-                Đang chuyển hướng đến trang đăng ký...
+                Đang chuyển hướng đến trang...
               </motion.p>
             </motion.div>
 

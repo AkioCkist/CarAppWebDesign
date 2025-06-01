@@ -138,8 +138,7 @@ const AnimatedDropdown = ({
             style={{ 
               marginTop: "4px",
               zIndex: zIndex // Use dynamic z-index
-            }}
-          >
+            }}>
             {options.map((option, index) => (
               <motion.div
                 key={option.value}
