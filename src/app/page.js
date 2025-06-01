@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { animate, scroll } from "motion";
 import { useCarLoading } from "../../components/CarLoading";
 import SimpleFaqSection from "../../components/SimpleFaqSection";
 import VehicleList from "../../components/VehicleList";
@@ -202,6 +203,7 @@ export default function HomePage() {
   // Add dropdown open states
   const [isPickupDropdownOpen, setIsPickupDropdownOpen] = useState(false);
   const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
+  const fleetContainerRef = useRef(null);
 
   // Instead of state and useEffect for scrollY:
   // const [scrollY, setScrollY] = useState(0);
@@ -364,6 +366,28 @@ export default function HomePage() {
       }
     }
   };
+
+  // Setup scroll pinning effect for fleet section
+  useEffect(() => {
+    if (typeof window !== 'undefined' && fleetContainerRef.current) {
+      const items = document.querySelectorAll(".fleet-item");
+      
+      if (items.length > 0) {
+        // Animate fleet horizontally during vertical scroll
+        scroll(
+          animate(".fleet-group", {
+            transform: ["none", `translateX(-${(items.length - 1) * 60}vw)`],
+          }),
+          { target: fleetContainerRef.current }
+        );
+
+        // Progress bar representing fleet scroll
+        scroll(animate(".fleet-progress", { scaleX: [0, 1] }), {
+          target: fleetContainerRef.current,
+        });
+      }
+    }
+  }, []);
 
   return isLoading ? (
     <CarLoadingScreen />
@@ -865,18 +889,123 @@ export default function HomePage() {
         </div>
       </motion.section>
 
-      {/* Car Fleet Section */}
+      {/* Car Fleet Section with Scroll Pinning */}
       <motion.section
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={3}
         id="renting"
-        className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
+        className="w-full">
+        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
           <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
-          <VehicleList vehicles={vehicles} />
         </div>
+        
+        {/* Fleet Gallery Container */}
+        <div 
+          ref={fleetContainerRef}
+          className="fleet-group-container"
+          style={{
+            height: '500vh',
+            position: 'relative'
+          }}
+        >
+          <div style={{
+            position: 'sticky',
+            top: 0,
+            overflow: 'hidden',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <ul className="fleet-group" style={{
+              display: 'flex',
+              margin: 0,
+              padding: 0,
+              listStyle: 'none'
+            }}>
+              {vehicles.slice(0, 5).map((vehicle, index) => (
+                <li 
+                  key={vehicle.id}
+                  className="fleet-item"
+                  style={{
+                    display: 'flex',
+                    width: '100vw',
+                    height: '100vh',
+                    flex: '0 0 auto',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    padding: '0 2rem'
+                  }}
+                >
+                  <div className="max-w-4xl mx-auto text-center">
+                    <motion.div
+                      initial={{ opacity: 0, y: 50 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="bg-white rounded-xl shadow-2xl overflow-hidden"
+                    >
+                      <div className="relative h-48 md:h-64">
+                        <Image
+                          src={vehicle.image}
+                          alt={vehicle.name}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          {vehicle.type}
+                        </div>
+                      </div>
+                      <div className="p-4 md:p-6">
+                        <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                          {vehicle.name}
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Engine</div>
+                            <div className="font-semibold">{vehicle.engine}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Fuel</div>
+                            <div className="font-semibold">{vehicle.fuel}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Seats</div>
+                            <div className="font-semibold">{vehicle.seats}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Transmission</div>
+                            <div className="font-semibold">{vehicle.transmission}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-3xl font-bold text-green-600">
+                            ${vehicle.price}<span className="text-lg text-gray-600">/day</span>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition-colors"
+                          >
+                            Book Now
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                    <div className="mt-6">
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div 
+          className="fleet-progress"
+        />
       </motion.section>
 
       {/* News Section */}
