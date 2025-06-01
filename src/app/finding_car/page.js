@@ -299,98 +299,227 @@ const CarListingPage = () => {
     const maxLimit = 10000000;
     const step = 100000;
 
-    // Đảm bảo min không lớn hơn max và ngược lại
-    const handleMinChange = (e) => {
-      const value = Math.min(Number(e.target.value), priceMax - step);
-      setPriceMin(value);
-    };
-    const handleMaxChange = (e) => {
-      const value = Math.max(Number(e.target.value), priceMin + step);
-      setPriceMax(value);
+    // Local state để xử lý input
+    const [localMin, setLocalMin] = useState(priceMin);
+    const [localMax, setLocalMax] = useState(priceMax);
+    const [isDragging, setIsDragging] = useState(false);
+
+    // Format number with thousands separator
+    const formatNumber = (num) => {
+      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     };
 
-    // Khi kéo thanh slider
-    const handleSliderMin = (e) => {
-      const value = Math.min(Number(e.target.value), priceMax - step);
-      setPriceMin(value);
+    // Parse formatted number back to number
+    const parseFormattedNumber = (str) => {
+      return parseInt(str.replace(/,/g, '')) || 0;
     };
-    const handleSliderMax = (e) => {
-      const value = Math.max(Number(e.target.value), priceMin + step);
-      setPriceMax(value);
+
+    // Xử lý input thay đổi - cải thiện UX
+    const handleMinInputChange = (e) => {
+      let value = e.target.value.replace(/,/g, ''); // Remove commas
+
+      // Allow only numbers
+      if (!/^\d*$/.test(value)) return;
+
+      if (value === '') {
+        setLocalMin('');
+        return;
+      }
+
+      const numValue = Math.max(minLimit, Math.min(parseInt(value), localMax || maxLimit));
+      setLocalMin(numValue);
     };
+
+    const handleMaxInputChange = (e) => {
+      let value = e.target.value.replace(/,/g, ''); // Remove commas
+
+      // Allow only numbers
+      if (!/^\d*$/.test(value)) return;
+
+      if (value === '') {
+        setLocalMax('');
+        return;
+      }
+
+      const numValue = Math.min(maxLimit, Math.max(parseInt(value), localMin || minLimit));
+      setLocalMax(numValue);
+    };
+
+    // Handle input blur to apply final values
+    const handleMinBlur = () => {
+      if (localMin === '') {
+        setLocalMin(minLimit);
+        setPriceMin(minLimit);
+      } else {
+        setPriceMin(localMin);
+      }
+    };
+
+    const handleMaxBlur = () => {
+      if (localMax === '') {
+        setLocalMax(maxLimit);
+        setPriceMax(maxLimit);
+      } else {
+        setPriceMax(localMax);
+      }
+    };
+
+    // Xử lý kéo thanh trượt - cải thiện tương tác
+    const handleSliderChange = (e, isMin) => {
+      const value = Number(e.target.value);
+      if (isMin) {
+        const newMin = Math.min(value, (localMax || maxLimit) - step);
+        setLocalMin(newMin);
+        setPriceMin(newMin);
+      } else {
+        const newMax = Math.max(value, (localMin || minLimit) + step);
+        setLocalMax(newMax);
+        setPriceMax(newMax);
+      }
+    };
+
+    // Handle mouse events for better slider interaction
+    const handleMouseDown = () => {
+      setIsDragging(true);
+      document.body.style.userSelect = 'none';
+    };
+
+    const handleMouseUp = () => {
+      setIsDragging(false);
+      document.body.style.userSelect = '';
+    };
+
+    // Add event listeners for mouse events
+    useEffect(() => {
+      document.addEventListener('mouseup', handleMouseUp);
+      return () => {
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.userSelect = '';
+      };
+    }, []);
 
     return (
       <PopupOverlay onClose={onClose}>
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
+        <div className="p-6 space-y-6">
+          <div className="flex justify-between items-center">
             <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-            <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
+            <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
               <X className="h-5 w-5" />
             </button>
           </div>
-          <div className="flex items-center space-x-4 mb-6">
-            <input
-              type="number"
-              min={minLimit}
-              max={priceMax - step}
-              step={step}
-              value={priceMin}
-              onChange={handleMinChange}
-              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
-              placeholder="Từ"
-            />
-            <span className="text-gray-500">—</span>
-            <input
-              type="number"
-              min={priceMin + step}
-              max={maxLimit}
-              step={step}
-              value={priceMax}
-              onChange={handleMaxChange}
-              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
-              placeholder="Đến"
-            />
+
+          {/* Input fields */}
+          <div className="flex items-center justify-between space-x-4">
+            <div className="flex-1">
+              <label className="block text-sm text-gray-600 mb-1">Từ</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={formatNumber(localMin)}
+                onChange={handleMinInputChange}
+                onBlur={handleMinBlur}
+                placeholder="0"
+                className="w-full px-3 py-2 border border-gray-300 rounded text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <div className="flex items-center">
+              <span className="text-gray-500">—</span>
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm text-gray-600 mb-1">Đến</label>
+              <input
+                type="text"
+                inputMode="numeric"
+                value={formatNumber(localMax)}
+                onChange={handleMaxInputChange}
+                onBlur={handleMaxBlur}
+                placeholder={maxLimit.toString()}
+                className="w-full px-3 py-2 border border-gray-300 rounded text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
           </div>
-          {/* Thanh kéo đôi custom */}
-          <div className="relative w-full mb-6" style={{ height: 40 }}>
-            <input
-              type="range"
-              min={minLimit}
-              max={maxLimit}
-              step={step}
-              value={priceMin}
-              onChange={handleSliderMin}
-              className="absolute pointer-events-none w-full accent-blue-600"
-              style={{ zIndex: priceMin > maxLimit - 100000 ? 5 : 6 }}
-            />
-            <input
-              type="range"
-              min={minLimit}
-              max={maxLimit}
-              step={step}
-              value={priceMax}
-              onChange={handleSliderMax}
-              className="absolute pointer-events-none w-full accent-blue-600"
-              style={{ zIndex: 7 }}
-            />
-            {/* Thanh màu giữa hai đầu */}
-            <div
-              className="absolute h-1 bg-blue-500 rounded"
-              style={{
-                left: `${((priceMin - minLimit) / (maxLimit - minLimit)) * 100}%`,
-                width: `${((priceMax - priceMin) / (maxLimit - minLimit)) * 100}%`,
-                top: 16,
-                zIndex: 1,
-              }}
-            />
+
+          {/* Slider section */}
+          <div className="mt-8">
+            <div className="relative h-2 bg-gray-200 rounded-full">
+              <div
+                className="absolute h-full bg-blue-500 rounded-full"
+                style={{
+                  left: `${((localMin || 0) / maxLimit) * 100}%`,
+                  right: `${100 - ((localMax || maxLimit) / maxLimit) * 100}%`
+                }}
+              />
+              <input
+                type="range"
+                min={minLimit}
+                max={maxLimit}
+                value={localMin || 0}
+                step={step}
+                onChange={(e) => handleSliderChange(e, true)}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleMouseDown}
+                className="absolute w-full h-2 appearance-none bg-transparent cursor-pointer z-10
+                  [-webkit-appearance:none] 
+                  [&::-webkit-slider-thumb]:appearance-none 
+                  [&::-webkit-slider-thumb]:h-4 
+                  [&::-webkit-slider-thumb]:w-4 
+                  [&::-webkit-slider-thumb]:rounded-full 
+                  [&::-webkit-slider-thumb]:bg-blue-600 
+                  [&::-webkit-slider-thumb]:border-2 
+                  [&::-webkit-slider-thumb]:border-white
+                  [&::-webkit-slider-thumb]:cursor-grab
+                  [&::-webkit-slider-thumb]:active:cursor-grabbing
+                  [&::-moz-range-thumb]:h-4 
+                  [&::-moz-range-thumb]:w-4 
+                  [&::-moz-range-thumb]:rounded-full 
+                  [&::-moz-range-thumb]:bg-blue-600 
+                  [&::-moz-range-thumb]:border-2 
+                  [&::-moz-range-thumb]:border-white
+                  [&::-moz-range-thumb]:cursor-grab
+                  [&::-moz-range-thumb]:active:cursor-grabbing"
+              />
+              <input
+                type="range"
+                min={minLimit}
+                max={maxLimit}
+                value={localMax || maxLimit}
+                step={step}
+                onChange={(e) => handleSliderChange(e, false)}
+                onMouseDown={handleMouseDown}
+                onTouchStart={handleMouseDown}
+                className="absolute w-full h-2 appearance-none bg-transparent cursor-pointer z-20
+                  [-webkit-appearance:none]
+                  [&::-webkit-slider-thumb]:appearance-none 
+                  [&::-webkit-slider-thumb]:h-4 
+                  [&::-webkit-slider-thumb]:w-4 
+                  [&::-webkit-slider-thumb]:rounded-full 
+                  [&::-webkit-slider-thumb]:bg-blue-600 
+                  [&::-webkit-slider-thumb]:border-2 
+                  [&::-webkit-slider-thumb]:border-white
+                  [&::-webkit-slider-thumb]:cursor-grab
+                  [&::-webkit-slider-thumb]:active:cursor-grabbing
+                  [&::-moz-range-thumb]:h-4 
+                  [&::-moz-range-thumb]:w-4 
+                  [&::-moz-range-thumb]:rounded-full 
+                  [&::-moz-range-thumb]:bg-blue-600 
+                  [&::-moz-range-thumb]:border-2 
+                  [&::-moz-range-thumb]:border-white
+                  [&::-moz-range-thumb]:cursor-grab
+                  [&::-moz-range-thumb]:active:cursor-grabbing"
+              />
+            </div>
+
+            {/* Price range labels */}
+            <div className="flex justify-between mt-2">
+              <span className="text-sm text-gray-600">{minLimit.toLocaleString()}đ</span>
+              <span className="text-sm text-gray-600">{maxLimit.toLocaleString()}đ</span>
+            </div>
           </div>
-          <div className="flex justify-between w-full text-xs text-gray-500 mt-1 mb-4">
-            <span>0</span>
-            <span>10.000.000</span>
-          </div>
+
+          {/* Apply button */}
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-6"
           >
             Áp dụng
           </button>
