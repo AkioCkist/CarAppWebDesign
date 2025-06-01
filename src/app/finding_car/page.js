@@ -4,7 +4,9 @@ import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
-import CarRentalModal from "../../../components/CarRentalModal"; // import component
+import CarRentalModal from "../../../components/CarRentalModal";
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
 
 const carAmenities = {
   1: ['bluetooth', 'camera', 'airbag', 'etc'],
@@ -276,8 +278,7 @@ const CarListingPage = () => {
         <div className="flex space-x-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
+            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
             Áp dụng
           </button>
           <button
@@ -285,8 +286,7 @@ const CarListingPage = () => {
               setFilters(prev => ({ ...prev, [category]: [] }));
               onClose();
             }}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-          >
+            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
             Xóa bộ lọc
           </button>
         </div>
@@ -298,229 +298,87 @@ const CarListingPage = () => {
     const minLimit = 0;
     const maxLimit = 10000000;
     const step = 100000;
+    const [values, setValues] = useState([priceMin, priceMax]);
+    const formatNumber = (num) => num.toLocaleString();
 
-    // Local state để xử lý input
-    const [localMin, setLocalMin] = useState(priceMin);
-    const [localMax, setLocalMax] = useState(priceMax);
-    const [isDragging, setIsDragging] = useState(false);
-
-    // Format number with thousands separator
-    const formatNumber = (num) => {
-      return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const handleChange = (newValues) => {
+      setValues(newValues);
     };
 
-    // Parse formatted number back to number
-    const parseFormattedNumber = (str) => {
-      return parseInt(str.replace(/,/g, '')) || 0;
+    const handleAfterChange = (newValues) => {
+      setPriceMin(newValues[0]);
+      setPriceMax(newValues[1]);
     };
-
-    // Xử lý input thay đổi - cải thiện UX
-    const handleMinInputChange = (e) => {
-      let value = e.target.value.replace(/,/g, ''); // Remove commas
-
-      // Allow only numbers
-      if (!/^\d*$/.test(value)) return;
-
-      if (value === '') {
-        setLocalMin('');
-        return;
-      }
-
-      const numValue = Math.max(minLimit, Math.min(parseInt(value), localMax || maxLimit));
-      setLocalMin(numValue);
-    };
-
-    const handleMaxInputChange = (e) => {
-      let value = e.target.value.replace(/,/g, ''); // Remove commas
-
-      // Allow only numbers
-      if (!/^\d*$/.test(value)) return;
-
-      if (value === '') {
-        setLocalMax('');
-        return;
-      }
-
-      const numValue = Math.min(maxLimit, Math.max(parseInt(value), localMin || minLimit));
-      setLocalMax(numValue);
-    };
-
-    // Handle input blur to apply final values
-    const handleMinBlur = () => {
-      if (localMin === '') {
-        setLocalMin(minLimit);
-        setPriceMin(minLimit);
-      } else {
-        setPriceMin(localMin);
-      }
-    };
-
-    const handleMaxBlur = () => {
-      if (localMax === '') {
-        setLocalMax(maxLimit);
-        setPriceMax(maxLimit);
-      } else {
-        setPriceMax(localMax);
-      }
-    };
-
-    // Xử lý kéo thanh trượt - cải thiện tương tác
-    const handleSliderChange = (e, isMin) => {
-      const value = Number(e.target.value);
-      if (isMin) {
-        const newMin = Math.min(value, (localMax || maxLimit) - step);
-        setLocalMin(newMin);
-        setPriceMin(newMin);
-      } else {
-        const newMax = Math.max(value, (localMin || minLimit) + step);
-        setLocalMax(newMax);
-        setPriceMax(newMax);
-      }
-    };
-
-    // Handle mouse events for better slider interaction
-    const handleMouseDown = () => {
-      setIsDragging(true);
-      document.body.style.userSelect = 'none';
-    };
-
-    const handleMouseUp = () => {
-      setIsDragging(false);
-      document.body.style.userSelect = '';
-    };
-
-    // Add event listeners for mouse events
-    useEffect(() => {
-      document.addEventListener('mouseup', handleMouseUp);
-      return () => {
-        document.removeEventListener('mouseup', handleMouseUp);
-        document.body.style.userSelect = '';
-      };
-    }, []);
 
     return (
       <PopupOverlay onClose={onClose}>
-        <div className="p-6 space-y-6">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-            <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+        <div className="p-6">
+          <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
 
-          {/* Input fields */}
-          <div className="flex items-center justify-between space-x-4">
+          <div className="flex space-x-4 mt-4">
             <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-1">Từ</label>
+              <label className="block text-sm text-black">Từ</label>
               <input
                 type="text"
-                inputMode="numeric"
-                value={formatNumber(localMin)}
-                onChange={handleMinInputChange}
-                onBlur={handleMinBlur}
-                placeholder="0"
-                className="w-full px-3 py-2 border border-gray-300 rounded text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-            <div className="flex items-center">
-              <span className="text-gray-500">—</span>
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm text-gray-600 mb-1">Đến</label>
-              <input
-                type="text"
-                inputMode="numeric"
-                value={formatNumber(localMax)}
-                onChange={handleMaxInputChange}
-                onBlur={handleMaxBlur}
-                placeholder={maxLimit.toString()}
-                className="w-full px-3 py-2 border border-gray-300 rounded text-black focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
-            </div>
-          </div>
-
-          {/* Slider section */}
-          <div className="mt-8">
-            <div className="relative h-2 bg-gray-200 rounded-full">
-              <div
-                className="absolute h-full bg-blue-500 rounded-full"
-                style={{
-                  left: `${((localMin || 0) / maxLimit) * 100}%`,
-                  right: `${100 - ((localMax || maxLimit) / maxLimit) * 100}%`
+                value={formatNumber(values[0])}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
+                  if (v <= values[1]) setValues([v, values[1]]);
                 }}
-              />
-              <input
-                type="range"
-                min={minLimit}
-                max={maxLimit}
-                value={localMin || 0}
-                step={step}
-                onChange={(e) => handleSliderChange(e, true)}
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleMouseDown}
-                className="absolute w-full h-2 appearance-none bg-transparent cursor-pointer z-10
-                  [-webkit-appearance:none] 
-                  [&::-webkit-slider-thumb]:appearance-none 
-                  [&::-webkit-slider-thumb]:h-4 
-                  [&::-webkit-slider-thumb]:w-4 
-                  [&::-webkit-slider-thumb]:rounded-full 
-                  [&::-webkit-slider-thumb]:bg-blue-600 
-                  [&::-webkit-slider-thumb]:border-2 
-                  [&::-webkit-slider-thumb]:border-white
-                  [&::-webkit-slider-thumb]:cursor-grab
-                  [&::-webkit-slider-thumb]:active:cursor-grabbing
-                  [&::-moz-range-thumb]:h-4 
-                  [&::-moz-range-thumb]:w-4 
-                  [&::-moz-range-thumb]:rounded-full 
-                  [&::-moz-range-thumb]:bg-blue-600 
-                  [&::-moz-range-thumb]:border-2 
-                  [&::-moz-range-thumb]:border-white
-                  [&::-moz-range-thumb]:cursor-grab
-                  [&::-moz-range-thumb]:active:cursor-grabbing"
-              />
-              <input
-                type="range"
-                min={minLimit}
-                max={maxLimit}
-                value={localMax || maxLimit}
-                step={step}
-                onChange={(e) => handleSliderChange(e, false)}
-                onMouseDown={handleMouseDown}
-                onTouchStart={handleMouseDown}
-                className="absolute w-full h-2 appearance-none bg-transparent cursor-pointer z-20
-                  [-webkit-appearance:none]
-                  [&::-webkit-slider-thumb]:appearance-none 
-                  [&::-webkit-slider-thumb]:h-4 
-                  [&::-webkit-slider-thumb]:w-4 
-                  [&::-webkit-slider-thumb]:rounded-full 
-                  [&::-webkit-slider-thumb]:bg-blue-600 
-                  [&::-webkit-slider-thumb]:border-2 
-                  [&::-webkit-slider-thumb]:border-white
-                  [&::-webkit-slider-thumb]:cursor-grab
-                  [&::-webkit-slider-thumb]:active:cursor-grabbing
-                  [&::-moz-range-thumb]:h-4 
-                  [&::-moz-range-thumb]:w-4 
-                  [&::-moz-range-thumb]:rounded-full 
-                  [&::-moz-range-thumb]:bg-blue-600 
-                  [&::-moz-range-thumb]:border-2 
-                  [&::-moz-range-thumb]:border-white
-                  [&::-moz-range-thumb]:cursor-grab
-                  [&::-moz-range-thumb]:active:cursor-grabbing"
+                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
+                placeholder="0"
               />
             </div>
-
-            {/* Price range labels */}
-            <div className="flex justify-between mt-2">
-              <span className="text-sm text-gray-600">{minLimit.toLocaleString()}đ</span>
-              <span className="text-sm text-gray-600">{maxLimit.toLocaleString()}đ</span>
+            <div className="flex-1">
+              <label className="block text-sm text-black">Đến</label>
+              <input
+                type="text"
+                value={formatNumber(values[1])}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
+                  if (v >= values[0]) setValues([values[0], v]);
+                }}
+                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
+                placeholder="10.000.000"
+              />
             </div>
           </div>
 
-          {/* Apply button */}
+          <div className="mt-6 px-2">
+            <Slider
+              range
+              min={minLimit}
+              max={maxLimit}
+              step={step}
+              defaultValue={[priceMin, priceMax]}
+              value={values}
+              onChange={handleChange}
+              onChangeComplete={handleAfterChange}
+              trackStyle={[{ background: '#22c55e', height: 6 }]}
+              handleStyle={[
+                {
+                  backgroundColor: '#fff',
+                  border: '2px solid #22c55e',
+                  width: 22,
+                  height: 22,
+                  marginTop: -8, // căn giữa dot với thanh trượt cao 6px
+                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                },
+                {
+                  backgroundColor: '#fff',
+                  border: '2px solid #22c55e',
+                  width: 22,
+                  height: 22,
+                  marginTop: -8,
+                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                }
+              ]}
+              railStyle={{ background: '#e5e7eb', height: 6 }} // màu xám nhạt cho rail
+            />
+          </div>
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors mt-6"
-          >
+            className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
             Áp dụng
           </button>
         </div>
@@ -605,6 +463,7 @@ const CarListingPage = () => {
                     {filters.carType.length}
                   </span>
                 )}
+
               </button>
               <button
                 onClick={() => setActivePopup('brand')}
