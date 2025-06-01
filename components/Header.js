@@ -78,7 +78,7 @@ export default function Header() {
           {/* Left side */}
           <div className="flex items-center gap-8">
             <button onClick={() => handleNavigation("/")} className="flex items-center group">
-              <img src="/logo/logo.png" alt="Logo" className="h-8" />
+              <img src="/logo/logo.png" alt="Logo" className="h-12" />
               <span className="ml-2 text-2xl font-bold group-hover:text-green-400">Whale Xe</span>
             </button>
             <nav className="flex gap-6 font-medium">
