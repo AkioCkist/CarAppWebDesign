@@ -1,15 +1,17 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
+import { animate, scroll } from "motion";
 import { useCarLoading } from "../../components/CarLoading";
 import SimpleFaqSection from "../../components/SimpleFaqSection";
 import VehicleList from "../../components/VehicleList";
 import vehicles from "../../lib/seed";
-import Header from "../../components/Header"; // Import Header
-import Footer from "../../components/Footer"; // Import Footer
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
 
+// Make sure this declaration is present!
 const vehicleTypes = [
   "Sedan",
   "SUV",
@@ -95,21 +97,21 @@ const NotificationDot = ({ children, color = "bg-red-500", delay = 0 }) => (
 );
 
 // Custom Dropdown Component
-const AnimatedDropdown = ({ 
-  options, 
-  value, 
-  onChange, 
-  placeholder, 
-  name, 
-  isOpen, 
-  onToggle, 
-  onFocus, 
+const AnimatedDropdown = ({
+  options,
+  value,
+  onChange,
+  placeholder,
+  name,
+  isOpen,
+  onToggle,
+  onFocus,
   onBlur,
   isFocused,
   zIndex = 50 // Add zIndex prop with default value
 }) => {
   const selectedOption = options.find(opt => opt.value === value);
-  
+
   return (
     <div className="relative w-full">
       <motion.div
@@ -123,19 +125,19 @@ const AnimatedDropdown = ({
           {selectedOption?.label || placeholder}
         </span>
       </motion.div>
-      
+
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0, y: -10 }}
-            animate={{ opacity: 1, height: "auto", y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -10 }}
-            transition={{ 
+            initial={{ opacity: 0, scaleY: 0, transformOrigin: "top" }} // Change height to scaleY
+            animate={{ opacity: 1, scaleY: 1 }} // Change height to scaleY
+            exit={{ opacity: 0, scaleY: 0 }} // Change height to scaleY
+            transition={{
               duration: 0.3,
               ease: "easeOut"
             }}
             className={`absolute top-full left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden`}
-            style={{ 
+            style={{
               marginTop: "4px",
               zIndex: zIndex // Use dynamic z-index
             }}>
@@ -144,7 +146,7 @@ const AnimatedDropdown = ({
                 key={option.value}
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ 
+                transition={{
                   delay: index * 0.05,
                   duration: 0.2,
                   ease: "easeOut"
@@ -156,8 +158,8 @@ const AnimatedDropdown = ({
                   }
                 }}
                 className={`px-4 py-3 cursor-pointer transition-colors ${
-                  option.disabled 
-                    ? "text-gray-400 cursor-not-allowed bg-gray-50" 
+                  option.disabled
+                    ? "text-gray-400 cursor-not-allowed bg-gray-50"
                     : "text-gray-800 hover:bg-green-50 hover:text-green-700"
                 } ${value === option.value ? "bg-green-100 text-green-800 font-medium" : ""}`}
               >
@@ -200,10 +202,18 @@ export default function HomePage() {
   // Add dropdown open states
   const [isPickupDropdownOpen, setIsPickupDropdownOpen] = useState(false);
   const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
-  
+  const fleetContainerRef = useRef(null);
+
+  // Instead of state and useEffect for scrollY:
+  // const [scrollY, setScrollY] = useState(0);
+  const heroImageRef = useRef(null); // Keep this ref
+
+  const { scrollY } = useScroll(); // Get raw scroll position
+  const backgroundY = useTransform(scrollY, [0, 1000], [0, 400]); // Example: move 400px when scrolled 1000px
+
   const { isLoading, CarLoadingScreen, startLoading, stopLoading } = useCarLoading();
   const [form, setForm] = useState({
-    vehicleType: vehicleTypes[0],
+    vehicleType: vehicleTypes[0], // Using vehicleTypes here
     pickUpLocation: "",
     dropOffLocation: "same",
     pickUpDate: "",
@@ -275,12 +285,12 @@ export default function HomePage() {
 
   // Animation variants for date/time pickers
   const pickerVariants = {
-    idle: { 
-      scale: 1, 
+    idle: {
+      scale: 1,
       boxShadow: "0 0 0 0px rgba(34, 197, 94, 0)",
       backgroundColor: "rgba(255, 255, 255, 1)"
     },
-    focused: { 
+    focused: {
       scale: 1.02,
       boxShadow: "0 0 0 3px rgba(34, 197, 94, 0.1)",
       backgroundColor: "rgba(240, 253, 244, 1)",
@@ -302,13 +312,13 @@ export default function HomePage() {
 
   // Animation variants for location selects
   const locationVariants = {
-    idle: { 
-      scale: 1, 
+    idle: {
+      scale: 1,
       boxShadow: "0 0 0 0px rgba(34, 197, 94, 0)",
       backgroundColor: "rgba(255, 255, 255, 1)",
       borderBottomColor: "rgba(229, 231, 235, 1)" // gray-200
     },
-    focused: { 
+    focused: {
       scale: 1.01,
       boxShadow: "0 0 0 2px rgba(34, 197, 94, 0.1)",
       backgroundColor: "rgba(240, 253, 244, 1)",
@@ -330,12 +340,12 @@ export default function HomePage() {
   };
 
   const iconVariants = {
-    idle: { 
+    idle: {
       rotate: 0,
       scale: 1,
       color: "#6B7280"
     },
-    focused: { 
+    focused: {
       rotate: 5,
       scale: 1.1,
       color: "#22C55E",
@@ -356,32 +366,58 @@ export default function HomePage() {
     }
   };
 
+  // Setup scroll pinning effect for fleet section
+  useEffect(() => {
+    if (typeof window !== 'undefined' && fleetContainerRef.current) {
+      const items = document.querySelectorAll(".fleet-item");
+      
+      if (items.length > 0) {
+        // Animate fleet horizontally during vertical scroll
+        scroll(
+          animate(".fleet-group", {
+            transform: ["none", `translateX(-${(items.length - 1) * 60}vw)`],
+          }),
+          { target: fleetContainerRef.current }
+        );
+
+        // Progress bar representing fleet scroll
+        scroll(animate(".fleet-progress", { scaleX: [0, 1] }), {
+          target: fleetContainerRef.current,
+        });
+      }
+    }
+  }, []);
+
   return isLoading ? (
     <CarLoadingScreen />
   ) : (
     <div className="font-sans bg-white text-gray-900">
-      <Header /> {/* Use Header Component */}
+      <Header />
 
-      {/* Hero Section */}
+      {/* Hero Section with Parallax */}
       <motion.section
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={1}
         className="relative pt-24">
-        <div
+        <motion.div // Change this to motion.div
+          ref={heroImageRef}
           className="absolute inset-0 bg-cover bg-center pointer-events-none"
           style={{
             backgroundImage: "url('/hero/hero.png')",
             filter: "brightness(0.7)",
-            top: "-48px",
+            top: `-48px`,
             height: "calc(100% + 48px)",
             width: "100%",
             left: 0,
             zIndex: 0,
             position: "absolute",
+            y: backgroundY, // Use the motion value for translateY
           }}
-        ></div>
+        >
+        </motion.div>
+
         <div className="relative pt-30 pb-16 px-4">
           <div className="max-w-5xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-8 text-white">
@@ -393,7 +429,7 @@ export default function HomePage() {
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-5xl mx-auto mt-10">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-6">
-                  <motion.div 
+                  <motion.div
                     variants={locationVariants}
                     animate={isPickupLocationFocused || isPickupDropdownOpen ? "focused" : "idle"}
                     whileTap="clicked"
@@ -411,12 +447,12 @@ export default function HomePage() {
                       )}
                     </AnimatePresence>
                     <div className="flex-shrink-0 mr-3 relative z-10">
-                      <motion.svg 
+                      <motion.svg
                         variants={iconVariants}
                         animate={isPickupLocationFocused || isPickupDropdownOpen ? "focused" : "idle"}
-                        className="w-6 h-6" 
-                        fill="none" 
-                        stroke="currentColor" 
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -442,18 +478,18 @@ export default function HomePage() {
                           isFocused={isPickupLocationFocused}
                           zIndex={60} // Higher z-index for pickup
                         />
-                        <motion.svg 
+                        <motion.svg
                           variants={iconVariants}
                           animate={isPickupLocationFocused || isPickupDropdownOpen ? "focused" : "idle"}
-                          className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
+                          className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
                           viewBox="0 0 24 24"
                         >
-                          <motion.path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
+                          <motion.path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                             d="M19 9l-7 7-7-7"
                             animate={{ rotate: isPickupDropdownOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
@@ -462,7 +498,7 @@ export default function HomePage() {
                       </div>
                     </div>
                   </motion.div>
-                  <motion.div 
+                  <motion.div
                     variants={locationVariants}
                     animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
                     whileTap="clicked"
@@ -480,12 +516,12 @@ export default function HomePage() {
                       )}
                     </AnimatePresence>
                     <div className="flex-shrink-0 mr-3 relative z-10">
-                      <motion.svg 
+                      <motion.svg
                         variants={iconVariants}
                         animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
-                        className="w-6 h-6" 
-                        fill="none" 
-                        stroke="currentColor" 
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
@@ -511,18 +547,18 @@ export default function HomePage() {
                           isFocused={isDropoffLocationFocused}
                           zIndex={50} // Lower z-index for dropoff
                         />
-                        <motion.svg 
+                        <motion.svg
                           variants={iconVariants}
                           animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
-                          className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" 
-                          fill="none" 
-                          stroke="currentColor" 
-                          strokeWidth="2" 
+                          className="absolute right-0 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
                           viewBox="0 0 24 24"
                         >
-                          <motion.path 
-                            strokeLinecap="round" 
-                            strokeLinejoin="round" 
+                          <motion.path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
                             d="M19 9l-7 7-7-7"
                             animate={{ rotate: isDropoffDropdownOpen ? 180 : 0 }}
                             transition={{ duration: 0.2 }}
@@ -535,13 +571,13 @@ export default function HomePage() {
                 <div className="space-y-6">
                   <div className="flex items-center border-b border-gray-200 pb-4">
                     <div className="flex-shrink-0 mr-3">
-                      <motion.svg 
+                      <motion.svg
                         variants={iconVariants}
                         animate={isPickupDateFocused || isPickupTimeFocused ? "focused" : "idle"}
-                        className="w-6 h-6" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -550,7 +586,7 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0">
                       <label className="block text-left font-bold text-base text-gray-700 mb-2">Pick Up Date & Time</label>
                       <div className="grid grid-cols-2 gap-3">
-                        <motion.div 
+                        <motion.div
                           variants={pickerVariants}
                           animate={isPickupDateFocused ? "focused" : "idle"}
                           whileTap="clicked"
@@ -580,19 +616,19 @@ export default function HomePage() {
                             onFocus={() => setIsPickupDateFocused(true)}
                             onBlur={() => setIsPickupDateFocused(false)}
                           />
-                          <motion.svg 
+                          <motion.svg
                             variants={iconVariants}
                             animate={isPickupDateFocused ? "focused" : "idle"}
-                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
                             viewBox="0 0 24 24"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
                           </motion.svg>
                         </motion.div>
-                        <motion.div 
+                        <motion.div
                           variants={pickerVariants}
                           animate={isPickupTimeFocused ? "focused" : "idle"}
                           whileTap="clicked"
@@ -613,13 +649,13 @@ export default function HomePage() {
                               />
                             )}
                           </AnimatePresence>
-                          <motion.svg 
+                          <motion.svg
                             variants={iconVariants}
                             animate={isPickupTimeFocused ? "focused" : "idle"}
-                            className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
+                            className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
                             viewBox="0 0 24 24"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -633,13 +669,13 @@ export default function HomePage() {
                             onFocus={() => setIsPickupTimeFocused(true)}
                             onBlur={() => setIsPickupTimeFocused(false)}
                           />
-                          <motion.svg 
+                          <motion.svg
                             variants={iconVariants}
                             animate={isPickupTimeFocused ? "focused" : "idle"}
-                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
                             viewBox="0 0 24 24"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -650,13 +686,13 @@ export default function HomePage() {
                   </div>
                   <div className="flex items-center">
                     <div className="flex-shrink-0 mr-3">
-                      <motion.svg 
+                      <motion.svg
                         variants={iconVariants}
                         animate={isDropoffDateFocused || isDropoffTimeFocused ? "focused" : "idle"}
-                        className="w-6 h-6" 
-                        fill="none" 
-                        stroke="currentColor" 
-                        strokeWidth="2" 
+                        className="w-6 h-6"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
                         viewBox="0 0 24 24"
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
@@ -665,7 +701,7 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0">
                       <label className="block text-left font-bold text-base text-gray-700 mb-2">Return Date & Time</label>
                       <div className="grid grid-cols-2 gap-3">
-                        <motion.div 
+                        <motion.div
                           variants={pickerVariants}
                           animate={isDropoffDateFocused ? "focused" : "idle"}
                           whileTap="clicked"
@@ -695,19 +731,19 @@ export default function HomePage() {
                             onFocus={() => setIsDropoffDateFocused(true)}
                             onBlur={() => setIsDropoffDateFocused(false)}
                           />
-                          <motion.svg 
+                          <motion.svg
                             variants={iconVariants}
                             animate={isDropoffDateFocused ? "focused" : "idle"}
-                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
                             viewBox="0 0 24 24"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
                           </motion.svg>
                         </motion.div>
-                        <motion.div 
+                        <motion.div
                           variants={pickerVariants}
                           animate={isDropoffTimeFocused ? "focused" : "idle"}
                           whileTap="clicked"
@@ -728,13 +764,13 @@ export default function HomePage() {
                               />
                             )}
                           </AnimatePresence>
-                          <motion.svg 
+                          <motion.svg
                             variants={iconVariants}
                             animate={isDropoffTimeFocused ? "focused" : "idle"}
-                            className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
+                            className="absolute left-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
                             viewBox="0 0 24 24"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -748,13 +784,13 @@ export default function HomePage() {
                             onFocus={() => setIsDropoffTimeFocused(true)}
                             onBlur={() => setIsDropoffTimeFocused(false)}
                           />
-                          <motion.svg 
+                          <motion.svg
                             variants={iconVariants}
                             animate={isDropoffTimeFocused ? "focused" : "idle"}
-                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10" 
-                            fill="none" 
-                            stroke="currentColor" 
-                            strokeWidth="2" 
+                            className="absolute right-1 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none z-10"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
                             viewBox="0 0 24 24"
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7"></path>
@@ -792,18 +828,18 @@ export default function HomePage() {
         </div>
       </motion.section>
 
-      {/* Features Section */}
+      {/* Features Section - Adjusted margin */}
       <motion.section
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={2}
         id="about"
-        className="py-16 bg-white">
-        <div className="max-w-6xl mx-auto px-4">
+        className="bg-white mt-[-2rem] relative z-10"> {/* Changed from -4rem to -2rem */}
+        <div className="max-w-6xl mx-auto px-4 py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-center mb-10">Our Features</h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
+            <h2 className="text-3xl font-bold text-center mb-10 text-gray-900">Our Features</h2> {/* Changed text color to gray-900 */}
+            <p className="text-gray-600 max-w-2xl mx-auto"> {/* Changed text color to gray-600 */}
               Discover a world of convenience, safety, and customization, paving the way for
               unforgettable adventures and seamless mobility solutions.
             </p>
@@ -820,8 +856,8 @@ export default function HomePage() {
                     <Image src={f.icon} alt={f.title} width={48} height={48} className="bg-green-100 p-2 rounded-lg" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-1">{f.title}</h3>
-                    <p className="text-gray-600 text-sm">{f.desc}</p>
+                    <h3 className="font-semibold text-lg mb-1 text-gray-900">{f.title}</h3> {/* Changed text color to gray-900 */}
+                    <p className="text-gray-600 text-sm">{f.desc}</p> {/* Changed text color to gray-600 */}
                   </div>
                 </motion.div>
               ))}
@@ -842,8 +878,8 @@ export default function HomePage() {
                     <Image src={f.icon} alt={f.title} width={48} height={48} className="bg-green-100 p-2 rounded-lg" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-1">{f.title}</h3>
-                    <p className="text-gray-600 text-sm">{f.desc}</p>
+                    <h3 className="font-semibold text-lg mb-1 text-gray-900">{f.title}</h3> {/* Changed text color to gray-900 */}
+                    <p className="text-gray-600 text-sm">{f.desc}</p> {/* Changed text color to gray-600 */}
                   </div>
                 </motion.div>
               ))}
@@ -852,18 +888,123 @@ export default function HomePage() {
         </div>
       </motion.section>
 
-      {/* Car Fleet Section */}
+      {/* Car Fleet Section with Scroll Pinning */}
       <motion.section
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={3}
         id="renting"
-        className="py-16 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4">
+        className="w-full">
+        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
           <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
-          <VehicleList vehicles={vehicles} />
         </div>
+        
+        {/* Fleet Gallery Container */}
+        <div 
+          ref={fleetContainerRef}
+          className="fleet-group-container"
+          style={{
+            height: '500vh',
+            position: 'relative'
+          }}
+        >
+          <div style={{
+            position: 'sticky',
+            top: 0,
+            overflow: 'hidden',
+            height: '100vh',
+            display: 'flex',
+            alignItems: 'center'
+          }}>
+            <ul className="fleet-group" style={{
+              display: 'flex',
+              margin: 0,
+              padding: 0,
+              listStyle: 'none'
+            }}>
+              {vehicles.slice(0, 5).map((vehicle, index) => (
+                <li 
+                  key={vehicle.id}
+                  className="fleet-item"
+                  style={{
+                    display: 'flex',
+                    width: '100vw',
+                    height: '100vh',
+                    flex: '0 0 auto',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexDirection: 'column',
+                    padding: '0 2rem'
+                  }}
+                >
+                  <div className="max-w-4xl mx-auto text-center">
+                    <motion.div
+                      initial={{ opacity: 0, y: 50 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      className="bg-white rounded-xl shadow-2xl overflow-hidden"
+                    >
+                      <div className="relative h-48 md:h-64">
+                        <Image
+                          src={vehicle.image}
+                          alt={vehicle.name}
+                          fill
+                          className="object-cover"
+                        />
+                        <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
+                          {vehicle.type}
+                        </div>
+                      </div>
+                      <div className="p-4 md:p-6">
+                        <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
+                          {vehicle.name}
+                        </h3>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Engine</div>
+                            <div className="font-semibold">{vehicle.engine}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Fuel</div>
+                            <div className="font-semibold">{vehicle.fuel}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Seats</div>
+                            <div className="font-semibold">{vehicle.seats}</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-gray-600 text-sm">Transmission</div>
+                            <div className="font-semibold">{vehicle.transmission}</div>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="text-3xl font-bold text-green-600">
+                            ${vehicle.price}<span className="text-lg text-gray-600">/day</span>
+                          </div>
+                          <motion.button
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition-colors"
+                          >
+                            Book Now
+                          </motion.button>
+                        </div>
+                      </div>
+                    </motion.div>
+                    <div className="mt-6">
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <div 
+          className="fleet-progress"
+        />
       </motion.section>
 
       {/* News Section */}
