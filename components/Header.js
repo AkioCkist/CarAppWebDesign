@@ -14,6 +14,7 @@ export default function Header() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
+  const [bgOpacity, setBgOpacity] = useState(0); // Thêm dòng này
 
   const isCarFindingPage = pathname?.includes('/finding_car');
 
@@ -105,7 +106,7 @@ export default function Header() {
           // Nếu ở trang finding_car thì luôn có background cố định
           backgroundColor: isCarFindingPage
             ? "rgba(17, 24, 39, 0.95)"
-            : scrollY > 50 ? "rgba(17, 24, 39, 0.9)" : "transparent",
+            : `rgba(17, 24, 39, ${bgOpacity})`,
           // Nếu ở trang finding_car thì luôn opacity là 1, không có hiệu ứng fade
           opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
           // Không có transition cho trang finding_car

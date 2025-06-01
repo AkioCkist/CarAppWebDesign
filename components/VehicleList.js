@@ -53,7 +53,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
           {/* Thay đổi phần div chứa transmission, fuel và seat */}
           <div className="grid grid-cols-3 gap-2 w-[600px] text-sm text-gray-600 mb-2">
             <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
+              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
                 }`}
             >
               <img
@@ -65,21 +65,18 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
             </span>
 
             <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
+              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
                 }`}
             >
               <img
                 src="/icons/IconDetailCarCard/seat.svg"
                 alt="seats"
-                className="w-4 h-4"
-              />
+                className="w-4 h-4" />
               {vehicle.seats} chỗ
             </span>
-
             <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
-                }`}
-            >
+              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
+                }`}>
               <img
                 src="/icons/IconDetailCarCard/fuel.svg"
                 alt="fuel"
@@ -88,18 +85,15 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               {vehicle.fuel}
             </span>
           </div>
-
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <span className="flex items-center gap-2">
               <img
                 src="/icons/IconDetailCarCard/location.svg"
                 alt="location"
-                className="w-4 h-4 text-blue-500"
-              />
+                className="w-4 h-4 text-green-500" />
               {vehicle.location}
             </span>
           </div>
-
           <div className="flex items-center text-sm text-gray-600 mb-3">
             <span className="flex items-center text-yellow-500 gap-1">
               <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -112,12 +106,10 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               <img
                 src="/icons/IconDetailCarCard/trips.svg"
                 alt="trips"
-                className="w-4 h-4"
-              />
+                className="w-4 h-4" />
               {vehicle.trips} chuyến
             </span>
           </div>
-
           <div className="flex items-center gap-2 mb-2">
             <span className="text-green-600 font-bold text-lg">
               {vehicle.priceDisplay}
@@ -128,23 +120,20 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               </span>
             )}
           </div>
-
           {vehicle.priceDiscount && (
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">
+              <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
                 {vehicle.priceDiscount}
               </span>
             </div>
           )}
-
           <div className="text-xs text-gray-700 mb-3 line-clamp-2 h-8 overflow-hidden">
             {vehicle.description}
           </div>
-
           <div className="mt-auto">
             <button
               onClick={handleBookClick}
-              className="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
             >
               <span className="flex items-center justify-center gap-2">
                 Đặt xe ngay
@@ -206,7 +195,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
       <div className="p-4 flex flex-col flex-1">
         <div className="flex items-center gap-2 mb-2">
           <span
-            className={`font-semibold text-base text-gray-900 transition-colors duration-300 ${isHovered ? 'text-blue-600' : ''
+            className={`font-semibold text-base text-gray-900 transition-colors duration-300 ${isHovered ? 'text-green-600' : ''
               }`}
           >
             {vehicle.name}
@@ -217,7 +206,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
           {/* Thay đổi phần div chứa transmission, fuel và seat */}
           <div className="grid grid-cols-3 gap-2 w-full text-sm text-gray-600 mb-2">
             <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
+              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
                 }`}
             >
               <img
@@ -229,7 +218,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
             </span>
 
             <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
+              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
                 }`}
             >
               <img
@@ -241,7 +230,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
             </span>
 
             <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
+              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
                 }`}
             >
               <img
@@ -255,14 +244,14 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
         </div>
 
         <div
-          className={`flex items-center text-sm text-gray-600 mb-2 transition-all duration-300 ${isHovered ? 'text-blue-600 transform translate-x-1' : ''
+          className={`flex items-center text-sm text-gray-600 mb-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
             }`}
         >
           <span className="flex items-center gap-2">
             <img
               src="/icons/IconDetailCarCard/location.svg"
               alt="location"
-              className="w-4 h-4 text-blue-500"
+              className="w-4 h-4 text-green-500"
             />
             {vehicle.location}
           </span>
@@ -308,7 +297,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
             className={`flex items-center gap-2 mb-2 transition-all duration-300 ${isHovered ? 'transform scale-105' : ''
               }`}
           >
-            <span className="bg-gradient-to-r from-blue-100 to-blue-200 text-blue-700 text-xs px-3 py-1 rounded-full font-medium">
+            <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
               {vehicle.priceDiscount}
             </span>
           </div>
@@ -321,9 +310,9 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
         <div className="mt-auto">
           <button
             onClick={handleBookClick}
-            className={`w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg font-semibold transition-all duration-300 transform ${isHovered
-              ? 'shadow-lg scale-105 from-blue-700 to-blue-800'
-              : 'hover:from-blue-700 hover:to-blue-800 hover:shadow-md'
+            className={`w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform ${isHovered
+              ? 'shadow-lg scale-105 from-green-600 to-green-700'
+              : 'hover:from-green-600 hover:to-green-700 hover:shadow-md'
               } active:scale-95 active:shadow-inner`}
           >
             <span className="flex items-center justify-center gap-2">

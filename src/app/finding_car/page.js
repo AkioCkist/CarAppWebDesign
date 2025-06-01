@@ -278,7 +278,7 @@ const CarListingPage = () => {
         <div className="flex space-x-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
             Áp dụng
           </button>
           <button
@@ -286,7 +286,7 @@ const CarListingPage = () => {
               setFilters(prev => ({ ...prev, [category]: [] }));
               onClose();
             }}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors">
+            className="flex-1 px-4 py-2 border border-green-500 text-green-600 rounded-md hover:bg-green-50 transition-colors">
             Xóa bộ lọc
           </button>
         </div>
@@ -378,7 +378,7 @@ const CarListingPage = () => {
           </div>
           <button
             onClick={onClose}
-            className="mt-6 w-full px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors">
+            className="mt-6 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
             Áp dụng
           </button>
         </div>
@@ -501,12 +501,12 @@ const CarListingPage = () => {
               <button
                 onClick={handleDiscountToggle}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
-                  ? 'border-blue-600 bg-blue-50 text-blue-600'
+                  ? 'border-green-600 bg-green-50 text-green-600'
                   : 'border-gray-300 hover:bg-gray-50'
                   }`}>
                 Giảm Giá
                 {filters.discount && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     1
                   </span>
                 )}
