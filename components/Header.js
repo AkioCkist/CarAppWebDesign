@@ -34,7 +34,6 @@ export default function Header() {
       }
     };
   }, [isCarFindingPage]);
-  const [bgOpacity, setBgOpacity] = useState(0); // New state for background opacity
 
   const handleNavigation = (href) => {
     setFadeOut(true);

@@ -7,6 +7,7 @@ import Footer from "../../../components/Footer";
 import CarRentalModal from "../../../components/CarRentalModal";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
+import CarLoadingScreen from '../../../components/CarLoading';
 
 const carAmenities = {
   1: ['bluetooth', 'camera', 'airbag', 'etc'],
@@ -36,6 +37,7 @@ const CarListingPage = () => {
   const loaderRef = useRef(null);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
+  const [isLoading, setIsLoading] = useState(false); // New loading state
 
   // Sample car data adapted for VehicleList
   const cars = [
@@ -426,7 +428,12 @@ const CarListingPage = () => {
   }, [filteredCars.length]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 relative">
+      {isLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60">
+          <CarLoadingScreen />
+        </div>
+      )}
       {/* Navigation Header */}
       <Header />
       {/* Spacer để header chiếm chỗ, chỉnh h-20 cho đúng chiều cao Header */}
