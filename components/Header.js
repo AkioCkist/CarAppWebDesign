@@ -42,7 +42,7 @@ export default function Header() {
       } else {
         window.location.href = href;
       }
-    }, 200);
+    }, 100); // Delay to allow fade out effect
   };
 
   const handleSignInClick = (e) => {
@@ -54,12 +54,33 @@ export default function Header() {
     router.push("/signin_registration");
   };
 
+  useEffect(() => {
+    let timeoutId;
+    const handleScroll = () => {
+      const scrollValue = window.scrollY;
+      // Calculate target opacity based on scroll position
+      const targetOpacity = scrollValue > 50 ? 0.9 : scrollValue > 5 ? (scrollValue - 5) / 45 * 0.9 : 0;
+      // Add a small delay before updating opacity
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setBgOpacity(targetOpacity);
+      }, 7); // 120ms delay for smoothness
+      setScrollY(scrollValue);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timeoutId);
+    };
+  }, []);
+
   const fadeVariant = {
     hidden: { opacity: 0, y: 40 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.7, ease: "easeOut" },
+      transition: { duration: 0.1, ease: "easeOut" },
     },
   };
 
@@ -73,7 +94,8 @@ export default function Header() {
 
   return (
     <>
-      <div className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${fadeOut ? "opacity-100" : "opacity-0"}`} />
+      {/* Remove the black fade out overlay */}
+      {/* <div className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${fadeOut ? "opacity-100" : "opacity-0"}`} /> */}
       <motion.header
         variants={fadeVariant}
         initial="hidden"
@@ -100,7 +122,7 @@ export default function Header() {
               <span className="ml-2 text-2xl font-bold group-hover:text-green-400">Whale Xe</span>
             </button>
             <nav className="flex gap-6 font-medium">
-              <button onClick={() => handleNavigation("/")} className="hover:text-green-400">Home</button>
+              <button onClick={() => handleNavigation("./")} className="hover:text-green-400">Home</button>
               <button onClick={() => handleNavigation("/#renting")} className="hover:text-green-400">Cars</button>
               <button onClick={() => handleNavigation("/#gallery")} className="hover:text-green-400">Gallery</button>
               <button onClick={() => handleNavigation("/#about")} className="hover:text-green-400">News</button>
