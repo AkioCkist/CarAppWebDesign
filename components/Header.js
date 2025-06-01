@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
@@ -8,13 +8,32 @@ import { useCarLoading } from './CarLoading';
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { data: session } = useSession();
   const { startLoading, CarLoadingScreen } = useCarLoading();
-
+  const [showDropdown, setShowDropdown] = useState(false);
   const [scrollY, setScrollY] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
-  const [bgOpacity, setBgOpacity] = useState(0); // New state for background opacity
+  const [bgOpacity, setBgOpacity] = useState(0); // Thêm dòng này
+
+  const isCarFindingPage = pathname?.includes('/finding_car');
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+
+    // Chỉ thêm scroll listener nếu không phải trang finding_car
+    if (!isCarFindingPage) {
+      window.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (!isCarFindingPage) {
+        window.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, [isCarFindingPage]);
 
   const handleNavigation = (href) => {
     setFadeOut(true);
@@ -84,9 +103,20 @@ export default function Header() {
         animate="visible"
         className="fixed top-0 left-0 w-full z-30 text-white"
         style={{
-          opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
-          backgroundColor: `rgba(17, 24, 39, ${bgOpacity})`, // Use the new opacity state
-          transition: "background-color 0.5s cubic-bezier(0.4,0,0.2,1)" // Smooth transition
+          // Nếu ở trang finding_car thì luôn có background cố định
+          backgroundColor: isCarFindingPage
+            ? "rgba(17, 24, 39, 0.95)"
+            : scrollY > 50
+              ? "rgba(17, 24, 39, 0.9)"
+              : "rgba(17, 24, 39, " + bgOpacity + ")",
+          // Nếu ở trang finding_car thì luôn opacity là 1, không có hiệu ứng fade
+          opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
+          // Không có transition cho trang finding_car
+          transition: isCarFindingPage
+            ? "none"
+            : "background-color 0.5s cubic-bezier(0.4,0,0.2,1)",
+          // Thêm backdrop-filter để header rõ ràng hơn trên trang finding_car
+          backdropFilter: isCarFindingPage ? "blur(10px)" : "none",
         }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">

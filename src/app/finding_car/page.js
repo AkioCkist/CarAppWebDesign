@@ -4,7 +4,10 @@ import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
-import CarRentalModal from "../../../components/CarRentalModal"; // import component
+import CarRentalModal from "../../../components/CarRentalModal";
+import Slider from 'rc-slider';
+import 'rc-slider/assets/index.css';
+import CarLoadingScreen from '../../../components/CarLoading';
 
 const carAmenities = {
   1: ['bluetooth', 'camera', 'airbag', 'etc'],
@@ -34,6 +37,7 @@ const CarListingPage = () => {
   const loaderRef = useRef(null);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
+  const [isLoading, setIsLoading] = useState(false); // New loading state
 
   // Sample car data adapted for VehicleList
   const cars = [
@@ -102,7 +106,7 @@ const CarListingPage = () => {
       oldPrice: 16810000,
       pricePer: 'ngày',
       priceDiscount: 'Giảm 11%',
-      description: 'Siêu xe độc nhất với thiết kế ấn tượng.',
+      description: 'Siêu xe độc nhất với thiết kế ấn tượng.yeyeyeyyeyeyeeeeeeeeeeeeeeeeeeeeeeeeeeeeê',
       isFavorite: false
     },
     {
@@ -276,8 +280,7 @@ const CarListingPage = () => {
         <div className="flex space-x-3 mt-6">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
+            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
             Áp dụng
           </button>
           <button
@@ -285,8 +288,7 @@ const CarListingPage = () => {
               setFilters(prev => ({ ...prev, [category]: [] }));
               onClose();
             }}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-          >
+            className="flex-1 px-4 py-2 border border-green-500 text-green-600 rounded-md hover:bg-green-50 transition-colors">
             Xóa bộ lọc
           </button>
         </div>
@@ -298,100 +300,87 @@ const CarListingPage = () => {
     const minLimit = 0;
     const maxLimit = 10000000;
     const step = 100000;
+    const [values, setValues] = useState([priceMin, priceMax]);
+    const formatNumber = (num) => num.toLocaleString();
 
-    // Đảm bảo min không lớn hơn max và ngược lại
-    const handleMinChange = (e) => {
-      const value = Math.min(Number(e.target.value), priceMax - step);
-      setPriceMin(value);
-    };
-    const handleMaxChange = (e) => {
-      const value = Math.max(Number(e.target.value), priceMin + step);
-      setPriceMax(value);
+    const handleChange = (newValues) => {
+      setValues(newValues);
     };
 
-    // Khi kéo thanh slider
-    const handleSliderMin = (e) => {
-      const value = Math.min(Number(e.target.value), priceMax - step);
-      setPriceMin(value);
-    };
-    const handleSliderMax = (e) => {
-      const value = Math.max(Number(e.target.value), priceMin + step);
-      setPriceMax(value);
+    const handleAfterChange = (newValues) => {
+      setPriceMin(newValues[0]);
+      setPriceMax(newValues[1]);
     };
 
     return (
       <PopupOverlay onClose={onClose}>
         <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-            <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
-              <X className="h-5 w-5" />
-            </button>
+          <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
+
+          <div className="flex space-x-4 mt-4">
+            <div className="flex-1">
+              <label className="block text-sm text-black">Từ</label>
+              <input
+                type="text"
+                value={formatNumber(values[0])}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
+                  if (v <= values[1]) setValues([v, values[1]]);
+                }}
+                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
+                placeholder="0"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-sm text-black">Đến</label>
+              <input
+                type="text"
+                value={formatNumber(values[1])}
+                onChange={(e) => {
+                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
+                  if (v >= values[0]) setValues([values[0], v]);
+                }}
+                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
+                placeholder="10.000.000"
+              />
+            </div>
           </div>
-          <div className="flex items-center space-x-4 mb-6">
-            <input
-              type="number"
-              min={minLimit}
-              max={priceMax - step}
-              step={step}
-              value={priceMin}
-              onChange={handleMinChange}
-              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
-              placeholder="Từ"
-            />
-            <span className="text-gray-500">—</span>
-            <input
-              type="number"
-              min={priceMin + step}
-              max={maxLimit}
-              step={step}
-              value={priceMax}
-              onChange={handleMaxChange}
-              className="w-28 px-2 py-1 border border-gray-300 rounded text-black"
-              placeholder="Đến"
-            />
-          </div>
-          {/* Thanh kéo đôi custom */}
-          <div className="relative w-full mb-6" style={{ height: 40 }}>
-            <input
-              type="range"
-              min={minLimit}
-              max={maxLimit}
-              step={step}
-              value={priceMin}
-              onChange={handleSliderMin}
-              className="absolute pointer-events-none w-full accent-blue-600"
-              style={{ zIndex: priceMin > maxLimit - 100000 ? 5 : 6 }}
-            />
-            <input
-              type="range"
+
+          <div className="mt-6 px-2">
+            <Slider
+              range
               min={minLimit}
               max={maxLimit}
               step={step}
-              value={priceMax}
-              onChange={handleSliderMax}
-              className="absolute pointer-events-none w-full accent-blue-600"
-              style={{ zIndex: 7 }}
+              defaultValue={[priceMin, priceMax]}
+              value={values}
+              onChange={handleChange}
+              onChangeComplete={handleAfterChange}
+              trackStyle={[{ background: '#22c55e', height: 6 }]}
+              handleStyle={[
+                {
+                  backgroundColor: '#fff',
+                  border: '2px solid #22c55e',
+                  width: 22,
+                  height: 22,
+                  marginTop: -8, // căn giữa dot với thanh trượt cao 6px
+                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                },
+                {
+                  backgroundColor: '#fff',
+                  border: '2px solid #22c55e',
+                  width: 22,
+                  height: 22,
+                  marginTop: -8,
+                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                }
+              ]}
+              railStyle={{ background: '#e5e7eb', height: 6 }} // màu xám nhạt cho rail
             />
-            {/* Thanh màu giữa hai đầu */}
-            <div
-              className="absolute h-1 bg-blue-500 rounded"
-              style={{
-                left: `${((priceMin - minLimit) / (maxLimit - minLimit)) * 100}%`,
-                width: `${((priceMax - priceMin) / (maxLimit - minLimit)) * 100}%`,
-                top: 16,
-                zIndex: 1,
-              }}
-            />
-          </div>
-          <div className="flex justify-between w-full text-xs text-gray-500 mt-1 mb-4">
-            <span>0</span>
-            <span>10.000.000</span>
           </div>
           <button
             onClick={onClose}
-            className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-          >
+            className="mt-6 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
             Áp dụng
           </button>
         </div>
@@ -401,6 +390,20 @@ const CarListingPage = () => {
 
   const [selectedCar, setSelectedCar] = useState(null);
   const [showRentalModal, setShowRentalModal] = useState(false);
+
+  // Thêm state favorites
+  const [favorites, setFavorites] = useState([]);
+
+  // Thêm hàm xử lý favorite toggle
+  const handleFavoriteToggle = (vehicleId) => {
+    setFavorites(prev => {
+      if (prev.includes(vehicleId)) {
+        return prev.filter(id => id !== vehicleId);
+      } else {
+        return [...prev, vehicleId];
+      }
+    });
+  };
 
   // Infinite scrolling logic
   useEffect(() => {
@@ -425,11 +428,16 @@ const CarListingPage = () => {
   }, [filteredCars.length]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 relative">
+      {isLoading && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60">
+          <CarLoadingScreen />
+        </div>
+      )}
       {/* Navigation Header */}
       <Header />
       {/* Spacer để header chiếm chỗ, chỉnh h-20 cho đúng chiều cao Header */}
-      <div className="h-15 bg-gray-800"></div>
+      <div className="h-21 bg-gray-800/95"></div>
 
       {/* Location & Time Bar */}
       <div className="bg-white shadow-sm border-b">
@@ -462,6 +470,7 @@ const CarListingPage = () => {
                     {filters.carType.length}
                   </span>
                 )}
+
               </button>
               <button
                 onClick={() => setActivePopup('brand')}
@@ -499,12 +508,12 @@ const CarListingPage = () => {
               <button
                 onClick={handleDiscountToggle}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
-                  ? 'border-blue-600 bg-blue-50 text-blue-600'
+                  ? 'border-green-600 bg-green-50 text-green-600'
                   : 'border-gray-300 hover:bg-gray-50'
                   }`}>
                 Giảm Giá
                 {filters.discount && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     1
                   </span>
                 )}
@@ -541,7 +550,9 @@ const CarListingPage = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <VehicleList
           vehicles={filteredCars.slice(0, displayedCount)}
-          onRentClick={(car) => {
+          onFavoriteToggle={handleFavoriteToggle}
+          favorites={favorites}
+          onBookClick={(car) => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}

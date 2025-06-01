@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import {
     X, Star, MapPin, Users, Fuel, Cog, Gauge, Camera, Bluetooth, RotateCcw, Circle, Package, Tablet, CreditCard, Shield, ShieldCheck, RotateCw, Zap, Radar, Sun, Map, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -91,8 +92,9 @@ const CarRentalModal = ({
     // Amenities
     const amenities = carAmenities[carData.id] || [];
 
-    return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+    // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
+    return createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
             <div className="relative w-full max-w-[1440px] mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-y-auto">
                 {/* Close Button */}
                 <button
@@ -285,7 +287,8 @@ const CarRentalModal = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        typeof window !== "undefined" ? document.body : null
     );
 };
 

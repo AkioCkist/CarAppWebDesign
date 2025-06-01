@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
+import VehicleList from "../../../components/VehicleList";
 
 export default function UserProfilePage() {
   const { data: session } = useSession();
@@ -84,45 +85,54 @@ export default function UserProfilePage() {
     favoriteCars: [
       {
         id: 1,
-        name: "Jeep Renegade",
-        image: "/cars/jeep-renegade.jpg",
-        seats: 4,
-        luggage: 2,
-        doors: 4,
-        fuel: "Petrol",
-        horsepower: 300,
-        engine: 3000,
-        drive: "4x4",
-        type: "Hatchback",
-        dailyRate: 265
+        name: 'Porsche 911',
+        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
+        transmission: 'Tự động',
+        fuel: 'Xăng',
+        seats: 2,
+        location: 'Quận Sơn Trà, Đà Nẵng',
+        rating: 5.0,
+        trips: 37,
+        priceDisplay: '865K',
+        oldPrice: 980000,
+        pricePer: 'ngày',
+        priceDiscount: 'Giảm 12%',
+        description: 'Xe thể thao sang trọng với hiệu suất vượt trội.',
+        isFavorite: false
       },
       {
         id: 2,
-        name: "BMW M2",
-        image: "/cars/bmw-m2.jpg",
-        seats: 4,
-        luggage: 2,
-        doors: 4,
-        fuel: "Petrol",
-        horsepower: 370,
-        engine: 3000,
-        drive: "4x4",
-        type: "Hatchback",
-        dailyRate: 244
+        name: 'Porsche 911 GT3 R rennsport',
+        image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
+        transmission: 'Tự động',
+        fuel: 'Xăng',
+        seats: 2,
+        location: 'Quận Sơn Trà, Đà Nẵng',
+        rating: 5.0,
+        trips: 170,
+        priceDisplay: '5585K',
+        oldPrice: 6412000,
+        pricePer: 'ngày',
+        priceDiscount: 'Giảm 13%',
+        description: 'Siêu xe đua với tốc độ đỉnh cao.',
+        isFavorite: false
       },
       {
         id: 3,
-        name: "Ferrari Enzo",
-        image: "/cars/ferrari-enzo.jpg",
-        seats: 4,
-        luggage: 2,
-        doors: 4,
-        fuel: "Petrol",
-        horsepower: 350,
-        engine: 3000,
-        drive: "4x4",
-        type: "Hatchback",
-        dailyRate: 167
+        name: 'SUZUKI XL7 2021',
+        image: 'https://images.unsplash.com/photo-1549399592-91b8e56a6b26?w=400&h=250&fit=crop',
+        transmission: 'Tự động',
+        fuel: 'Xăng',
+        seats: 7,
+        location: 'Quận Sơn Trà, Đà Nẵng',
+        rating: 4.8,
+        trips: 2,
+        priceDisplay: '865K',
+        oldPrice: 912000,
+        pricePer: 'ngày',
+        priceDiscount: 'Giảm 5%',
+        description: 'Xe gia đình rộng rãi, tiết kiệm nhiên liệu.',
+        isFavorite: false
       }
     ]
   };
@@ -189,6 +199,24 @@ export default function UserProfilePage() {
   const name = user?.name || "Unknown User";
   const phone = user?.phone || "N/A";
 
+  // Thêm state để quản lý danh sách xe yêu thích
+  const [favoriteCars, setFavoriteCars] = useState(userData.favoriteCars);
+
+  // Thêm hàm xử lý favorite/unfavorite
+  const handleFavoriteToggle = (vehicleId) => {
+    setFavoriteCars(prev => {
+      const isFavorite = prev.some(car => car.id === vehicleId);
+      if (isFavorite) {
+        // Remove from favorites
+        return prev.filter(car => car.id !== vehicleId);
+      } else {
+        // Add to favorites
+        const carToAdd = vehicles.find(car => car.id === vehicleId);
+        return [...prev, carToAdd];
+      }
+    });
+  };
+
   return (
     <div className="font-sans bg-gray-50 text-gray-900 min-h-screen relative">
       {/* White fade-in overlay */}
@@ -239,9 +267,9 @@ export default function UserProfilePage() {
       <section className="pt-16 pb-8 relative z-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-6">
-            
+
             {/* Sidebar */}
-            <motion.div 
+            <motion.div
               variants={fadeVariant}
               initial="hidden"
               animate="visible"
@@ -318,9 +346,9 @@ export default function UserProfilePage() {
 
             {/* Main Content */}
             <div className="lg:w-3/4 space-y-6">
-              
+
               {/* Stats Cards */}
-              <motion.div 
+              <motion.div
                 variants={fadeVariant}
                 initial="hidden"
                 animate="visible"
@@ -369,7 +397,7 @@ export default function UserProfilePage() {
               </motion.div>
 
               {/* Recent Orders */}
-              <motion.div 
+              <motion.div
                 variants={fadeVariant}
                 initial="hidden"
                 animate="visible"
@@ -412,85 +440,22 @@ export default function UserProfilePage() {
               </motion.div>
 
               {/* Favorite Cars */}
-              <motion.div 
+              <motion.div
                 variants={fadeVariant}
                 initial="hidden"
                 animate="visible"
-                custom={4} // Favorite cars animation delay order
+                custom={4}
                 className="bg-white rounded-lg shadow-sm"
               >
                 <div className="p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-800">My Favorites</h3>
                 </div>
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {userData.favoriteCars.map((car, index) => (
-                      <motion.div 
-                        key={car.id}
-                        whileHover={{ scale: 1.02 }}
-                        className="border border-gray-200 rounded-lg overflow-hidden"
-                      >
-                        <div className="aspect-w-16 aspect-h-10 bg-gray-200">
-                          <img
-                            src={car.image}
-                            alt={car.name}
-                            className="w-full h-48 object-cover"
-                            onError={(e) => {
-                              e.target.src = "https://placehold.co/400x200/22C55E/ffffff?text=Car";
-                            }}
-                          />
-                        </div>
-                        <div className="p-4">
-                          <h4 className="font-semibold text-lg mb-2">{car.name}</h4>
-                          
-                          <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-3">
-                            <div className="flex items-center">
-                              <span className="font-medium">Seats:</span>
-                              <span className="ml-1">{car.seats}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">HP:</span>
-                              <span className="ml-1">{car.horsepower}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">Luggage:</span>
-                              <span className="ml-1">{car.luggage}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">Engine:</span>
-                              <span className="ml-1">{car.engine}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">Doors:</span>
-                              <span className="ml-1">{car.doors}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">Drive:</span>
-                              <span className="ml-1">{car.drive}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">Fuel:</span>
-                              <span className="ml-1">{car.fuel}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <span className="font-medium">Type:</span>
-                              <span className="ml-1">{car.type}</span>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between">
-                            <div className="text-right">
-                              <div className="text-xs text-gray-500">Daily rate from</div>
-                              <div className="text-xl font-bold text-green-600">${car.dailyRate}</div>
-                            </div>
-                            <button className="px-4 py-2 bg-green-500 text-white text-sm font-medium rounded-md hover:bg-green-600 transition-colors">
-                              Rent Now
-                            </button>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+                <div className="p-4 md:p-6">
+                  <VehicleList
+                    vehicles={favoriteCars}
+                    onFavoriteToggle={handleFavoriteToggle}
+                    favorites={favoriteCars.map(car => car.id)}
+                  />
                 </div>
               </motion.div>
             </div>
