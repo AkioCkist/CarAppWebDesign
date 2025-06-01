@@ -14,6 +14,7 @@ export default function Header() {
   const [scrollY, setScrollY] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [bgOpacity, setBgOpacity] = useState(0); // New state for background opacity
 
   const handleNavigation = (href) => {
     setFadeOut(true);
@@ -23,7 +24,7 @@ export default function Header() {
       } else {
         window.location.href = href;
       }
-    }, 200);
+    }, 100); // Delay to allow fade out effect
   };
 
   const handleSignInClick = (e) => {
@@ -36,12 +37,24 @@ export default function Header() {
   };
 
   useEffect(() => {
+    let timeoutId;
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      const scrollValue = window.scrollY;
+      // Calculate target opacity based on scroll position
+      const targetOpacity = scrollValue > 50 ? 0.9 : scrollValue > 5 ? (scrollValue - 5) / 45 * 0.9 : 0;
+      // Add a small delay before updating opacity
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(() => {
+        setBgOpacity(targetOpacity);
+      }, 7); // 120ms delay for smoothness
+      setScrollY(scrollValue);
     };
 
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearTimeout(timeoutId);
+    };
   }, []);
 
   const fadeVariant = {
@@ -49,7 +62,7 @@ export default function Header() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.7, ease: "easeOut" },
+      transition: { duration: 0.1, ease: "easeOut" },
     },
   };
 
@@ -63,7 +76,8 @@ export default function Header() {
 
   return (
     <>
-      <div className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${fadeOut ? "opacity-100" : "opacity-0"}`} />
+      {/* Remove the black fade out overlay */}
+      {/* <div className={`fixed inset-0 bg-black z-50 transition-opacity duration-200 pointer-events-none ${fadeOut ? "opacity-100" : "opacity-0"}`} /> */}
       <motion.header
         variants={fadeVariant}
         initial="hidden"
@@ -71,7 +85,8 @@ export default function Header() {
         className="fixed top-0 left-0 w-full z-30 text-white"
         style={{
           opacity: scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
-          backgroundColor: scrollY > 50 ? "rgba(17, 24, 39, 0.9)" : "transparent",
+          backgroundColor: `rgba(17, 24, 39, ${bgOpacity})`, // Use the new opacity state
+          transition: "background-color 0.5s cubic-bezier(0.4,0,0.2,1)" // Smooth transition
         }}
       >
         <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -82,7 +97,7 @@ export default function Header() {
               <span className="ml-2 text-2xl font-bold group-hover:text-green-400">Whale Xe</span>
             </button>
             <nav className="flex gap-6 font-medium">
-              <button onClick={() => handleNavigation("/")} className="hover:text-green-400">Home</button>
+              <button onClick={() => handleNavigation("./")} className="hover:text-green-400">Home</button>
               <button onClick={() => handleNavigation("/#renting")} className="hover:text-green-400">Cars</button>
               <button onClick={() => handleNavigation("/#gallery")} className="hover:text-green-400">Gallery</button>
               <button onClick={() => handleNavigation("/#about")} className="hover:text-green-400">News</button>
