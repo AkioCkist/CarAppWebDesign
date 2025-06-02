@@ -161,7 +161,7 @@ export default function Header() {
                       exit="exit"
                     >
                       <ul className="py-2 text-sm text-gray-700">
-                        <li><a href="/user_profile" className="block px-4 py-2 hover:bg-gray-100">My Profile</a></li>
+                        <li><a href="/user_dashboard" className="block px-4 py-2 hover:bg-gray-100">My Dashboard</a></li>
                         <li><a href="#" className="block px-4 py-2 hover:bg-gray-100">My Bookings</a></li>
                         <li><a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a></li>
                       </ul>
