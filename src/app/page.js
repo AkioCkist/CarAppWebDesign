@@ -836,11 +836,12 @@ export default function HomePage() {
         animate="visible"
         custom={2}
         id="about"
-        className="bg-white mt-[-2rem] relative z-10"> {/* Changed from -4rem to -2rem */}
+        className="bg-white mt-16 relative z-10" // Set a positive margin-top to push it down
+      >
         <div className="max-w-6xl mx-auto px-4 py-16">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-center mb-10 text-gray-900">Our Features</h2> {/* Changed text color to gray-900 */}
-            <p className="text-gray-600 max-w-2xl mx-auto"> {/* Changed text color to gray-600 */}
+            <h2 className="text-3xl font-bold text-center mb-10 text-gray-900">Our Features</h2>
+            <p className="text-gray-600 max-w-2xl mx-auto">
               Discover a world of convenience, safety, and customization, paving the way for
               unforgettable adventures and seamless mobility solutions.
             </p>
