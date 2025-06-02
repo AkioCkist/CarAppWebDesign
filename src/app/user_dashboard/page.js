@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react"; // <-- Add signOut import
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import VehicleList from "../../../components/VehicleList";
@@ -444,6 +444,10 @@ export default function UserProfilePage() {
                   </motion.a>
                   <motion.a 
                     href="#" 
+                    onClick={e => {
+                      e.preventDefault();
+                      signOut({ callbackUrl: "/" }); // <-- Sign out and redirect to home
+                    }}
                     className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                     variants={buttonVariants}
                     initial="idle"

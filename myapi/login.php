@@ -3,6 +3,7 @@ header('Content-Type: application/json');
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Access-Control-Allow-Methods: POST, OPTIONS");
+
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
@@ -38,11 +39,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
 
-    $stmt = $pdo->prepare("SELECT * FROM accounts WHERE phone_number = ? AND password = ?");
-    $stmt->execute([$data['phone_number'], $data['password']]);
+    // Lấy user theo số điện thoại
+    $stmt = $pdo->prepare("SELECT * FROM accounts WHERE phone_number = ?");
+    $stmt->execute([$data['phone_number']]);
     $user = $stmt->fetch();
 
-    if ($user) {
+    if ($user && password_verify($data['password'], $user['password'])) {
+        // Đảm bảo không trả mật khẩu về client
+        unset($user['password']);
         echo json_encode(['success' => true, 'user' => $user]);
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid credentials']);
