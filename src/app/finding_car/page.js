@@ -50,29 +50,40 @@ const CarListingPage = () => {
       })
       .catch(() => setIsLoading(false));
   }, []);
-  
+
   const locations = ['Tất cả địa điểm', 'Quận Sơn Trà', 'Quận Hải Châu', 'Quận Thanh Khê', 'Quận Liên Chiểu', 'Quận Cẩm Lệ', 'Quận Ngũ Hành Sơn'];
   const carTypes = ['Tất cả loại xe', '2 chỗ', '5 chỗ', '7 chỗ', 'SUV', 'Sedan'];
   const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
 
   // Filter options
   const filterOptions = {
-    carType: ['Sedan', 'SUV', 'Hatchback', 'Coupe', 'Convertible', 'Pickup'],
+    carType: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
     brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Porsche', 'Lamborghini', 'Suzuki'],
     seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
     fuel: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
+  };
+  const formatCarTypeDisplay = (type) => {
+    const typeMap = {
+      'sedan': 'Sedan',
+      'suv': 'SUV',
+      'hatchback': 'Hatchback',
+      'crossover': 'Crossover',
+      'pickup': 'Pickup'
+    };
+    return typeMap[type] || type;
   };
 
   // Filter cars based on search term and filters
   const filteredCars = cars.filter(car => {
     const matchesSearch = car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesLocation = selectedLocation === 'Tất cả địa điểm' || !selectedLocation ||
+      car.location?.includes(selectedLocation);
 
-    const matchesLocation = selectedLocation === 'Tất cả địa điểm' || !selectedLocation || car.location?.includes(selectedLocation);
-
-    // Sửa filter loại xe: dùng vehicle_type thay vì carType
+    //filter loại xe: dùng vehicle_type
     const matchesCarType = selectedCarType === 'Tất cả loại xe' || !selectedCarType ||
-      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType : car.vehicle_type === selectedCarType);
+      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType :
+        car.vehicle_type?.toLowerCase() === selectedCarType?.toLowerCase());
 
     // Sửa filter giá: dùng base_price (giả sử đơn vị là VND)
     const priceValue = car.base_price ? Number(car.base_price) : 0;
@@ -83,12 +94,13 @@ const CarListingPage = () => {
       (priceRange === 'Trên 5 triệu' && priceValue > 5000000);
 
     // Sửa filter nâng cao: dùng vehicle_type thay vì carType
-    const matchesFilters = (!filters.carType.length || filters.carType.includes(car.vehicle_type)) &&
+    const matchesFilters =
+      (!filters.carType.length || filters.carType.some(type =>
+        car.vehicle_type?.toLowerCase() === type?.toLowerCase())) &&
       (!filters.brand.length || filters.brand.includes(car.name?.split(' ')[0])) &&
       (!filters.seats.length || filters.seats.includes(`${car.seats} chỗ`)) &&
-      (!filters.fuel.length || filters.fuel.includes(car.fuel)) &&
+      (!filters.fuel.length || filters.fuel.includes(car.fuel_type || car.fuel)) &&
       (!filters.discount || car.priceDiscount);
-
     return matchesSearch && matchesLocation && matchesCarType && matchesPrice && matchesFilters;
   });
 
@@ -142,7 +154,6 @@ const CarListingPage = () => {
             <X className="h-5 w-5" />
           </button>
         </div>
-
         <div className="space-y-3">
           {options.map((option) => (
             <label key={option} className="flex items-center space-x-3 cursor-pointer">
@@ -150,13 +161,13 @@ const CarListingPage = () => {
                 type="checkbox"
                 checked={filters[category].includes(option)}
                 onChange={() => handleFilterToggle(category, option)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <span className="text-black">{option}</span>
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+              <span className="text-black">
+                {category === 'carType' ? formatCarTypeDisplay(option) : option}
+              </span>
             </label>
           ))}
         </div>
-
         <div className="flex space-x-3 mt-6">
           <button
             onClick={onClose}
@@ -182,7 +193,6 @@ const CarListingPage = () => {
     const step = 100000;
     const [values, setValues] = useState([priceMin, priceMax]);
     const formatNumber = (num) => num.toLocaleString();
-
     const handleChange = (newValues) => {
       setValues(newValues);
     };
