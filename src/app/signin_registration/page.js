@@ -152,33 +152,34 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    setIsLoading(true);
-    setLoginError("");
+  e.preventDefault();
+  if (!validateForm()) return;
+  setIsLoading(true);
+  setLoginError("");
 
-    if (isLogin) {
-      // Use NextAuth signIn
-      const res = await signIn("credentials", {
-        redirect: false,
-        phone: formData.phone,
-        password: formData.password
-      });
+  const res = await signIn("credentials", {
+    redirect: false,
+    phone: formData.phone,
+    password: formData.password,
+    name: formData.name,
+    action: isLogin ? "login" : "register",
+  });
 
-      if (res.ok && !res.error) {
-        window.location.href = "/";
-        return;
-      } else {
-        setLoginError("Phone number or password is incorrect.");
-      }
-      setIsLoading(false);
-    } else {
-      // Registration logic (if needed)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      alert("Account created successfully!");
-      setIsLoading(false);
-    }
-  };
+  if (res.ok && !res.error) {
+    // ✅ Đăng ký hoặc đăng nhập thành công → redirect
+    window.location.href = "/";
+    return;
+  } else {
+    // ❌ Thất bại
+    setLoginError(
+      isLogin
+        ? "Phone number or password is incorrect."
+        : "Registration failed. Please try again."
+    );
+  }
+
+  setIsLoading(false);
+};
 
   const handleSocialLogin = (provider) => {
     alert(`${provider} login clicked`);
