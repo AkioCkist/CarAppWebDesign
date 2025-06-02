@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
 import { TypeAnimation } from 'react-type-animation';
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -55,8 +55,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [flipDirection, setFlipDirection] = useState('horizontal');
   const [loginError, setLoginError] = useState(""); // Add this state for error message
+  const [signupPopup, setSignupPopup] = useState({ show: false, message: "", success: false }); // Add signupPopup state
 
   const { focusedInput, handleFocus, handleBlur } = useFocusState();
+  const { update } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -152,33 +154,53 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
-    setIsLoading(true);
-    setLoginError("");
+  e.preventDefault();
+  if (!validateForm()) return;
+  setIsLoading(true);
+  setLoginError("");
 
-    if (isLogin) {
-      // Use NextAuth signIn
-      const res = await signIn("credentials", {
-        redirect: false,
-        phone: formData.phone,
-        password: formData.password
+  const res = await signIn("credentials", {
+    redirect: false,
+    phone: formData.phone,
+    password: formData.password,
+    name: formData.name,
+    action: isLogin ? "login" : "register",
+  });
+
+  if (!isLogin) { // Only show popup for registration
+    if (res.ok && !res.error) {
+      setSignupPopup({
+        show: true,
+        message: "Account created successfully!",
+        success: true,
       });
-
-      if (res.ok && !res.error) {
-        window.location.href = "/";
-        return;
-      } else {
-        setLoginError("Phone number or password is incorrect.");
-      }
-      setIsLoading(false);
+      setTimeout(() => {
+        setSignupPopup({ show: false, message: "", success: false });
+        window.location.reload();
+      }, 1500);
     } else {
-      // Registration logic (if needed)
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      alert("Account created successfully!");
-      setIsLoading(false);
+      setSignupPopup({
+        show: true,
+        message: "Registration failed. Please try again.",
+        success: false,
+      });
+      setTimeout(() => {
+        setSignupPopup({ show: false, message: "", success: false });
+      }, 2000);
     }
-  };
+    setIsLoading(false);
+    return;
+  }
+
+  // ...existing login logic...
+  if (res.ok && !res.error) {
+    window.location.href = "/";
+    return;
+  } else {
+    setLoginError("Phone number or password is incorrect.");
+  }
+  setIsLoading(false);
+};
 
   const handleSocialLogin = (provider) => {
     alert(`${provider} login clicked`);
