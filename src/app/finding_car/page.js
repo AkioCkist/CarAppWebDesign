@@ -37,148 +37,20 @@ const CarListingPage = () => {
   const loaderRef = useRef(null);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
-  const [isLoading, setIsLoading] = useState(false); // New loading state
+  const [cars, setCars] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // đã có
 
-  // Sample car data adapted for VehicleList
-  const cars = [
-    {
-      id: 1,
-      name: 'Porsche 911',
-      image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 2,
-      location: 'Quận Sơn Trà, Đà Nẵng',
-      rating: 5.0,
-      trips: 37,
-      priceDisplay: '865K',
-      oldPrice: 980000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 12%',
-      description: 'Xe thể thao sang trọng với hiệu suất vượt trội.',
-      isFavorite: false
-    },
-    {
-      id: 2,
-      name: 'Porsche 911 GT3 R rennsport',
-      image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 2,
-      location: 'Quận Sơn Trà, Đà Nẵng',
-      rating: 5.0,
-      trips: 170,
-      priceDisplay: '5585K',
-      oldPrice: 6412000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 13%',
-      description: 'Siêu xe đua với tốc độ đỉnh cao.',
-      isFavorite: false
-    },
-    {
-      id: 3,
-      name: 'SUZUKI XL7 2021',
-      image: 'https://images.unsplash.com/photo-1549399592-91b8e56a6b26?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 7,
-      location: 'Quận Sơn Trà, Đà Nẵng',
-      rating: 4.8,
-      trips: 2,
-      priceDisplay: '865K',
-      oldPrice: 912000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 5%',
-      description: 'Xe gia đình rộng rãi, tiết kiệm nhiên liệu.',
-      isFavorite: false
-    },
-    {
-      id: 4,
-      name: 'Lamborghini SC18 ALSTON',
-      image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 2,
-      location: 'Quận Cẩm Lệ, Đà Nẵng',
-      rating: 5.0,
-      trips: 37,
-      priceDisplay: '14865K',
-      oldPrice: 16810000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 11%',
-      description: 'Siêu xe độc nhất với thiết kế ấn tượng.yeyeyeyyeyeyeeeeeeeeeeeeeeeeeeeeeeeeeeeeê',
-      isFavorite: false
-    },
-    {
-      id: 5,
-      name: 'BMW X3 2020',
-      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Hải Châu, Đà Nẵng',
-      rating: 4.9,
-      trips: 45,
-      priceDisplay: '1200K',
-      oldPrice: 1350000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 11%',
-      description: 'SUV cao cấp với nội thất tiện nghi.',
-      isFavorite: false
-    },
-    {
-      id: 6,
-      name: 'Mercedes C-Class',
-      image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Thanh Khê, Đà Nẵng',
-      rating: 4.7,
-      trips: 28,
-      priceDisplay: '1500K',
-      oldPrice: 1800000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 17%',
-      description: 'Sedan sang trọng với công nghệ hiện đại.',
-      isFavorite: false
-    },
-    {
-      id: 7,
-      name: 'Toyota Camry 2022',
-      image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Liên Chiểu, Đà Nẵng',
-      rating: 4.8,
-      trips: 62,
-      priceDisplay: '950K',
-      oldPrice: 1100000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 14%',
-      description: 'Sedan đáng tin cậy với mức giá hợp lý.',
-      isFavorite: false
-    },
-    {
-      id: 8,
-      name: 'Honda Civic 2023',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Ngũ Hành Sơn, Đà Nẵng',
-      rating: 4.6,
-      trips: 18,
-      priceDisplay: '800K',
-      oldPrice: 920000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 13%',
-      description: 'Sedan thể thao với thiết kế trẻ trung.',
-      isFavorite: false
-    }
-  ];
-
+  useEffect(() => {
+    setIsLoading(true);
+    fetch('http://localhost/myapi/vehicles.php')
+      .then(res => res.json())
+      .then(data => {
+        setCars(data.records || []);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, []);
+  
   const locations = ['Tất cả địa điểm', 'Quận Sơn Trà', 'Quận Hải Châu', 'Quận Thanh Khê', 'Quận Liên Chiểu', 'Quận Cẩm Lệ', 'Quận Ngũ Hành Sơn'];
   const carTypes = ['Tất cả loại xe', '2 chỗ', '5 chỗ', '7 chỗ', 'SUV', 'Sedan'];
   const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
@@ -193,22 +65,30 @@ const CarListingPage = () => {
 
   // Filter cars based on search term and filters
   const filteredCars = cars.filter(car => {
-    const matchesSearch = car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = selectedLocation === 'Tất cả địa điểm' || !selectedLocation || car.location.includes(selectedLocation);
+
+    const matchesLocation = selectedLocation === 'Tất cả địa điểm' || !selectedLocation || car.location?.includes(selectedLocation);
+
+    // Sửa filter loại xe: dùng vehicle_type thay vì carType
     const matchesCarType = selectedCarType === 'Tất cả loại xe' || !selectedCarType ||
-      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType : car.carType === selectedCarType);
-    const priceValue = parseInt(car.priceDisplay.replace('K', '')) * 1000;
+      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType : car.vehicle_type === selectedCarType);
+
+    // Sửa filter giá: dùng base_price (giả sử đơn vị là VND)
+    const priceValue = car.base_price ? Number(car.base_price) : 0;
     const matchesPrice = priceRange === 'Tất cả giá' || !priceRange ||
       (priceRange === 'Dưới 1 triệu' && priceValue < 1000000) ||
       (priceRange === '1-2 triệu' && priceValue >= 1000000 && priceValue <= 2000000) ||
       (priceRange === '2-5 triệu' && priceValue > 2000000 && priceValue <= 5000000) ||
       (priceRange === 'Trên 5 triệu' && priceValue > 5000000);
-    const matchesFilters = (!filters.carType.length || filters.carType.includes(car.carType)) &&
-      (!filters.brand.length || filters.brand.includes(car.name.split(' ')[0])) &&
+
+    // Sửa filter nâng cao: dùng vehicle_type thay vì carType
+    const matchesFilters = (!filters.carType.length || filters.carType.includes(car.vehicle_type)) &&
+      (!filters.brand.length || filters.brand.includes(car.name?.split(' ')[0])) &&
       (!filters.seats.length || filters.seats.includes(`${car.seats} chỗ`)) &&
       (!filters.fuel.length || filters.fuel.includes(car.fuel)) &&
       (!filters.discount || car.priceDiscount);
+
     return matchesSearch && matchesLocation && matchesCarType && matchesPrice && matchesFilters;
   });
 

@@ -16,7 +16,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
   };
 
   const handleBookClick = () => {
-    onBookClick(vehicle); // Gọi callback với thông tin xe
+    onBookClick(vehicle.id); // Truyền id thay vì object
   };
 
   if (!isMounted) {
@@ -339,6 +339,7 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
   const [isMounted, setIsMounted] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Dữ liệu tiện nghi mẫu cho các xe (bạn có thể customize theo dữ liệu thực)
   const carAmenities = {
@@ -353,9 +354,18 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
     setIsMounted(true);
   }, []);
 
-  const handleBookClick = (vehicle) => {
-    setSelectedCar(vehicle);
+  // Sửa hàm này để fetch chi tiết xe
+  const handleBookClick = async (vehicleId) => {
+    setLoadingDetail(true);
     setIsModalOpen(true);
+    try {
+      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const data = await res.json();
+      setSelectedCar(data);
+    } catch (e) {
+      setSelectedCar(null);
+    }
+    setLoadingDetail(false);
   };
 
   const handleCloseModal = () => {
@@ -418,7 +428,7 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         carData={selectedCar}
-        carAmenities={carAmenities}
+        loading={loadingDetail}
       />
     </>
   );
