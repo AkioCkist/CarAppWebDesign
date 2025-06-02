@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
 import { TypeAnimation } from 'react-type-animation';
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -55,8 +55,10 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [flipDirection, setFlipDirection] = useState('horizontal');
   const [loginError, setLoginError] = useState(""); // Add this state for error message
+  const [signupPopup, setSignupPopup] = useState({ show: false, message: "", success: false }); // Add signupPopup state
 
   const { focusedInput, handleFocus, handleBlur } = useFocusState();
+  const { update } = useSession();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -165,19 +167,38 @@ export default function LoginPage() {
     action: isLogin ? "login" : "register",
   });
 
+  if (!isLogin) { // Only show popup for registration
+    if (res.ok && !res.error) {
+      setSignupPopup({
+        show: true,
+        message: "Account created successfully!",
+        success: true,
+      });
+      setTimeout(() => {
+        setSignupPopup({ show: false, message: "", success: false });
+        window.location.reload();
+      }, 1500);
+    } else {
+      setSignupPopup({
+        show: true,
+        message: "Registration failed. Please try again.",
+        success: false,
+      });
+      setTimeout(() => {
+        setSignupPopup({ show: false, message: "", success: false });
+      }, 2000);
+    }
+    setIsLoading(false);
+    return;
+  }
+
+  // ...existing login logic...
   if (res.ok && !res.error) {
-    // ✅ Đăng ký hoặc đăng nhập thành công → redirect
     window.location.href = "/";
     return;
   } else {
-    // ❌ Thất bại
-    setLoginError(
-      isLogin
-        ? "Phone number or password is incorrect."
-        : "Registration failed. Please try again."
-    );
+    setLoginError("Phone number or password is incorrect.");
   }
-
   setIsLoading(false);
 };
 
