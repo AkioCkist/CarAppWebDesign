@@ -86,13 +86,20 @@ const CarRentalModal = ({
         );
     }
 
-    // Fake gallery images
-    const gallery = [
-        carData.image,
-        carData.image + "&2", // fake
-        carData.image + "&3", // fake
-        carData.image + "&4", // fake
-    ];
+    // Gallery images từ API, đảm bảo ảnh primary luôn ở đầu
+    const gallery = carData.images && carData.images.length > 0
+        ? [
+            ...carData.images
+                .slice() // clone mảng
+                .sort((a, b) => {
+                    if (a.is_primary && !b.is_primary) return -1;
+                    if (!a.is_primary && b.is_primary) return 1;
+                    return (a.display_order || 0) - (b.display_order || 0);
+                })
+                .map(img => img.url),
+            ...Array(Math.max(0, 4 - carData.images.length)).fill(null)
+        ].slice(0, 4)
+        : [carData.image, null, null, null];
 
     // Pricing
     const basePrice = carData.base_price ? Number(carData.base_price) : 0;
@@ -102,6 +109,15 @@ const CarRentalModal = ({
 
     // Amenities
     const amenities = carData.amenities || [];
+
+    // Helper để lấy đúng URL ảnh
+    function getImageUrl(url) {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        // Nếu url bắt đầu bằng /cars thì giữ nguyên, nếu không thì thêm /cars/
+        if (url.startsWith('/cars/')) return url;
+        return `/cars/${url.replace(/^\/+/, '')}`;
+    }
 
     // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
     return createPortal(
@@ -121,7 +137,7 @@ const CarRentalModal = ({
                         {/* Main Image */}
                         <div className="relative rounded-lg overflow-hidden basis-[70%]">
                             <img
-                                src={gallery[selectedImage]}
+                                src={getImageUrl(gallery[selectedImage])}
                                 alt={carData.name}
                                 className="object-cover w-full h-full"
                             />
@@ -134,14 +150,21 @@ const CarRentalModal = ({
                         {/* Side Images */}
                         <div className="flex flex-col gap-2 basis-[30%]">
                             {gallery.slice(1, 4).map((img, idx) => (
-                                <button
-                                    key={idx + 1}
-                                    className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx + 1 ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
-                                    onClick={() => setSelectedImage(idx + 1)}
-                                    aria-label={`Ảnh ${idx + 2}`}
-                                >
-                                    <img src={img} alt="" className="object-cover w-full h-full" />
-                                </button>
+                                img ? (
+                                    <button
+                                        key={idx + 1}
+                                        className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx + 1 ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
+                                        onClick={() => setSelectedImage(idx + 1)}
+                                        aria-label={`Ảnh ${idx + 2}`}
+                                    >
+                                        <img src={getImageUrl(img)} alt="" className="object-cover w-full h-full" />
+                                    </button>
+                                ) : (
+                                    <div
+                                        key={idx + 1}
+                                        className="flex-1 rounded-lg border-2 border-gray-200 bg-gray-100"
+                                    />
+                                )
                             ))}
                         </div>
                     </div>
