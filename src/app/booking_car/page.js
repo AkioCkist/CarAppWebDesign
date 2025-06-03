@@ -1,3 +1,4 @@
+"use client";
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import CarBookingPage from '../finding_car/page'; 
 import HomePage from '../page'; 
