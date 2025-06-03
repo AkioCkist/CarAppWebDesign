@@ -408,7 +408,7 @@ export default function HomePage() {
           ref={heroImageRef}
           className="absolute inset-0 bg-cover bg-center pointer-events-none"
           style={{
-            backgroundImage: "url('/hero/hero.png')",
+            backgroundImage: "url('/hero/hero.webp')",
             filter: "brightness(0.7)",
             top: `-48px`,
             height: "calc(100% + 48px)",
@@ -1179,9 +1179,9 @@ export default function HomePage() {
             <div className="flex items-start gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <img
-                  src="/path-to-phone-avatar.jpg"
+                  src="/icons/phone_bubble.svg"
                   alt="Phone Support"
-                  className="w-full h-full rounded-full object-cover"
+                  className="w-7 h-7 rounded-4 object-cover"
                   onError={(e) => {
                     e.target.style.display = "none";
                     e.target.nextSibling.style.display = "block";
@@ -1293,7 +1293,7 @@ export default function HomePage() {
             <div className="flex items-start gap-3">
               <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
                 <img
-                  src="/path-to-email-avatar.jpg"
+                  src="/icons/email_bubble.svg"
                   alt="Email Support"
                   className="w-full h-full rounded-full object-cover"
                   onError={(e) => {
