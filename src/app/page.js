@@ -1023,7 +1023,7 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         custom={5}
-        className="py-9 bg-gray-50">
+        className="py-4 bg-gray-50">
         <div className="max-w-[98vw] xl:max-w-[1170px] mx-auto px-4">
           <div className="space-y-4">
             <SimpleFaqSection />
