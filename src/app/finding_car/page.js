@@ -10,17 +10,6 @@ import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
 import { useSearchParams } from 'next/navigation'; // Thêm dòng này
 
-// const carAmenities = {
-//   1: ['bluetooth', 'camera', 'airbag', 'etc'],
-//   2: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode'],
-//   3: ['bluetooth', 'camera', 'airbag', 'etc', 'tablet'],
-//   4: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode', 'camera360'],
-//   5: ['bluetooth', 'camera', 'airbag', 'etc', 'map'],
-//   6: ['bluetooth', 'camera', 'airbag', 'etc', 'rotateCcw', 'circle'],
-//   7: ['bluetooth', 'camera', 'airbag', 'etc', 'package', 'shield'],
-//   8: ['bluetooth', 'camera', 'airbag', 'etc', 'radar', 'sunroof'],
-// };
-
 const cityNameMap = {
   hcm: "Hồ Chí Minh",
   hanoi: "Hà Nội",
@@ -38,6 +27,19 @@ function beautifyCityName(val) {
   if (!val) return "";
   // Nếu là mã thì chuyển, nếu là tên thì giữ nguyên
   return cityNameMap[val] || val;
+}
+
+// Chuẩn hóa tên thành phố để so sánh
+function normalizeCity(str) {
+  if (!str) return "";
+  str = str.toLowerCase().trim();
+  // Quy về dạng không dấu, viết thường, bỏ ký tự đặc biệt
+  str = str.replace(/tp\.?\s*hcm|thành phố hồ chí minh|hồ chí minh/g, "hcm");
+  str = str.replace(/hà nội/g, "hanoi");
+  str = str.replace(/đà nẵng/g, "danang");
+  str = str.replace(/huế/g, "hue");
+  str = str.replace(/bắc ninh/g, "bacninh");
+  return str;
 }
 
 const CarListingPage = () => {
@@ -70,9 +72,6 @@ const CarListingPage = () => {
       })
       .catch(() => setIsLoading(false));
   }, []);
-
-  const locations = ['Tất cả địa điểm', 'Quận Sơn Trà', 'Quận Hải Châu', 'Quận Thanh Khê', 'Quận Liên Chiểu', 'Quận Cẩm Lệ', 'Quận Ngũ Hành Sơn'];
-  const carTypes = ['Tất cả loại xe', '2 chỗ', '5 chỗ', '7 chỗ', 'SUV', 'Sedan'];
   const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
 
   // Filter options
@@ -93,12 +92,40 @@ const CarListingPage = () => {
     return typeMap[type] || type;
   };
 
+  const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
+  const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
+  const [pickUpDate, setPickUpDate] = useState('');
+  const [pickUpTime, setPickUpTime] = useState('');
+  const [dropOffDate, setDropOffDate] = useState('');
+  const [dropOffTime, setDropOffTime] = useState('');
+
+  // Lấy search params sau khi mounted
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      setPickUpLocation(beautifyCityName(searchParams.get('pickUpLocation')) || 'Địa điểm nhận xe');
+      setDropOffLocation(beautifyCityName(searchParams.get('dropOffLocation')) || 'Địa điểm trả xe');
+      setPickUpDate(searchParams.get('pickUpDate') || '');
+      setPickUpTime(searchParams.get('pickUpTime') || '');
+      setDropOffDate(searchParams.get('dropOffDate') || '');
+      setDropOffTime(searchParams.get('dropOffTime') || '');
+    }
+  }, []);
+
   // Filter cars based on search term and filters
   const filteredCars = cars.filter(car => {
     const matchesSearch = car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = selectedLocation === 'Tất cả địa điểm' || !selectedLocation ||
-      car.location?.includes(selectedLocation);
+
+    // Lọc theo thành phố lấy từ pickUpLocation
+    let matchesLocation = true;
+    if (pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe') {
+      // Lấy phần tên thành phố đầu tiên trong location của xe
+      const carCityRaw = car.location?.split('-')[0]?.trim();
+      const carCity = normalizeCity(carCityRaw);
+      const pickUpCity = normalizeCity(pickUpLocation);
+      matchesLocation = carCity === pickUpCity;
+    }
 
     //filter loại xe: dùng vehicle_type
     const matchesCarType = selectedCarType === 'Tất cả loại xe' || !selectedCarType ||
@@ -336,17 +363,6 @@ const CarListingPage = () => {
       }
     };
   }, [filteredCars.length]);
-
-  const searchParams = typeof window !== "undefined"
-    ? new URLSearchParams(window.location.search)
-    : null;
-
-  const pickUpLocation = beautifyCityName(searchParams?.get('pickUpLocation')) || 'Địa điểm nhận xe';
-  const dropOffLocation = beautifyCityName(searchParams?.get('dropOffLocation')) || 'Địa điểm trả xe';
-  const pickUpDate = searchParams?.get('pickUpDate') || '';
-  const pickUpTime = searchParams?.get('pickUpTime') || '';
-  const dropOffDate = searchParams?.get('dropOffDate') || '';
-  const dropOffTime = searchParams?.get('dropOffTime') || '';
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
