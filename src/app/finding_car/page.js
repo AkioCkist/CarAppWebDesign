@@ -497,6 +497,38 @@ const CarListingPage = () => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
+          noResultType={
+            pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
+              ? "location"
+              : filters.carType.length
+                ? "filter"
+                : filters.brand.length
+                  ? "filter"
+                  : filters.seats.length
+                    ? "filter"
+                    : filters.fuel.length
+                      ? "filter"
+                      : filters.discount
+                        ? "filter"
+                        : priceRange && priceRange !== 'Tất cả giá'
+                          ? "filter"
+                          : undefined
+          }
+          noResultFilter={
+            filters.carType.length
+              ? "carType"
+              : filters.brand.length
+                ? "brand"
+                : filters.seats.length
+                  ? "seats"
+                  : filters.fuel.length
+                    ? "fuel"
+                    : filters.discount
+                      ? "discount"
+                      : priceRange && priceRange !== 'Tất cả giá'
+                        ? "price"
+                        : undefined
+          }
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>

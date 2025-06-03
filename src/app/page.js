@@ -69,8 +69,8 @@ const locationOptions = [
   { value: "hcm", label: "TP. Hồ Chí Minh" },
   { value: "hanoi", label: "Hà Nội" },
   { value: "danang", label: "Đà Nẵng" },
-  { value: "hue", label: "Huế" },         // Thêm Huế
-  { value: "bacninh", label: "Bắc Ninh" } // Thêm Bắc Ninh
+  { value: "hue", label: "Huế" },
+  { value: "bacninh", label: "Bắc Ninh" }
 ];
 
 const dropoffOptions = [
@@ -78,6 +78,8 @@ const dropoffOptions = [
   { value: "hcm", label: "TP. Hồ Chí Minh" },
   { value: "hanoi", label: "Hà Nội" },
   { value: "danang", label: "Đà Nẵng" },
+  { value: "hue", label: "Huế" },
+  { value: "bacninh", label: "Bắc Ninh" }
 ];
 
 // Notification Dot Components

@@ -221,17 +221,17 @@ export default function UserProfilePage() {
 
   // Animation variants for sidebar buttons
   const buttonVariants = {
-    idle: { 
-      scale: 1, 
+    idle: {
+      scale: 1,
       x: 0,
       transition: { duration: 0.2 }
     },
-    hover: { 
-      scale: 1.02, 
+    hover: {
+      scale: 1.02,
       x: 4,
       transition: { duration: 0.2 }
     },
-    tap: { 
+    tap: {
       scale: 0.98,
       transition: { duration: 0.1 }
     }
@@ -239,13 +239,13 @@ export default function UserProfilePage() {
 
   // Animation variants for panel content
   const panelVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 20,
       scale: 0.98
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
@@ -253,8 +253,8 @@ export default function UserProfilePage() {
         ease: "easeOut"
       }
     },
-    exit: { 
-      opacity: 0, 
+    exit: {
+      opacity: 0,
       y: -10,
       scale: 1.02,
       transition: {
@@ -277,13 +277,13 @@ export default function UserProfilePage() {
   };
 
   const itemVariants = {
-    hidden: { 
-      opacity: 0, 
+    hidden: {
+      opacity: 0,
       y: 20,
       scale: 0.9
     },
-    visible: { 
-      opacity: 1, 
+    visible: {
+      opacity: 1,
       y: 0,
       scale: 1,
       transition: {
@@ -442,8 +442,8 @@ export default function UserProfilePage() {
                     </svg>
                     My Favorite Cars
                   </motion.a>
-                  <motion.a 
-                    href="#" 
+                  <motion.a
+                    href="#"
                     onClick={e => {
                       e.preventDefault();
                       signOut({ callbackUrl: "/" }); // <-- Sign out and redirect to home
@@ -498,8 +498,8 @@ export default function UserProfilePage() {
                           key={key}
                           variants={itemVariants}
                           className="bg-white rounded-lg p-6 text-center shadow-sm"
-                          whileHover={{ 
-                            scale: 1.05, 
+                          whileHover={{
+                            scale: 1.05,
                             boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
                             transition: { duration: 0.2 }
                           }}
@@ -539,8 +539,8 @@ export default function UserProfilePage() {
                           </thead>
                           <tbody className="bg-white divide-y divide-gray-200">
                             {userData.recentOrders.map((order, index) => (
-                              <motion.tr 
-                                key={order.id} 
+                              <motion.tr
+                                key={order.id}
                                 className="hover:bg-gray-50"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
@@ -578,6 +578,7 @@ export default function UserProfilePage() {
                           vehicles={favoriteCars}
                           onFavoriteToggle={handleFavoriteToggle}
                           favorites={favoriteCars.map(car => car.id)}
+                          noResultType="favorite"
                         />
                       </div>
                     </motion.div>
@@ -629,6 +630,7 @@ export default function UserProfilePage() {
                           vehicles={favoriteCars}
                           onFavoriteToggle={handleFavoriteToggle}
                           favorites={favoriteCars.map(car => car.id)}
+                          noResultType="favorite"
                         />
                       </div>
                     </div>
