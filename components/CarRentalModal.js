@@ -58,6 +58,7 @@ const CarRentalModal = ({
     onClose,
     carData,
     carAmenities,
+    loading // thêm props này
 }) => {
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
@@ -73,7 +74,17 @@ const CarRentalModal = ({
         };
     }, [isOpen]);
 
-    if (!isOpen || !carData) return null;
+    if (!isOpen) return null;
+    if (loading || !carData) {
+        return createPortal(
+            <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
+                <div className="bg-white p-8 rounded-lg shadow-lg text-center text-lg font-semibold">
+                    Đang tải thông tin xe...
+                </div>
+            </div>,
+            typeof window !== "undefined" ? document.body : null
+        );
+    }
 
     // Fake gallery images
     const gallery = [
@@ -84,13 +95,13 @@ const CarRentalModal = ({
     ];
 
     // Pricing
-    const basePrice = parseInt(carData.oldPrice || "0", 10);
+    const basePrice = carData.base_price ? Number(carData.base_price) : 0;
     const insurance = 77250;
     const extraInsurance = additionalInsurance ? 50000 : 0;
     const total = basePrice + insurance + extraInsurance;
 
     // Amenities
-    const amenities = carAmenities[carData.id] || [];
+    const amenities = carData.amenities || [];
 
     // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
     return createPortal(
@@ -195,13 +206,17 @@ const CarRentalModal = ({
                                 <div>
                                     <div className="font-semibold text-gray-900 mb-1">Tiện nghi</div>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                                        {amenities.map((key) =>
-                                            AMENITY_ICONS[key] ? (
-                                                <div key={key} className="flex items-center gap-2 text-gray-700 text-sm">
-                                                    {AMENITY_ICONS[key].icon}
-                                                    <span>{AMENITY_ICONS[key].label}</span>
+                                        {amenities.map((item) =>
+                                            AMENITY_ICONS[item.name] ? (
+                                                <div key={item.name} className="flex items-center gap-2 text-gray-700 text-sm">
+                                                    {AMENITY_ICONS[item.name].icon}
+                                                    <span>{AMENITY_ICONS[item.name].label}</span>
                                                 </div>
-                                            ) : null
+                                            ) : (
+                                                <div key={item.name} className="flex items-center gap-2 text-gray-700 text-sm">
+                                                    <span>{item.name}</span>
+                                                </div>
+                                            )
                                         )}
                                     </div>
                                 </div>
@@ -237,7 +252,9 @@ const CarRentalModal = ({
                             <div className="bg-gray-50 rounded-lg p-4 flex flex-col gap-2">
                                 <div className="flex items-center justify-between">
                                     <span className="text-gray-700 font-bold">Giá thuê:</span>
-                                    <span className="text-2xl font-bold text-green-600">{carData.priceDisplay} <span className="text-base font-normal text-gray-500">/ngày</span></span>
+                                    <span className="text-2xl font-bold text-green-600">
+                                        {basePrice.toLocaleString()} <span className="text-base font-normal text-gray-500">VNĐ/ngày</span>
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between text-sm text-gray-700">
                                     <span>Đơn giá thuê xe</span>

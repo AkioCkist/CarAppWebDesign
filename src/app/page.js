@@ -69,6 +69,8 @@ const locationOptions = [
   { value: "hcm", label: "TP. Hồ Chí Minh" },
   { value: "hanoi", label: "Hà Nội" },
   { value: "danang", label: "Đà Nẵng" },
+  { value: "hue", label: "Huế" },
+  { value: "bacninh", label: "Bắc Ninh" }
 ];
 
 const dropoffOptions = [
@@ -76,6 +78,8 @@ const dropoffOptions = [
   { value: "hcm", label: "TP. Hồ Chí Minh" },
   { value: "hanoi", label: "Hà Nội" },
   { value: "danang", label: "Đà Nẵng" },
+  { value: "hue", label: "Huế" },
+  { value: "bacninh", label: "Bắc Ninh" }
 ];
 
 // Notification Dot Components
@@ -814,9 +818,18 @@ export default function HomePage() {
                   className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200"
                   onClick={() => {
                     startLoading();
+                    // Tạo query string từ form
+                    const params = new URLSearchParams({
+                      pickUpLocation: form.pickUpLocation,
+                      dropOffLocation: form.dropOffLocation,
+                      pickUpDate: form.pickUpDate,
+                      pickUpTime: form.pickUpTime,
+                      dropOffDate: form.dropOffDate,
+                      dropOffTime: form.dropOffTime,
+                    }).toString();
                     setTimeout(() => {
-                      router.push("/finding_car");
-                    }, 2600); // Thời gian khớp với CarLoadingScreen (2.5s + 0.1s buffer)
+                      router.push(`/finding_car?${params}`);
+                    }, 2600);
                   }}
                 >
                   Search Your Cars

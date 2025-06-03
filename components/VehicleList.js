@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CarRentalModal from "./CarRentalModal"; // Import CarRentalModal
+import NoResultMessage from "./NoResultMessage";
 
 // VehicleCard subcomponent for each vehicle
 function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
@@ -16,7 +17,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
   };
 
   const handleBookClick = () => {
-    onBookClick(vehicle); // Gọi callback với thông tin xe
+    onBookClick(vehicle.id); // Truyền id thay vì object
   };
 
   if (!isMounted) {
@@ -335,10 +336,11 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
 }
 
 // Main VehicleList component with Modal integration
-export default function VehicleList({ vehicles, onFavoriteToggle, favorites = [] }) {
+export default function VehicleList({ vehicles, onFavoriteToggle, favorites = [], noResultType, noResultFilter }) {
   const [isMounted, setIsMounted] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   // Dữ liệu tiện nghi mẫu cho các xe (bạn có thể customize theo dữ liệu thực)
   const carAmenities = {
@@ -353,9 +355,18 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
     setIsMounted(true);
   }, []);
 
-  const handleBookClick = (vehicle) => {
-    setSelectedCar(vehicle);
+  // Sửa hàm này để fetch chi tiết xe
+  const handleBookClick = async (vehicleId) => {
+    setLoadingDetail(true);
     setIsModalOpen(true);
+    try {
+      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const data = await res.json();
+      setSelectedCar(data);
+    } catch (e) {
+      setSelectedCar(null);
+    }
+    setLoadingDetail(false);
   };
 
   const handleCloseModal = () => {
@@ -390,35 +401,15 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
           ))}
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12">
-          <svg
-            className="w-16 h-16 text-gray-400 mb-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={1.5}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-1">
-            Không có xe nào trong mục yêu thích
-          </h3>
-          <p className="text-gray-500 text-center">
-            Hãy thêm xe bạn yêu thích vào danh sách để xem chúng ở đây
-          </p>
-        </div>
+        <NoResultMessage type={noResultType} filter={noResultFilter} />
       )}
 
       {/* CarRentalModal */}
       <CarRentalModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        carData={selectedCar}
-        carAmenities={carAmenities}
+        car={selectedCar}
+        loading={loadingDetail}
       />
     </>
   );

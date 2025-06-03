@@ -8,17 +8,39 @@ import CarRentalModal from "../../../components/CarRentalModal";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
+import { useSearchParams } from 'next/navigation'; // Thêm dòng này
 
-const carAmenities = {
-  1: ['bluetooth', 'camera', 'airbag', 'etc'],
-  2: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode'],
-  3: ['bluetooth', 'camera', 'airbag', 'etc', 'tablet'],
-  4: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode', 'camera360'],
-  5: ['bluetooth', 'camera', 'airbag', 'etc', 'map'],
-  6: ['bluetooth', 'camera', 'airbag', 'etc', 'rotateCcw', 'circle'],
-  7: ['bluetooth', 'camera', 'airbag', 'etc', 'package', 'shield'],
-  8: ['bluetooth', 'camera', 'airbag', 'etc', 'radar', 'sunroof'],
+const cityNameMap = {
+  hcm: "Hồ Chí Minh",
+  hanoi: "Hà Nội",
+  danang: "Đà Nẵng",
+  hue: "Huế",
+  bacninh: "Bắc Ninh",
+  "TP. Hồ Chí Minh": "Hồ Chí Minh",
+  "Hà Nội": "Hà Nội",
+  "Đà Nẵng": "Đà Nẵng",
+  "Huế": "Huế",
+  "Bắc Ninh": "Bắc Ninh"
 };
+
+function beautifyCityName(val) {
+  if (!val) return "";
+  // Nếu là mã thì chuyển, nếu là tên thì giữ nguyên
+  return cityNameMap[val] || val;
+}
+
+// Chuẩn hóa tên thành phố để so sánh
+function normalizeCity(str) {
+  if (!str) return "";
+  str = str.toLowerCase().trim();
+  // Quy về dạng không dấu, viết thường, bỏ ký tự đặc biệt
+  str = str.replace(/tp\.?\s*hcm|thành phố hồ chí minh|hồ chí minh/g, "hcm");
+  str = str.replace(/hà nội/g, "hanoi");
+  str = str.replace(/đà nẵng/g, "danang");
+  str = str.replace(/huế/g, "hue");
+  str = str.replace(/bắc ninh/g, "bacninh");
+  return str;
+}
 
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -37,177 +59,94 @@ const CarListingPage = () => {
   const loaderRef = useRef(null);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
-  const [isLoading, setIsLoading] = useState(false); // New loading state
+  const [cars, setCars] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // đã có
 
-  // Sample car data adapted for VehicleList
-  const cars = [
-    {
-      id: 1,
-      name: 'Porsche 911',
-      image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 2,
-      location: 'Quận Sơn Trà, Đà Nẵng',
-      rating: 5.0,
-      trips: 37,
-      priceDisplay: '865K',
-      oldPrice: 980000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 12%',
-      description: 'Xe thể thao sang trọng với hiệu suất vượt trội.',
-      isFavorite: false
-    },
-    {
-      id: 2,
-      name: 'Porsche 911 GT3 R rennsport',
-      image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 2,
-      location: 'Quận Sơn Trà, Đà Nẵng',
-      rating: 5.0,
-      trips: 170,
-      priceDisplay: '5585K',
-      oldPrice: 6412000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 13%',
-      description: 'Siêu xe đua với tốc độ đỉnh cao.',
-      isFavorite: false
-    },
-    {
-      id: 3,
-      name: 'SUZUKI XL7 2021',
-      image: 'https://images.unsplash.com/photo-1549399592-91b8e56a6b26?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 7,
-      location: 'Quận Sơn Trà, Đà Nẵng',
-      rating: 4.8,
-      trips: 2,
-      priceDisplay: '865K',
-      oldPrice: 912000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 5%',
-      description: 'Xe gia đình rộng rãi, tiết kiệm nhiên liệu.',
-      isFavorite: false
-    },
-    {
-      id: 4,
-      name: 'Lamborghini SC18 ALSTON',
-      image: 'https://images.unsplash.com/photo-1571068316344-75bc76f77890?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 2,
-      location: 'Quận Cẩm Lệ, Đà Nẵng',
-      rating: 5.0,
-      trips: 37,
-      priceDisplay: '14865K',
-      oldPrice: 16810000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 11%',
-      description: 'Siêu xe độc nhất với thiết kế ấn tượng.yeyeyeyyeyeyeeeeeeeeeeeeeeeeeeeeeeeeeeeeê',
-      isFavorite: false
-    },
-    {
-      id: 5,
-      name: 'BMW X3 2020',
-      image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Hải Châu, Đà Nẵng',
-      rating: 4.9,
-      trips: 45,
-      priceDisplay: '1200K',
-      oldPrice: 1350000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 11%',
-      description: 'SUV cao cấp với nội thất tiện nghi.',
-      isFavorite: false
-    },
-    {
-      id: 6,
-      name: 'Mercedes C-Class',
-      image: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Thanh Khê, Đà Nẵng',
-      rating: 4.7,
-      trips: 28,
-      priceDisplay: '1500K',
-      oldPrice: 1800000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 17%',
-      description: 'Sedan sang trọng với công nghệ hiện đại.',
-      isFavorite: false
-    },
-    {
-      id: 7,
-      name: 'Toyota Camry 2022',
-      image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Liên Chiểu, Đà Nẵng',
-      rating: 4.8,
-      trips: 62,
-      priceDisplay: '950K',
-      oldPrice: 1100000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 14%',
-      description: 'Sedan đáng tin cậy với mức giá hợp lý.',
-      isFavorite: false
-    },
-    {
-      id: 8,
-      name: 'Honda Civic 2023',
-      image: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?w=400&h=250&fit=crop',
-      transmission: 'Tự động',
-      fuel: 'Xăng',
-      seats: 5,
-      location: 'Quận Ngũ Hành Sơn, Đà Nẵng',
-      rating: 4.6,
-      trips: 18,
-      priceDisplay: '800K',
-      oldPrice: 920000,
-      pricePer: 'ngày',
-      priceDiscount: 'Giảm 13%',
-      description: 'Sedan thể thao với thiết kế trẻ trung.',
-      isFavorite: false
-    }
-  ];
-
-  const locations = ['Tất cả địa điểm', 'Quận Sơn Trà', 'Quận Hải Châu', 'Quận Thanh Khê', 'Quận Liên Chiểu', 'Quận Cẩm Lệ', 'Quận Ngũ Hành Sơn'];
-  const carTypes = ['Tất cả loại xe', '2 chỗ', '5 chỗ', '7 chỗ', 'SUV', 'Sedan'];
+  useEffect(() => {
+    setIsLoading(true);
+    fetch('http://localhost/myapi/vehicles.php')
+      .then(res => res.json())
+      .then(data => {
+        setCars(data.records || []);
+        setIsLoading(false);
+      })
+      .catch(() => setIsLoading(false));
+  }, []);
   const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
 
   // Filter options
   const filterOptions = {
-    carType: ['Sedan', 'SUV', 'Hatchback', 'Coupe', 'Convertible', 'Pickup'],
+    carType: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
     brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Porsche', 'Lamborghini', 'Suzuki'],
     seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
     fuel: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
   };
+  const formatCarTypeDisplay = (type) => {
+    const typeMap = {
+      'sedan': 'Sedan',
+      'suv': 'SUV',
+      'hatchback': 'Hatchback',
+      'crossover': 'Crossover',
+      'pickup': 'Pickup'
+    };
+    return typeMap[type] || type;
+  };
+
+  const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
+  const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
+  const [pickUpDate, setPickUpDate] = useState('');
+  const [pickUpTime, setPickUpTime] = useState('');
+  const [dropOffDate, setDropOffDate] = useState('');
+  const [dropOffTime, setDropOffTime] = useState('');
+
+  // Lấy search params sau khi mounted
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      setPickUpLocation(beautifyCityName(searchParams.get('pickUpLocation')) || 'Địa điểm nhận xe');
+      setDropOffLocation(beautifyCityName(searchParams.get('dropOffLocation')) || 'Địa điểm trả xe');
+      setPickUpDate(searchParams.get('pickUpDate') || '');
+      setPickUpTime(searchParams.get('pickUpTime') || '');
+      setDropOffDate(searchParams.get('dropOffDate') || '');
+      setDropOffTime(searchParams.get('dropOffTime') || '');
+    }
+  }, []);
 
   // Filter cars based on search term and filters
   const filteredCars = cars.filter(car => {
-    const matchesSearch = car.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    const matchesSearch = car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       car.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLocation = selectedLocation === 'Tất cả địa điểm' || !selectedLocation || car.location.includes(selectedLocation);
+
+    // Lọc theo thành phố lấy từ pickUpLocation
+    let matchesLocation = true;
+    if (pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe') {
+      // Lấy phần tên thành phố đầu tiên trong location của xe
+      const carCityRaw = car.location?.split('-')[0]?.trim();
+      const carCity = normalizeCity(carCityRaw);
+      const pickUpCity = normalizeCity(pickUpLocation);
+      matchesLocation = carCity === pickUpCity;
+    }
+
+    //filter loại xe: dùng vehicle_type
     const matchesCarType = selectedCarType === 'Tất cả loại xe' || !selectedCarType ||
-      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType : car.carType === selectedCarType);
-    const priceValue = parseInt(car.priceDisplay.replace('K', '')) * 1000;
+      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType :
+        car.vehicle_type?.toLowerCase() === selectedCarType?.toLowerCase());
+
+    // Sửa filter giá: dùng base_price (giả sử đơn vị là VND)
+    const priceValue = car.base_price ? Number(car.base_price) : 0;
     const matchesPrice = priceRange === 'Tất cả giá' || !priceRange ||
       (priceRange === 'Dưới 1 triệu' && priceValue < 1000000) ||
       (priceRange === '1-2 triệu' && priceValue >= 1000000 && priceValue <= 2000000) ||
       (priceRange === '2-5 triệu' && priceValue > 2000000 && priceValue <= 5000000) ||
       (priceRange === 'Trên 5 triệu' && priceValue > 5000000);
-    const matchesFilters = (!filters.carType.length || filters.carType.includes(car.carType)) &&
-      (!filters.brand.length || filters.brand.includes(car.name.split(' ')[0])) &&
+
+    // Sửa filter nâng cao: dùng vehicle_type thay vì carType
+    const matchesFilters =
+      (!filters.carType.length || filters.carType.some(type =>
+        car.vehicle_type?.toLowerCase() === type?.toLowerCase())) &&
+      (!filters.brand.length || filters.brand.includes(car.name?.split(' ')[0])) &&
       (!filters.seats.length || filters.seats.includes(`${car.seats} chỗ`)) &&
-      (!filters.fuel.length || filters.fuel.includes(car.fuel)) &&
+      (!filters.fuel.length || filters.fuel.includes(car.fuel_type || car.fuel)) &&
       (!filters.discount || car.priceDiscount);
     return matchesSearch && matchesLocation && matchesCarType && matchesPrice && matchesFilters;
   });
@@ -262,7 +201,6 @@ const CarListingPage = () => {
             <X className="h-5 w-5" />
           </button>
         </div>
-
         <div className="space-y-3">
           {options.map((option) => (
             <label key={option} className="flex items-center space-x-3 cursor-pointer">
@@ -270,13 +208,13 @@ const CarListingPage = () => {
                 type="checkbox"
                 checked={filters[category].includes(option)}
                 onChange={() => handleFilterToggle(category, option)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-              />
-              <span className="text-black">{option}</span>
+                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
+              <span className="text-black">
+                {category === 'carType' ? formatCarTypeDisplay(option) : option}
+              </span>
             </label>
           ))}
         </div>
-
         <div className="flex space-x-3 mt-6">
           <button
             onClick={onClose}
@@ -302,7 +240,6 @@ const CarListingPage = () => {
     const step = 100000;
     const [values, setValues] = useState([priceMin, priceMax]);
     const formatNumber = (num) => num.toLocaleString();
-
     const handleChange = (newValues) => {
       setValues(newValues);
     };
@@ -445,9 +382,13 @@ const CarListingPage = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <MapPin className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-gray-900">Đà Nẵng</span>
+              <span className="font-medium text-gray-900">{pickUpLocation}</span>
+              <span className="text-gray-500">→</span>
+              <span className="font-medium text-gray-900">{dropOffLocation}</span>
               <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-600 text-sm">21:00 14/05/2025 - 20:00 15/05/2025</span>
+              <span className="text-gray-600 text-sm">
+                {pickUpTime} {pickUpDate} - {dropOffTime} {dropOffDate}
+              </span>
             </div>
           </div>
         </div>
@@ -556,6 +497,38 @@ const CarListingPage = () => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
+          noResultType={
+            pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
+              ? "location"
+              : filters.carType.length
+                ? "filter"
+                : filters.brand.length
+                  ? "filter"
+                  : filters.seats.length
+                    ? "filter"
+                    : filters.fuel.length
+                      ? "filter"
+                      : filters.discount
+                        ? "filter"
+                        : priceRange && priceRange !== 'Tất cả giá'
+                          ? "filter"
+                          : undefined
+          }
+          noResultFilter={
+            filters.carType.length
+              ? "carType"
+              : filters.brand.length
+                ? "brand"
+                : filters.seats.length
+                  ? "seats"
+                  : filters.fuel.length
+                    ? "fuel"
+                    : filters.discount
+                      ? "discount"
+                      : priceRange && priceRange !== 'Tất cả giá'
+                        ? "price"
+                        : undefined
+          }
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>
