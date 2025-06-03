@@ -8,17 +8,37 @@ import CarRentalModal from "../../../components/CarRentalModal";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
+import { useSearchParams } from 'next/navigation'; // Thêm dòng này
 
-const carAmenities = {
-  1: ['bluetooth', 'camera', 'airbag', 'etc'],
-  2: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode'],
-  3: ['bluetooth', 'camera', 'airbag', 'etc', 'tablet'],
-  4: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode', 'camera360'],
-  5: ['bluetooth', 'camera', 'airbag', 'etc', 'map'],
-  6: ['bluetooth', 'camera', 'airbag', 'etc', 'rotateCcw', 'circle'],
-  7: ['bluetooth', 'camera', 'airbag', 'etc', 'package', 'shield'],
-  8: ['bluetooth', 'camera', 'airbag', 'etc', 'radar', 'sunroof'],
+// const carAmenities = {
+//   1: ['bluetooth', 'camera', 'airbag', 'etc'],
+//   2: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode'],
+//   3: ['bluetooth', 'camera', 'airbag', 'etc', 'tablet'],
+//   4: ['bluetooth', 'camera', 'airbag', 'etc', 'sunroof', 'sportMode', 'camera360'],
+//   5: ['bluetooth', 'camera', 'airbag', 'etc', 'map'],
+//   6: ['bluetooth', 'camera', 'airbag', 'etc', 'rotateCcw', 'circle'],
+//   7: ['bluetooth', 'camera', 'airbag', 'etc', 'package', 'shield'],
+//   8: ['bluetooth', 'camera', 'airbag', 'etc', 'radar', 'sunroof'],
+// };
+
+const cityNameMap = {
+  hcm: "Hồ Chí Minh",
+  hanoi: "Hà Nội",
+  danang: "Đà Nẵng",
+  hue: "Huế",
+  bacninh: "Bắc Ninh",
+  "TP. Hồ Chí Minh": "Hồ Chí Minh",
+  "Hà Nội": "Hà Nội",
+  "Đà Nẵng": "Đà Nẵng",
+  "Huế": "Huế",
+  "Bắc Ninh": "Bắc Ninh"
 };
+
+function beautifyCityName(val) {
+  if (!val) return "";
+  // Nếu là mã thì chuyển, nếu là tên thì giữ nguyên
+  return cityNameMap[val] || val;
+}
 
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -317,6 +337,17 @@ const CarListingPage = () => {
     };
   }, [filteredCars.length]);
 
+  const searchParams = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search)
+    : null;
+
+  const pickUpLocation = beautifyCityName(searchParams?.get('pickUpLocation')) || 'Địa điểm nhận xe';
+  const dropOffLocation = beautifyCityName(searchParams?.get('dropOffLocation')) || 'Địa điểm trả xe';
+  const pickUpDate = searchParams?.get('pickUpDate') || '';
+  const pickUpTime = searchParams?.get('pickUpTime') || '';
+  const dropOffDate = searchParams?.get('dropOffDate') || '';
+  const dropOffTime = searchParams?.get('dropOffTime') || '';
+
   return (
     <div className="min-h-screen bg-gray-50 relative">
       {isLoading && (
@@ -335,9 +366,13 @@ const CarListingPage = () => {
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <MapPin className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-gray-900">Đà Nẵng</span>
+              <span className="font-medium text-gray-900">{pickUpLocation}</span>
+              <span className="text-gray-500">→</span>
+              <span className="font-medium text-gray-900">{dropOffLocation}</span>
               <Calendar className="h-4 w-4 text-gray-500" />
-              <span className="text-gray-600 text-sm">21:00 14/05/2025 - 20:00 15/05/2025</span>
+              <span className="text-gray-600 text-sm">
+                {pickUpTime} {pickUpDate} - {dropOffTime} {dropOffDate}
+              </span>
             </div>
           </div>
         </div>
