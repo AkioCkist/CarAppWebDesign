@@ -86,13 +86,13 @@ const CarRentalModal = ({
         );
     }
 
-    // Fake gallery images
-    const gallery = [
-        carData.image,
-        carData.image + "&2", // fake
-        carData.image + "&3", // fake
-        carData.image + "&4", // fake
-    ];
+    // Gallery images: sort theo order_display, lấy hết ảnh
+    const gallery = carData.images && carData.images.length > 0
+        ? carData.images
+            .slice()
+            .sort((a, b) => (a.order_display || 0) - (b.order_display || 0))
+            .map(img => img.url)
+        : [carData.image];
 
     // Pricing
     const basePrice = carData.base_price ? Number(carData.base_price) : 0;
@@ -102,6 +102,15 @@ const CarRentalModal = ({
 
     // Amenities
     const amenities = carData.amenities || [];
+
+    // Helper để lấy đúng URL ảnh
+    function getImageUrl(url) {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        // Nếu url bắt đầu bằng /cars thì giữ nguyên, nếu không thì thêm /cars/
+        if (url.startsWith('/cars/')) return url;
+        return `/cars/${url.replace(/^\/+/, '')}`;
+    }
 
     // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
     return createPortal(
@@ -121,7 +130,7 @@ const CarRentalModal = ({
                         {/* Main Image */}
                         <div className="relative rounded-lg overflow-hidden basis-[70%]">
                             <img
-                                src={gallery[selectedImage]}
+                                src={getImageUrl(gallery[selectedImage])}
                                 alt={carData.name}
                                 className="object-cover w-full h-full"
                             />
@@ -131,16 +140,17 @@ const CarRentalModal = ({
                                 Xem tất cả ảnh
                             </button>
                         </div>
-                        {/* Side Images */}
-                        <div className="flex flex-col gap-2 basis-[30%]">
-                            {gallery.slice(1, 4).map((img, idx) => (
+                        {/* Side Images: HIỂN THỊ TẤT CẢ ẢNH */}
+                        <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">
+                            {gallery.map((img, idx) => (
                                 <button
-                                    key={idx + 1}
-                                    className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx + 1 ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
-                                    onClick={() => setSelectedImage(idx + 1)}
-                                    aria-label={`Ảnh ${idx + 2}`}
+                                    key={idx}
+                                    className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
+                                    onClick={() => setSelectedImage(idx)}
+                                    aria-label={`Ảnh ${idx + 1}`}
+                                    style={{ minHeight: 0, height: "calc((100% - 8px * " + (gallery.length - 1) + ") / " + gallery.length + ")" }}
                                 >
-                                    <img src={img} alt="" className="object-cover w-full h-full" />
+                                    <img src={getImageUrl(img)} alt="" className="object-cover w-full h-full" />
                                 </button>
                             ))}
                         </div>
