@@ -314,7 +314,7 @@ export default function UserProfilePage() {
           <motion.div
             className="absolute inset-0 bg-cover bg-center"
             style={{
-              backgroundImage: "url('/hero/hero_profile.jpg')",
+              backgroundImage: "url('/hero/hero_profile.webp')",
               filter: "brightness(0.7)",
               top: "-48px",
               height: "calc(100% + 48px)",

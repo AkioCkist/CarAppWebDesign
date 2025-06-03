@@ -74,6 +74,7 @@ function BookingContent() {
     );
   }
 
+
   return (
     <>
       <Header />
