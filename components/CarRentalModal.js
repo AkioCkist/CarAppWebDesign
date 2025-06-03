@@ -3,6 +3,8 @@ import { createPortal } from "react-dom";
 import {
     X, Star, MapPin, Users, Fuel, Cog, Gauge, Camera, Bluetooth, RotateCcw, Circle, Package, Tablet, CreditCard, Shield, ShieldCheck, RotateCw, Zap, Radar, Sun, Map, ChevronDown, ChevronUp
 } from "lucide-react";
+import { useRouter } from 'next/navigation';
+
 
 const AMENITY_ICONS = {
     bluetooth: { icon: <Bluetooth className="w-5 h-5" />, label: "Bluetooth" },
@@ -60,8 +62,29 @@ const CarRentalModal = ({
     carAmenities,
     loading // thêm props này
 }) => {
+
+
+    const router = useRouter();
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
+
+    const [searchData, setSearchData] = useState({
+        pickupLocation: '',
+        dropoffLocation: '',
+        pickupDate: '',
+        pickupTime: '',
+        dropoffDate: '',
+        dropoffTime: ''
+    });
+
+    useEffect(() => {
+        const saved = localStorage.getItem('searchData');
+        if (saved) {
+            setSearchData(JSON.parse(saved));
+      }
+    }, []);
+
+    
     // Khóa scroll khi mở modal
     useEffect(() => {
         if (isOpen) {
@@ -102,6 +125,23 @@ const CarRentalModal = ({
 
     // Amenities
     const amenities = carData.amenities || [];
+
+    const handleSelectCar = () => {
+    const queryParams = new URLSearchParams({
+        carId: carData.id,
+        pickupLocation: searchData.pickupLocation,
+        dropoffLocation: searchData.dropoffLocation,
+        pickupDate: searchData.pickupDate,
+        pickupTime: searchData.pickupTime,
+        dropoffDate: searchData.dropoffDate,
+        dropoffTime: searchData.dropoffTime
+    });
+
+    console.log('Data gửi qua URL:', searchData);
+
+    router.push(`/booking_car?${queryParams.toString()}`);
+    };
+
 
     // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
     return createPortal(
@@ -297,7 +337,7 @@ const CarRentalModal = ({
                             {/* Action Button */}
                             <button
                                 className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
-                                onClick={onClose}>
+                                onClick={handleSelectCar}>
                                 Chọn thuê
                             </button>
                         </div>

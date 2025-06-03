@@ -172,6 +172,8 @@ const CarListingPage = () => {
     setActivePopup(null);
   };
 
+  
+
   // Thêm useEffect để khóa scroll khi popup mở
   useEffect(() => {
     if (activePopup) {
