@@ -12,7 +12,8 @@ class Vehicle {
     }
 
     // Lấy tất cả xe với thông tin chi tiết
-    public function getAllVehicles($limit = null, $offset = null) {
+    public function getAllVehicles($limit = null, $offset = null, $status = 'available') {
+        $sql = "SELECT * FROM vehicles WHERE status = ?";
         $query = "SELECT 
             v.vehicle_id as id,
             v.name,
@@ -36,7 +37,7 @@ class Vehicle {
         LEFT JOIN vehicle_images vi ON v.vehicle_id = vi.vehicle_id AND vi.is_primary = 1
         WHERE v.status = 'available'
         ORDER BY v.created_at DESC";
-        
+        $stmt->bindParam(1, $status);
         if ($limit) {
             $query .= " LIMIT " . $limit;
             if ($offset) {
@@ -109,7 +110,9 @@ class Vehicle {
     }
 
     // Tìm kiếm xe
-    public function searchVehicles($search_term, $vehicle_type = null, $location = null) {
+    public function searchVehicles($search_term, $vehicle_type = null, $location = null, $status = 'available') {
+        $sql = "SELECT * FROM vehicles WHERE status = ?";
+        $params = [$status];
         $query = "SELECT 
             v.vehicle_id as id,
             v.name,

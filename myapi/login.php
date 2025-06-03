@@ -9,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+// 1. Kết nối database
 $host = 'localhost';
 $db   = 'whalexe';
 $user = 'root';
@@ -29,13 +30,13 @@ try {
     exit;
 }
 
-// Handle login POST
+// 2. Xử lý POST login
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $data = json_decode(file_get_contents("php://input"), true);
 
     if (!isset($data['phone_number']) || !isset($data['password'])) {
         http_response_code(400);
-        echo json_encode(['error' => 'Missing required fields']);
+        echo json_encode(['success' => false, 'error' => 'Missing required fields']);
         exit;
     }
 
@@ -45,9 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $stmt->fetch();
 
     if ($user && password_verify($data['password'], $user['password'])) {
-        // Đảm bảo không trả mật khẩu về client
-        unset($user['password']);
-        echo json_encode(['success' => true, 'user' => $user]);
+        // ✅ Trả về account_id và username tách riêng
+        echo json_encode([
+            'success' => true,
+            'account_id' => $user['account_id'],
+            'username' => $user['username']
+        ]);
     } else {
         echo json_encode(['success' => false, 'error' => 'Invalid credentials']);
     }

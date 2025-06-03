@@ -1,137 +1,98 @@
-// src/app/booking_car/page.js
 'use client';
 
 import { useSearchParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
+import CarBookingPage from '../../../components/CarBooking';
+import Header from '../../../components/Header';
+import Footer from '../../../components/Footer';
 
 function BookingContent() {
   const searchParams = useSearchParams();
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
   const carId = searchParams.get('carId');
   const carName = searchParams.get('carName');
-  const price = searchParams.get('price');
+  
+  // Dữ liệu lọc chuyến đi
+  const preFilledSearchData = {
+    pickupLocation: searchParams.get('pickupLocation') || '',
+    dropoffLocation: searchParams.get('dropoffLocation') || '',
+    pickupDate: searchParams.get('pickupDate') || '',
+    pickupTime: searchParams.get('pickupTime') || '',
+    dropoffDate: searchParams.get('dropoffDate') || '',
+    dropoffTime: searchParams.get('dropoffTime') || ''
+  };
+
+  useEffect(() => {
+    if (!carId) {
+      setError('Không tìm thấy thông tin xe');
+      setIsLoading(false);
+      return;
+    }
+
+    const fetchCar = async () => {
+      try {
+        setIsLoading(true);
+        const res = await fetch(`http://localhost/myapi/vehicles.php?id=${carId}`);
+        
+        if (!res.ok) throw new Error('Không thể lấy dữ liệu xe');
+        
+        const car = await res.json();
+        setSelectedCar(car);
+      } catch (error) {
+        console.error('Lỗi khi lấy thông tin xe:', error);
+        setError('Không thể tải thông tin xe. Vui lòng thử lại sau.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCar();
+  }, [carId]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-green-700 text-lg">Đang tải thông tin xe...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-lg">{error}</p>
+          <p className="text-gray-700 mt-2">Vui lòng quay lại trang chọn xe</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Đặt xe</h1>
-      
-      {carName && (
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-xl font-semibold mb-4">Thông tin xe đã chọn</h2>
-          <p><strong>Tên xe:</strong> {decodeURIComponent(carName)}</p>
-          {price && <p><strong>Giá:</strong> {price}</p>}
-          <p><strong>ID:</strong> {carId}</p>
-        </div>
-      )}
-
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <h2 className="text-xl font-semibold mb-4">Thông tin đặt xe</h2>
-        
-        <form className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Họ và tên *
-              </label>
-              <input
-                type="text"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Số điện thoại *
-              </label>
-              <input
-                type="tel"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ngày nhận xe *
-              </label>
-              <input
-                type="datetime-local"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ngày trả xe *
-              </label>
-              <input
-                type="datetime-local"
-                required
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Địa chỉ nhận xe
-            </label>
-            <input
-              type="text"
-              placeholder="Quận Sơn Trà, Đà Nẵng"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Ghi chú
-            </label>
-            <textarea
-              rows="3"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Ghi chú thêm về yêu cầu đặt xe..."
-            ></textarea>
-          </div>
-
-          <div className="flex gap-4 pt-4">
-            <button
-              type="button"
-              onClick={() => window.history.back()}
-              className="px-6 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
-            >
-              Quay lại
-            </button>
-            
-            <button
-              type="submit"
-              className="px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
-            >
-              Xác nhận đặt xe
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <>
+      <Header />
+      <CarBookingPage selectedCar={selectedCar} preFilledSearchData={preFilledSearchData} />
+      <Footer />
+    </>
   );
 }
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<div>Đang tải...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <p className="text-green-700 text-lg">Đang tải thông tin đặt xe...</p>
+        </div>
+      </div>
+    }>
       <BookingContent />
     </Suspense>
   );
