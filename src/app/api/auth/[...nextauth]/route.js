@@ -1,9 +1,20 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-// import bcrypt from "bcrypt"; // bcrypt is not used in your provided authorize function
+import GoogleProvider from "next-auth/providers/google"; // Import Google Provider
+import FacebookProvider from "next-auth/providers/facebook"; // Import Facebook Provider
 
 const handler = NextAuth({
   providers: [
+    // --- OAuth Providers ---
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET,
+    }),
+    // --- Credentials Provider (for Phone/Password) ---
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -14,7 +25,7 @@ const handler = NextAuth({
       },
       async authorize(credentials) {
         const { phone, password, name, action } = credentials;
-        console.log("[NextAuth] Authorize called. Action:", action); // General log
+        console.log("[NextAuth] Authorize called. Action:", action);
 
         if (action === "register") {
           console.log("[NextAuth] Attempting registration for phone:", phone, "name:", name);
@@ -22,38 +33,37 @@ const handler = NextAuth({
             const apiRequestBody = {
               phone_number: phone,
               password: password,
-              username: name, // Sending 'name' from form as 'username' to PHP
+              username: name,
             };
             console.log("[NextAuth] Calling register.php with body:", JSON.stringify(apiRequestBody));
 
-            const res = await fetch("http://localhost/myapi/register.php", { // Ensure this URL is correct and accessible from your Next.js backend
+            const res = await fetch("http://localhost/myapi/register.php", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify(apiRequestBody),
             });
 
             console.log("[NextAuth] register.php response status:", res.status);
-            const responseText = await res.text(); // Get raw text to check for non-JSON errors
+            const responseText = await res.text();
             console.log("[NextAuth] register.php raw response text:", responseText);
 
             let data;
             try {
-              data = JSON.parse(responseText); // Attempt to parse the raw text
+              data = JSON.parse(responseText);
               console.log("[NextAuth] register.php parsed JSON data:", data);
             } catch (e) {
               console.error("[NextAuth] Failed to parse JSON from register.php:", e);
               console.error("[NextAuth] Response text that caused parsing error was:", responseText);
-              return null; // If JSON parsing fails, authorization fails
+              return null;
             }
 
-            // Check for success and user object from register.php
             if (res.ok && data.success && data.user && data.user.account_id) {
               console.log("[NextAuth] Registration successful via API. Returning user data to NextAuth:", data.user);
-              return { // This object is passed to the JWT callback
-                id: data.user.account_id.toString(), // Ensure ID is a string
+              return {
+                id: data.user.account_id.toString(),
                 name: data.user.username,
                 phone: data.user.phone_number,
-                // avatar: data.user.avatar || null, // Add if avatar is returned by register.php
+                // avatar: data.user.avatar || null,
               };
             } else {
               console.error("[NextAuth] Registration via API failed or data.user not found, or account_id missing.");
@@ -61,7 +71,7 @@ const handler = NextAuth({
               if (data && data.error) {
                 console.error("[NextAuth] API error message from register.php:", data.error);
               }
-              return null; // Explicitly return null on failure
+              return null;
             }
           } catch (error) {
             console.error("[NextAuth] Error during fetch to register.php or subsequent processing:", error);
@@ -69,11 +79,10 @@ const handler = NextAuth({
           }
         }
 
-        // Login logic (existing)
-        if (action === "login") { // Assuming 'login' is the action string for login
+        if (action === "login") {
             console.log("[NextAuth] Attempting login for phone:", phone);
             try {
-                const loginRes = await fetch("http://127.0.0.1/myapi/login.php", { // Ensure this URL is correct
+                const loginRes = await fetch("http://127.0.0.1/myapi/login.php", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
@@ -95,7 +104,7 @@ const handler = NextAuth({
                     console.error("[NextAuth] Response text that caused parsing error was:", loginResponseText);
                     return null;
                 }
-                
+
                 if (loginRes.ok && loginData?.success && loginData.user) {
                     console.log("[NextAuth] Login successful via API. Returning user data to NextAuth:", loginData.user);
                     return {
@@ -117,9 +126,9 @@ const handler = NextAuth({
                 return null;
             }
         }
-        
+
         console.warn("[NextAuth] Authorize function reached end without specific action match or success. Action was:", action);
-        return null; // Default failure if action doesn't match or other conditions fail
+        return null;
       },
     }),
   ],
@@ -127,38 +136,61 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
+    async jwt({ token, user, account, profile, trigger, session }) { // Added account and profile for OAuth data
       console.log("[NextAuth JWT Callback] Trigger:", trigger);
-      if (user) { // 'user' is the object returned from authorize
+      
+      // Initial sign-in (for both Credentials and OAuth)
+      if (user) {
         console.log("[NextAuth JWT Callback] User object present:", user);
         token.id = user.id;
-        token.phone = user.phone;
         token.name = user.name;
-        if (user.avatar) { // Only assign avatar if it exists
+        // For credentials provider, user.phone will be present
+        if (user.phone) {
+          token.phone = user.phone;
+        }
+        // For OAuth providers, user.image is typically the avatar
+        if (user.image) {
+          token.avatar = user.image;
+        } else if (user.avatar) { // Fallback for credentials if you return 'avatar'
           token.avatar = user.avatar;
         }
       }
+
+      // If signing in with OAuth, you might want to store provider-specific details
+      if (account) {
+        console.log("[NextAuth JWT Callback] Account object present:", account);
+        token.accessToken = account.access_token; // Store access token if needed for API calls
+        token.provider = account.provider; // e.g., 'google', 'facebook'
+        // You might want to store the provider-specific ID
+        token.providerAccountId = account.id_token || account.providerAccountId;
+      }
+      
       // For session updates (e.g., profile update)
       if (trigger === "update" && session?.user) {
         console.log("[NextAuth JWT Callback] Updating token with session data:", session.user);
         token.name = session.user.name;
-        token.phone = session.user.phone;
-        token.avatar = session.user.avatar;
+        token.phone = session.user.phone; // Assuming phone might be updated for credentials
+        token.avatar = session.user.avatar; // Assuming avatar might be updated
       }
       console.log("[NextAuth JWT Callback] Returning token:", token);
       return token;
     },
     async session({ session, token }) {
       console.log("[NextAuth Session Callback] Token received:", token);
-      if (token && token.id) {
+      if (token) { // Check for token existence before accessing properties
         session.user.id = token.id;
-        session.user.phone = token.phone;
         session.user.name = token.name;
-        if (token.avatar) { // Only assign avatar if it exists
+        if (token.phone) {
+          session.user.phone = token.phone;
+        }
+        if (token.avatar) {
           session.user.avatar = token.avatar;
         }
+        if (token.provider) { // Add provider info to session if helpful
+            session.user.provider = token.provider;
+        }
       } else {
-        console.warn("[NextAuth Session Callback] Token missing id, user data might be incomplete in session.");
+        console.warn("[NextAuth Session Callback] Token is null or undefined, user data might be incomplete in session.");
       }
       console.log("[NextAuth Session Callback] Returning session:", session);
       return session;
@@ -167,8 +199,8 @@ const handler = NextAuth({
   pages: {
     signIn: "/login", // Your custom login page
   },
-  // Optional: Add for more detailed NextAuth internal logs
-  // debug: process.env.NODE_ENV === 'development',
+  secret: process.env.NEXTAUTH_SECRET, // Make sure this is set in your .env.local
+  debug: process.env.NODE_ENV === 'development', // Enable debug logs in development
 });
 
 export { handler as GET, handler as POST };
