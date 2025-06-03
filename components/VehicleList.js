@@ -408,7 +408,7 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
       <CarRentalModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        car={selectedCar}
+        carData={selectedCar} // Đúng tên prop
         loading={loadingDetail}
       />
     </>

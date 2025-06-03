@@ -119,8 +119,13 @@ export default function Header() {
           {/* Left side */}
           <div className="flex items-center gap-8">
             <button onClick={() => handleNavigation("/")} className="flex items-center group">
-              <img src="/logo/logo.png" alt="Logo" className="h-12" />
-              <span className="ml-2 text-2xl font-bold group-hover:text-green-400">Whale Xe</span>
+              <motion.img
+                src="/logo/logo.png"
+                alt="Logo"
+                className="h-12"
+                whileHover={{ scale: 0.96 }}
+                whileTap={{ scale: 0.92 }}
+              />
             </button>
             <nav className="flex gap-6 font-medium">
               <button onClick={() => handleNavigation("./")} className="hover:text-green-400">Home</button>
