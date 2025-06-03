@@ -48,5 +48,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
+// Handle PUT (update user info)
+if ($_SERVER['REQUEST_METHOD'] === 'PUT') {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (!isset($data['account_id'])) {
+        http_response_code(400);
+        echo json_encode(['error' => 'Missing account_id']);
+        exit;
+    }
+
+    $fields = [];
+    $params = [];
+
+    if (isset($data['username'])) {
+        $fields[] = "username = ?";
+        $params[] = $data['username'];
+    }
+    if (isset($data['phone_number'])) {
+        $fields[] = "phone_number = ?";
+        $params[] = $data['phone_number'];
+    }
+    if (isset($data['password']) && $data['password']) {
+        $fields[] = "password = ?";
+        $params[] = $data['password'];
+    }
+
+    if (empty($fields)) {
+        http_response_code(400);
+        echo json_encode(['error' => 'No fields to update']);
+        exit;
+    }
+
+    $params[] = $data['account_id'];
+    $sql = "UPDATE accounts SET " . implode(', ', $fields) . " WHERE account_id = ?";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    echo json_encode(['success' => true]);
+    exit;
+}
+
 http_response_code(405); // Method not allowed
 echo json_encode(['error' => 'Method not allowed']);
