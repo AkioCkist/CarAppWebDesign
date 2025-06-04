@@ -8,9 +8,8 @@ import {
   ArrowRight, Star, Shield, Award, Users
 } from 'lucide-react';
 
+// carbooking.js - Sửa lại useEffect
 const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
-  const searchParams = useSearchParams();
-
   const [searchData, setSearchData] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -33,39 +32,30 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // ✅ Fetch searchData from URL
+  // ✅ Chỉ sử dụng preFilledSearchData từ component cha
   useEffect(() => {
+    console.log('preFilledSearchData received:', preFilledSearchData); // Debug log
+    
     if (preFilledSearchData) {
-      setSearchData(preFilledSearchData);
-    } else if (searchParams) {
-      const pickupLocation = searchParams.get('pickupLocation');
-      const dropoffLocation = searchParams.get('dropoffLocation');
-      const pickupDate = searchParams.get('pickupDate');
-      const pickupTime = searchParams.get('pickupTime');
-      const dropoffDate = searchParams.get('dropoffDate');
-      const dropoffTime = searchParams.get('dropoffTime');
-
-      if (pickupLocation && dropoffLocation && pickupDate && pickupTime && dropoffDate && dropoffTime) {
-        setSearchData({
-          pickupLocation,
-          dropoffLocation,
-          pickupDate,
-          pickupTime,
-          dropoffDate,
-          dropoffTime
-        });
-      }
+      setSearchData(prevData => ({
+        ...prevData,
+        ...preFilledSearchData
+      }));
     }
-  }, [preFilledSearchData, searchParams]);
+  }, [preFilledSearchData]);
 
+  // Debug: Log searchData khi nó thay đổi
+  useEffect(() => {
+    console.log('Current searchData:', searchData);
+  }, [searchData]);
 
   const validateStep1 = () => {
     const newErrors = {};
     
-    if (!searchData.pickupLocation.trim()) {
+    if (!searchData.pickupLocation?.trim()) {
       newErrors.pickupLocation = 'Vui lòng nhập điểm đón';
     }
-    if (!searchData.dropoffLocation.trim()) {
+    if (!searchData.dropoffLocation?.trim()) {
       newErrors.dropoffLocation = 'Vui lòng nhập điểm trả xe';
     }
     if (!searchData.pickupDate) {
@@ -90,7 +80,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         newErrors.dropoffDate = 'Ngày trả xe phải sau ngày đón xe';
       }
     }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };

@@ -1,5 +1,5 @@
-'use client';
-
+'use client'
+// booking_car/page.js - Sửa lại cách lấy dữ liệu từ URL
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import CarBookingPage from '../../../components/CarBooking';
@@ -13,17 +13,29 @@ function BookingContent() {
   const [error, setError] = useState(null);
 
   const carId = searchParams.get('carId');
-  const carName = searchParams.get('carName');
   
-  // Dữ liệu lọc chuyến đi
+  // ✅ Decode URL parameters properly và thêm debug log
   const preFilledSearchData = {
-    pickupLocation: searchParams.get('pickupLocation') || '',
-    dropoffLocation: searchParams.get('dropoffLocation') || '',
+    pickupLocation: decodeURIComponent(searchParams.get('pickupLocation') || ''),
+    dropoffLocation: decodeURIComponent(searchParams.get('dropoffLocation') || ''),
     pickupDate: searchParams.get('pickupDate') || '',
     pickupTime: searchParams.get('pickupTime') || '',
     dropoffDate: searchParams.get('dropoffDate') || '',
     dropoffTime: searchParams.get('dropoffTime') || ''
   };
+
+  // Debug log để kiểm tra dữ liệu
+  useEffect(() => {
+    console.log('URL params:', {
+      pickupLocation: searchParams.get('pickupLocation'),
+      dropoffLocation: searchParams.get('dropoffLocation'),
+      pickupDate: searchParams.get('pickupDate'),
+      pickupTime: searchParams.get('pickupTime'),
+      dropoffDate: searchParams.get('dropoffDate'),
+      dropoffTime: searchParams.get('dropoffTime')
+    });
+    console.log('Processed preFilledSearchData:', preFilledSearchData);
+  }, [searchParams]);
 
   useEffect(() => {
     if (!carId) {
@@ -54,45 +66,35 @@ function BookingContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-green-700 text-lg">Đang tải thông tin xe...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Đang tải...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 text-lg">{error}</p>
-          <p className="text-gray-700 mt-2">Vui lòng quay lại trang chọn xe</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500 text-lg">{error}</div>
       </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <CarBookingPage selectedCar={selectedCar} preFilledSearchData={preFilledSearchData} />
+      <CarBookingPage 
+        selectedCar={selectedCar} 
+        preFilledSearchData={preFilledSearchData}
+      />
       <Footer />
-    </>
+    </div>
   );
 }
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-green-700 text-lg">Đang tải thông tin đặt xe...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div>Loading...</div>}>
       <BookingContent />
     </Suspense>
   );
