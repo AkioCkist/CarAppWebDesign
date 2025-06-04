@@ -3,8 +3,6 @@ import { createPortal } from "react-dom";
 import {
     X, Star, MapPin, Users, Fuel, Cog, Gauge, Camera, Bluetooth, RotateCcw, Circle, Package, Tablet, CreditCard, Shield, ShieldCheck, RotateCw, Zap, Radar, Sun, Map, ChevronDown, ChevronUp
 } from "lucide-react";
-import { useRouter } from 'next/navigation';
-
 
 const AMENITY_ICONS = {
     bluetooth: { icon: <Bluetooth className="w-5 h-5" />, label: "Bluetooth" },
@@ -62,29 +60,8 @@ const CarRentalModal = ({
     carAmenities,
     loading // thêm props này
 }) => {
-
-
-    const router = useRouter();
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
-
-    const [searchData, setSearchData] = useState({
-        pickupLocation: '',
-        dropoffLocation: '',
-        pickupDate: '',
-        pickupTime: '',
-        dropoffDate: '',
-        dropoffTime: ''
-    });
-
-    useEffect(() => {
-        const saved = localStorage.getItem('searchData');
-        if (saved) {
-            setSearchData(JSON.parse(saved));
-      }
-    }, []);
-
-    
     // Khóa scroll khi mở modal
     useEffect(() => {
         if (isOpen) {
@@ -109,13 +86,13 @@ const CarRentalModal = ({
         );
     }
 
-    // Fake gallery images
-    const gallery = [
-        carData.image,
-        carData.image + "&2", // fake
-        carData.image + "&3", // fake
-        carData.image + "&4", // fake
-    ];
+    // Gallery images: sort theo order_display, lấy hết ảnh
+    const gallery = carData.images && carData.images.length > 0
+        ? carData.images
+            .slice()
+            .sort((a, b) => (a.order_display || 0) - (b.order_display || 0))
+            .map(img => img.url)
+        : [carData.image];
 
     // Pricing
     const basePrice = carData.base_price ? Number(carData.base_price) : 0;
@@ -126,22 +103,14 @@ const CarRentalModal = ({
     // Amenities
     const amenities = carData.amenities || [];
 
-    const handleSelectCar = () => {
-    const queryParams = new URLSearchParams({
-        carId: carData.id,
-        pickupLocation: searchData.pickupLocation,
-        dropoffLocation: searchData.dropoffLocation,
-        pickupDate: searchData.pickupDate,
-        pickupTime: searchData.pickupTime,
-        dropoffDate: searchData.dropoffDate,
-        dropoffTime: searchData.dropoffTime
-    });
-
-    console.log('Data gửi qua URL:', searchData);
-
-    router.push(`/booking_car?${queryParams.toString()}`);
-    };
-
+    // Helper để lấy đúng URL ảnh
+    function getImageUrl(url) {
+        if (!url) return null;
+        if (url.startsWith('http')) return url;
+        // Nếu url bắt đầu bằng /cars thì giữ nguyên, nếu không thì thêm /cars/
+        if (url.startsWith('/cars/')) return url;
+        return `/cars/${url.replace(/^\/+/, '')}`;
+    }
 
     // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
     return createPortal(
@@ -161,7 +130,7 @@ const CarRentalModal = ({
                         {/* Main Image */}
                         <div className="relative rounded-lg overflow-hidden basis-[70%]">
                             <img
-                                src={gallery[selectedImage]}
+                                src={getImageUrl(gallery[selectedImage])}
                                 alt={carData.name}
                                 className="object-cover w-full h-full"
                             />
@@ -171,16 +140,17 @@ const CarRentalModal = ({
                                 Xem tất cả ảnh
                             </button>
                         </div>
-                        {/* Side Images */}
-                        <div className="flex flex-col gap-2 basis-[30%]">
-                            {gallery.slice(1, 4).map((img, idx) => (
+                        {/* Side Images: HIỂN THỊ TẤT CẢ ẢNH */}
+                        <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">
+                            {gallery.map((img, idx) => (
                                 <button
-                                    key={idx + 1}
-                                    className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx + 1 ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
-                                    onClick={() => setSelectedImage(idx + 1)}
-                                    aria-label={`Ảnh ${idx + 2}`}
+                                    key={idx}
+                                    className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
+                                    onClick={() => setSelectedImage(idx)}
+                                    aria-label={`Ảnh ${idx + 1}`}
+                                    style={{ minHeight: 0, height: "calc((100% - 8px * " + (gallery.length - 1) + ") / " + gallery.length + ")" }}
                                 >
-                                    <img src={img} alt="" className="object-cover w-full h-full" />
+                                    <img src={getImageUrl(img)} alt="" className="object-cover w-full h-full" />
                                 </button>
                             ))}
                         </div>
@@ -337,7 +307,7 @@ const CarRentalModal = ({
                             {/* Action Button */}
                             <button
                                 className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
-                                onClick={handleSelectCar}>
+                                onClick={onClose}>
                                 Chọn thuê
                             </button>
                         </div>
