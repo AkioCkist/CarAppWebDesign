@@ -7,6 +7,7 @@ import { animate, scroll } from "motion";
 import { useCarLoading } from "../../components/CarLoading";
 import SimpleFaqSection from "../../components/SimpleFaqSection";
 import VehicleList from "../../components/VehicleList";
+import CarRentalModal from "../../components/CarRentalModal";
 import vehicles from "../../lib/seed";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -226,6 +227,11 @@ export default function HomePage() {
   });
   const [fadeIn, setFadeIn] = useState(false);
   const router = useRouter();
+  const [fleetVehicles, setFleetVehicles] = useState([]);
+  const [fleetLoading, setFleetLoading] = useState(true);
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loadingDetail, setLoadingDetail] = useState(false);
 
   const handleNavigation = (href) => {
     setFadeOut(true);
@@ -390,6 +396,36 @@ export default function HomePage() {
       }
     }
   }, []);
+
+  useEffect(() => {
+    // Fetch 4 xe đầu tiên từ API
+    fetch("http://localhost/myapi/vehicles.php?limit=4")
+      .then(res => res.json())
+      .then(data => {
+        setFleetVehicles(data.records ? data.records : []);
+        setFleetLoading(false);
+      })
+      .catch(() => setFleetLoading(false));
+  }, []);
+
+  // Hàm lấy chi tiết xe khi bấm "Đặt xe ngay"
+  const handleBookClick = async (vehicleId) => {
+    setLoadingDetail(true);
+    setIsModalOpen(true);
+    try {
+      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const data = await res.json();
+      setSelectedCar(data);
+    } catch (e) {
+      setSelectedCar(null);
+    }
+    setLoadingDetail(false);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedCar(null);
+  };
 
   return isLoading ? (
     <CarLoadingScreen />
@@ -914,62 +950,118 @@ export default function HomePage() {
           <div className="relative">
             <div className="overflow-x-auto scrollbar-hide">
               <ul className="flex gap-8 py-4" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
-                {vehicles.map((vehicle, index) => (
-                  <li key={vehicle.id || index} className="min-w-[340px] max-w-xs flex-shrink-0">
-                    <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-                      <div className="relative h-48 md:h-64">
-                        <Image
-                          src={vehicle.image}
-                          alt={vehicle.name}
-                          fill
-                          className="object-cover"
-                        />
-                        <div className="absolute top-4 right-4 bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">
-                          {vehicle.type}
+                {fleetLoading ? (
+                  // Skeleton loading for 4 cars
+                  Array.from({ length: 4 }).map((_, idx) => (
+                    <li key={idx} className="min-w-[340px] max-w-xs flex-shrink-0">
+                      <div className="bg-gray-100 rounded-xl h-80 animate-pulse" />
+                    </li>
+                  ))
+                ) : (
+                  fleetVehicles.map((vehicle, idx) => (
+                    <li key={vehicle.id || idx} className="min-w-[400px] max-w-xs flex-shrink-0">
+                      {/* Copy phần VehicleCard ở VehicleList.js vào đây */}
+                      <div
+                        className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col border border-gray-200 relative h-[520px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-2"
+                      >
+                        <div className="relative w-full h-80 overflow-hidden">
+                          <img
+                            src={vehicle.image}
+                            alt={vehicle.name}
+                            className="w-full h-full object-cover transition-all duration-500"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                        <div className="p-4 flex flex-col flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="font-semibold text-base text-gray-900">
+                              {vehicle.name}
+                            </span>
+                          </div>
+                          <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 gap-x-4 gap-y-1">
+                            <div className="grid grid-cols-3 gap-2 w-full text-sm text-gray-600 mb-2">
+                              <span className="flex items-center gap-2">
+                                <img src="/icons/IconDetailCarCard/transmission.svg" alt="transmission" className="w-4 h-4" />
+                                {vehicle.transmission}
+                              </span>
+                              <span className="flex items-center gap-2">
+                                <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-4 h-4" />
+                                {vehicle.seats} chỗ
+                              </span>
+                              <span className="flex items-center gap-2">
+                                <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-4 h-4" />
+                                {vehicle.fuel}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="flex items-center text-sm text-gray-600 mb-2">
+                            <span className="flex items-center gap-2">
+                              <img src="/icons/IconDetailCarCard/location.svg" alt="location" className="w-4 h-4 text-green-500" />
+                              {vehicle.location}
+                            </span>
+                          </div>
+                          <div className="flex items-center text-sm text-gray-600 mb-3">
+                            <span className="flex items-center text-yellow-500 gap-1">
+                              <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                              {vehicle.rating}
+                            </span>
+                            <span className="mx-2 text-gray-400">・</span>
+                            <span className="flex items-center gap-1">
+                              <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-4 h-4" />
+                              {vehicle.trips} chuyến
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-green-600 font-bold text-lg">
+                              {vehicle.priceDisplay}
+                            </span>
+                            {vehicle.oldPrice && (
+                              <span className="text-gray-400 line-through text-sm">
+                                {`${(vehicle.oldPrice / 1000).toFixed(0)}K/${vehicle.pricePer}`}
+                              </span>
+                            )}
+                          </div>
+                          {vehicle.priceDiscount && (
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
+                                {vehicle.priceDiscount}
+                              </span>
+                            </div>
+                          )}
+                          <div className="text-xs text-gray-700 mb-3 line-clamp-2 h-8 overflow-hidden">
+                            {vehicle.description}
+                          </div>
+                          <div className="mt-auto">
+                            <button
+                              onClick={() => handleBookClick(vehicle.id)}
+                              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+                            >
+                              <span className="flex items-center justify-center gap-2">
+                                Đặt xe ngay
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                              </span>
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div className="p-6 md:p-8">
-                        <h3 className="text-2xl md:text-3xl font-bold mb-4 text-gray-900">
-                          {vehicle.name}
-                        </h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                          <div className="text-center">
-                            <div className="text-gray-600 text-sm">Engine</div>
-                            <div className="font-semibold">{vehicle.engine}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-gray-600 text-sm">Fuel</div>
-                            <div className="font-semibold">{vehicle.fuel}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-gray-600 text-sm">Seats</div>
-                            <div className="font-semibold">{vehicle.seats}</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-gray-600 text-sm">Transmission</div>
-                            <div className="font-semibold">{vehicle.transmission}</div>
-                          </div>
-                        </div>
-                        <div className="flex items-center justify-between">
-                          <div className="text-3xl font-bold text-green-600">
-                            ${vehicle.price}<span className="text-lg text-gray-600">/day</span>
-                          </div>
-                          <motion.button
-                            whileHover={{ scale: 1.05 }}
-                            whileTap={{ scale: 0.95 }}
-                            className="bg-green-500 text-white px-6 py-3 rounded-lg font-medium hover:bg-green-600 transition-colors"
-                          >
-                            Book Now
-                          </motion.button>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  ))
+                )}
               </ul>
             </div>
           </div>
         </div>
+        {/* Modal chi tiết xe */}
+        <CarRentalModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          carData={selectedCar}
+          loading={loadingDetail}
+        />
       </motion.section>
 
       {/* News Section */}
@@ -1076,6 +1168,42 @@ export default function HomePage() {
       </section>
 
       <Footer />
+
+      {/* Floating Chat Bubbles */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-4">
+        {/* Phone Bubble */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg cursor-pointer transition-colors duration-300"
+          onClick={() => window.open('tel:+1234567890', '_self')}
+        >
+          <Image
+            src="/icons/phone_bubble.svg"
+            alt="Phone"
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
+        </motion.div>
+
+        {/* Email Bubble */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg cursor-pointer transition-colors duration-300"
+          onClick={() => window.open('mailto:contact@carrental.com', '_self')}
+        >
+          <Image
+            src="/icons/email_bubble.svg"
+            alt="Email"
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
+        </motion.div>
+      </div>
+
     </div>
   );
 }
