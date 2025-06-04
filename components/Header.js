@@ -16,6 +16,7 @@ export default function Header() {
   const [scrollY, setScrollY] = useState(0);
   const [fadeOut, setFadeOut] = useState(false);
   const [bgOpacity, setBgOpacity] = useState(0);
+  const [showWhiteFade, setShowWhiteFade] = useState(false);
 
   const isCarFindingPage = pathname?.includes('/finding_car');
 
@@ -101,6 +102,19 @@ export default function Header() {
 
   return (
     <>
+      {/* White fade overlay */}
+      <AnimatePresence>
+        {showWhiteFade && (
+          <motion.div
+            className="fixed top-0 left-0 w-full h-full bg-white z-50"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          />
+        )}
+      </AnimatePresence>
+
       <motion.header
         variants={fadeVariant}
         initial="hidden"
@@ -139,14 +153,22 @@ export default function Header() {
                 <button onClick={() => handleNavigation("./")} className="hover:text-green-400 transition-colors">
                   Home
                 </button>
-                <button onClick={() => handleNavigation("/#renting")} className="hover:text-green-400 transition-colors">
-                  Cars
-                </button>
-                <button onClick={() => handleNavigation("/#gallery")} className="hover:text-green-400 transition-colors">
-                  Gallery
-                </button>
-                <button onClick={() => handleNavigation("/#about")} className="hover:text-green-400 transition-colors">
+                <button onClick={() => handleNavigation("/#news")} className="hover:text-green-400 transition-colors">
                   News
+                </button>
+                <button
+                  onClick={() => {
+                    setShowWhiteFade(true);
+                    setTimeout(() => {
+                      handleNavigation("/about_us");
+                    }, 200); // Reduced timeout for smoother transition
+                    setTimeout(() => {
+                      setShowWhiteFade(false);
+                    }, 600); // Reset after navigation
+                  }}
+                  className="hover:text-green-400 transition-colors"
+                >
+                  About Us
                 </button>
               </nav>
             </div>
