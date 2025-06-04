@@ -12,6 +12,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if ($_POST['action'] === 'update_status') {
+        updateVehicleStatus($_POST);
+    }
+}
 // Database connection
 $host = 'localhost';
 $db   = 'whalexe';
@@ -48,8 +54,8 @@ switch($request_method) {
         }
         break;
     case 'POST':
-        if (isset($_GET['action']) && $_GET['action'] == 'toggle_favorite') {
-            toggle_favorite($vehicle);
+        if (isset($_POST['action']) && $_POST['action'] == 'update_status') {
+        updateVehicleStatus($_POST);
         }
         break;
     default:
@@ -58,9 +64,12 @@ switch($request_method) {
 }
 
 function get_vehicles($vehicle) {
+    // Thêm tham số status vào xử lý query
+    $status_filter = isset($_GET['status']) ? $_GET['status'] : 'available'; // Mặc định chỉ lấy xe available
+
     // Xử lý tham số query
     $limit = isset($_GET['limit']) ? intval($_GET['limit']) : null;
-    $offset = isset($_GET['offset']) ? intval($_GET['offset']) : null;
+    $offset = isset($_GET['offset']) ? intval($_GET['offset']) : null;  
     $search = isset($_GET['search']) ? $_GET['search'] : null;
     $type = isset($_GET['type']) ? $_GET['type'] : null;
     $location = isset($_GET['location']) ? $_GET['location'] : null;
@@ -68,11 +77,11 @@ function get_vehicles($vehicle) {
 
     try {
         if ($favorites_only) {
-            $stmt = $vehicle->getFavoriteVehicles();
+            $stmt = $vehicle->getFavoriteVehicles($status_filter); // Thêm tham số status
         } elseif ($search || $type || $location) {
-            $stmt = $vehicle->searchVehicles($search, $type, $location);
+            $stmt = $vehicle->searchVehicles($search, $type, $location, $status_filter); // Thêm tham số status
         } else {
-            $stmt = $vehicle->getAllVehicles($limit, $offset);
+            $stmt = $vehicle->getAllVehicles($limit, $offset, $status_filter); // Thêm tham số status
         }
 
         $num = $stmt->rowCount();
@@ -249,4 +258,22 @@ function toggle_favorite($vehicle) {
         echo json_encode(array("message" => "Dữ liệu không hợp lệ."));
     }
 }
+
+function updateVehicleStatus($data) {
+    global $pdo;
+    
+    $vehicleId = $data['vehicle_id'] ?? null;
+    $status = $data['status'] ?? 'rented';
+
+    try {
+        $stmt = $pdo->prepare("UPDATE vehicles SET status = ? WHERE id = ?");
+        $stmt->execute([$status, $vehicleId]);
+        
+        echo json_encode(['success' => true]);
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+    }
+}
+
 ?>

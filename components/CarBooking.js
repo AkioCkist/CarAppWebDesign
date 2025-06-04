@@ -1,8 +1,16 @@
-import React, { useState } from 'react';
-import { Calendar, MapPin, Clock, User, Mail, Phone, CreditCard, Banknote, Car, Users, Fuel, Settings } from 'lucide-react';
+'use client';
 
-const CarBookingPage = () => {
-  const [currentStep, setCurrentStep] = useState(1);
+import React, { useState, useEffect,  } from 'react';
+import { useSearchParams } from 'next/navigation';
+import {
+  Calendar, MapPin, Clock, User, Mail, Phone,
+  CreditCard, Banknote, Car, CheckCircle, ArrowLeft,
+  ArrowRight, Star, Shield, Award, Users
+} from 'lucide-react';
+
+const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
+  const searchParams = useSearchParams();
+
   const [searchData, setSearchData] = useState({
     pickupLocation: '',
     dropoffLocation: '',
@@ -11,7 +19,7 @@ const CarBookingPage = () => {
     dropoffDate: '',
     dropoffTime: ''
   });
-  
+
   const [userInfo, setUserInfo] = useState({
     fullName: '',
     email: '',
@@ -19,75 +27,203 @@ const CarBookingPage = () => {
     address: '',
     driverLicense: ''
   });
-  
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [paymentMethod, setPaymentMethod] = useState('cash');
 
-  // Sample car data
-  const availableCars = [
-    {
-      id: 1,
-      name: 'Toyota Camry',
-      type: 'Sedan',
-      seats: 5,
-      transmission: 'Automatic',
-      fuel: 'Gasoline',
-      price: 45,
-      image: '🚗',
-      rating: 4.8,
-      features: ['AC', 'GPS', 'Bluetooth']
-    },
-    {
-      id: 2,
-      name: 'Honda CR-V',
-      type: 'SUV',
-      seats: 7,
-      transmission: 'Automatic',
-      fuel: 'Gasoline',
-      price: 65,
-      image: '🚙',
-      rating: 4.9,
-      features: ['AC', 'GPS', '4WD', 'Bluetooth']
-    },
-    {
-      id: 3,
-      name: 'BMW 3 Series',
-      type: 'Luxury',
-      seats: 5,
-      transmission: 'Automatic',
-      fuel: 'Gasoline',
-      price: 85,
-      image: '🚘',
-      rating: 4.7,
-      features: ['AC', 'GPS', 'Leather', 'Premium Sound']
+  const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errors, setErrors] = useState({});
+
+  // ✅ Fetch searchData from URL
+  useEffect(() => {
+    if (preFilledSearchData) {
+      setSearchData(preFilledSearchData);
+    } else if (searchParams) {
+      const pickupLocation = searchParams.get('pickupLocation');
+      const dropoffLocation = searchParams.get('dropoffLocation');
+      const pickupDate = searchParams.get('pickupDate');
+      const pickupTime = searchParams.get('pickupTime');
+      const dropoffDate = searchParams.get('dropoffDate');
+      const dropoffTime = searchParams.get('dropoffTime');
+
+      if (pickupLocation && dropoffLocation && pickupDate && pickupTime && dropoffDate && dropoffTime) {
+        setSearchData({
+          pickupLocation,
+          dropoffLocation,
+          pickupDate,
+          pickupTime,
+          dropoffDate,
+          dropoffTime
+        });
+      }
     }
-  ];
+  }, [preFilledSearchData, searchParams]);
+
+
+  const validateStep1 = () => {
+    const newErrors = {};
+    
+    if (!searchData.pickupLocation.trim()) {
+      newErrors.pickupLocation = 'Vui lòng nhập điểm đón';
+    }
+    if (!searchData.dropoffLocation.trim()) {
+      newErrors.dropoffLocation = 'Vui lòng nhập điểm trả xe';
+    }
+    if (!searchData.pickupDate) {
+      newErrors.pickupDate = 'Vui lòng chọn ngày đón';
+    }
+    if (!searchData.pickupTime) {
+      newErrors.pickupTime = 'Vui lòng chọn giờ đón';
+    }
+    if (!searchData.dropoffDate) {
+      newErrors.dropoffDate = 'Vui lòng chọn ngày trả';
+    }
+    if (!searchData.dropoffTime) {
+      newErrors.dropoffTime = 'Vui lòng chọn giờ trả';
+    }
+
+    // Validate dates
+    if (searchData.pickupDate && searchData.dropoffDate) {
+      const pickupDateTime = new Date(`${searchData.pickupDate}T${searchData.pickupTime || '00:00'}`);
+      const dropoffDateTime = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime || '00:00'}`);
+      
+      if (dropoffDateTime <= pickupDateTime) {
+        newErrors.dropoffDate = 'Ngày trả xe phải sau ngày đón xe';
+      }
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validateStep2 = () => {
+    const newErrors = {};
+    
+    if (!userInfo.fullName.trim()) {
+      newErrors.fullName = 'Vui lòng nhập họ và tên';
+    }
+    if (!userInfo.email.trim()) {
+      newErrors.email = 'Vui lòng nhập email';
+    } else if (!/\S+@\S+\.\S+/.test(userInfo.email)) {
+      newErrors.email = 'Email không hợp lệ';
+    }
+    if (!userInfo.phone.trim()) {
+      newErrors.phone = 'Vui lòng nhập số điện thoại';
+    } else if (!/^[0-9+\-\s()]{10,15}$/.test(userInfo.phone.replace(/\s/g, ''))) {
+      newErrors.phone = 'Số điện thoại không hợp lệ';
+    }
+    if (!userInfo.address.trim()) {
+      newErrors.address = 'Vui lòng nhập địa chỉ';
+    }
+    if (!userInfo.driverLicense.trim()) {
+      newErrors.driverLicense = 'Vui lòng nhập số giấy phép lái xe';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
   const handleSearchSubmit = () => {
-    setCurrentStep(2);
+    if (validateStep1()) {
+      setCurrentStep(2);
+    }
   };
 
   const handleUserInfoSubmit = () => {
-    setCurrentStep(3);
+    if (validateStep2()) {
+      setCurrentStep(3);
+    }
   };
 
-  const handleBookingComplete = () => {
-    alert(`Booking confirmed! Payment method: ${paymentMethod === 'cash' ? 'Cash on Delivery' : 'Bank Transfer'}`);
+  const handleBookingComplete = async () => {
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      const bookingData = {
+        car: selectedCar,
+        search: searchData,
+        customer: userInfo,
+        payment: paymentMethod,
+        total: calculateTotal(),
+        bookingId: 'BK' + Date.now()
+      };
+      
+      console.log('Booking Data:', bookingData);
+      alert(`🎉 Đặt xe thành công! 
+
+📋 Mã đặt xe: ${bookingData.bookingId}
+💳 Phương thức thanh toán: ${paymentMethod === 'cash' ? 'Thanh toán khi nhận xe' : 'Chuyển khoản ngân hàng'}
+💰 Tổng tiền: $${calculateTotal()}
+
+📧 Thông tin chi tiết đã được gửi tới email của bạn.
+📞 Chúng tôi sẽ liên hệ xác nhận trong vòng 30 phút.`);
+      
+      setIsSubmitting(false);
+      // Reset form after success
+      setCurrentStep(1);
+      setSearchData({
+        pickupLocation: '',
+        dropoffLocation: '',
+        pickupDate: '',
+        pickupTime: '',
+        dropoffDate: '',
+        dropoffTime: ''
+      });
+      setUserInfo({
+        fullName: '',
+        email: '',
+        phone: '',
+        address: '',
+        driverLicense: ''
+      });
+      setPaymentMethod('cash');
+    }, 2000);
   };
 
   const calculateTotal = () => {
-    const days = searchData.pickupDate && searchData.dropoffDate ? 
-      Math.ceil((new Date(searchData.dropoffDate) - new Date(searchData.pickupDate)) / (1000 * 60 * 60 * 24)) : 1;
-    return 45 * Math.max(days, 1); // Using a base price of $45/day
+    if (!searchData.pickupDate || !searchData.dropoffDate) return selectedCar.price;
+    
+    const startDate = new Date(searchData.pickupDate);
+    const endDate = new Date(searchData.dropoffDate);
+    const timeDiff = endDate.getTime() - startDate.getTime();
+    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    return selectedCar.base_price * Math.max(days, 1);
+  };
+
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount * 25000);
+  };
+
+  const getDayCount = () => {
+    if (!searchData.pickupDate || !searchData.dropoffDate) return 1;
+    const startDate = new Date(searchData.pickupDate);
+    const endDate = new Date(searchData.dropoffDate);
+    const timeDiff = endDate.getTime() - startDate.getTime();
+    return Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
+      <pre className="text-sm p-4 bg-gray-100 border rounded-md mb-4">
+        <strong>Xe chọn:</strong> {selectedCar.name} ({selectedCar.type}) - {selectedCar.price} đ/ngày
+      </pre>
+      <pre className="text-sm p-4 bg-yellow-50 border rounded-md mb-6">
+        <strong>Thông tin tìm kiếm:</strong><br />
+        Đón: {searchData.pickupLocation} lúc {searchData.pickupDate} {searchData.pickupTime}<br />
+        Trả: {searchData.dropoffLocation} lúc {searchData.dropoffDate} {searchData.dropoffTime}
+      </pre>
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-green-800 mb-2">🚗 Car Booking</h1>
-          <p className="text-green-600">Book your perfect ride in 3 easy steps</p>
+          <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500 rounded-full mb-4">
+            <Car className="w-10 h-10 text-white" />
+          </div>
+          <h1 className="text-4xl font-bold text-green-800 mb-2">Đặt Xe Ngay</h1>
+          <p className="text-green-600 text-lg">Hoàn thành đặt xe chỉ trong 3 bước đơn giản</p>
         </div>
 
         {/* Progress Bar */}
@@ -95,14 +231,16 @@ const CarBookingPage = () => {
           <div className="flex items-center space-x-4">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center text-white font-bold ${
-                  currentStep >= step ? 'bg-green-500' : 'bg-gray-300'
-                }`}>
-                  {step}
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ${
+                  currentStep >= step 
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg scale-110' 
+                    : 'bg-gray-300'
+                } ${currentStep === step ? 'ring-4 ring-green-200' : ''}`}>
+                  {currentStep > step ? <CheckCircle className="w-6 h-6" /> : step}
                 </div>
                 {step < 3 && (
-                  <div className={`w-16 h-1 mx-2 ${
-                    currentStep > step ? 'bg-green-500' : 'bg-gray-300'
+                  <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300 ${
+                    currentStep > step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-300'
                   }`}></div>
                 )}
               </div>
@@ -112,358 +250,709 @@ const CarBookingPage = () => {
 
         {/* Step Labels */}
         <div className="flex justify-center mb-8">
-          <div className="flex space-x-24 text-sm text-green-700">
-            <span className={currentStep >= 1 ? 'font-semibold' : ''}>Search Cars</span>
-            <span className={currentStep >= 2 ? 'font-semibold' : ''}>Your Info</span>
-            <span className={currentStep >= 3 ? 'font-semibold' : ''}>Payment</span>
+          <div className="flex space-x-24 text-sm">
+            <span className={`transition-all duration-300 ${currentStep >= 1 ? 'font-bold text-green-700' : 'text-gray-500'}`}>
+              Thông tin chuyến đi
+            </span>
+            <span className={`transition-all duration-300 ${currentStep >= 2 ? 'font-bold text-green-700' : 'text-gray-500'}`}>
+              Thông tin cá nhân
+            </span>
+            <span className={`transition-all duration-300 ${currentStep >= 3 ? 'font-bold text-green-700' : 'text-gray-500'}`}>
+              Thanh toán
+            </span>
           </div>
         </div>
 
-        {/* Step 1: Car Search */}
+        {/* Selected Car Info - Enhanced */}
+        <div className="max-w-4xl mx-auto mb-8">
+          <div className="bg-white rounded-2xl shadow-xl p-6 border border-green-100 overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full opacity-10 transform translate-x-16 -translate-y-16"></div>
+            <div className="relative">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-6">
+                  <div className="text-5xl bg-green-50 p-4 rounded-2xl">
+                    {selectedCar.image}
+                  </div>
+                  <div>
+                    <h3 className="text-2xl font-bold text-green-800 mb-1">{selectedCar.name}</h3>
+                    <p className="text-green-600 text-lg mb-2">
+                      {selectedCar.type} • {selectedCar.seats} chỗ • {selectedCar.transmission}
+                    </p>
+                    <div className="flex space-x-2">
+                      {selectedCar.features?.map((feature, index) => (
+                        <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
+                          {feature}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl mb-2">
+                    <p className="text-2xl font-bold">${selectedCar.price}</p>
+                    <p className="text-sm opacity-90">/ngày</p>
+                  </div>
+                  <p className="text-green-600 font-medium flex items-center justify-end">
+                    <Star className="w-4 h-4 mr-1 fill-yellow-400 text-yellow-400" />
+                    {selectedCar.rating}/5
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Step 1: Trip Information */}
         {currentStep === 1 && (
           <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-              <h2 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
-                <Car className="mr-3" /> Find Your Perfect Car
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-green-100">
+              <h2 className="text-3xl font-bold text-green-800 mb-8 flex items-center">
+                <div className="bg-green-100 p-3 rounded-2xl mr-4">
+                  <MapPin className="w-6 h-6 text-green-600" />
+                </div>
+                Thông tin chuyến đi
               </h2>
               
-              <div className="space-y-6">
-                <div className="grid md:grid-cols-2 gap-6">
+              <div className="space-y-8">
+                <div className="grid md:grid-cols-2 gap-8">
                   <div>
-                    <label className="block text-green-700 font-medium mb-2">
-                      <MapPin className="inline w-4 h-4 mr-2" />
-                      Pickup Location
+                    <label className="block text-green-700 font-semibold mb-3 text-lg">
+                      <MapPin className="inline w-5 h-5 mr-2" />
+                      Điểm đón xe
                     </label>
                     <input
                       type="text"
-                      required
-                      className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                      placeholder="Enter pickup location"
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg ${
+                        errors.pickupLocation 
+                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      }`}
                       value={searchData.pickupLocation}
-                      onChange={(e) => setSearchData({...searchData, pickupLocation: e.target.value})}
+                      onChange={(e) =>
+                        setSearchData((prev) => ({ ...prev, pickupLocation: e.target.value }))
+                      }
                     />
+                    {errors.pickupLocation && (
+                      <p className="text-red-500 text-sm mt-1">{errors.pickupLocation}</p>
+                    )}
                   </div>
                   
                   <div>
-                    <label className="block text-green-700 font-medium mb-2">
-                      <MapPin className="inline w-4 h-4 mr-2" />
-                      Drop-off Location
+                    <label className="block text-green-700 font-semibold mb-3 text-lg">
+                      <MapPin className="inline w-5 h-5 mr-2" />
+                      Điểm trả xe
                     </label>
                     <input
                       type="text"
-                      required
-                      className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                      placeholder="Enter drop-off location"
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg ${
+                        errors.dropoffLocation 
+                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      }`}
                       value={searchData.dropoffLocation}
-                      onChange={(e) => setSearchData({...searchData, dropoffLocation: e.target.value})}
+                      onChange={(e) => {
+                        setSearchData({...searchData, dropoffLocation: e.target.value});
+                        if (errors.dropoffLocation) setErrors({...errors, dropoffLocation: ''});
+                      }}
                     />
+                    {errors.dropoffLocation && (
+                      <p className="text-red-500 text-sm mt-1">{errors.dropoffLocation}</p>
+                    )}
                   </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-green-700 font-medium mb-2">
-                        <Calendar className="inline w-4 h-4 mr-2" />
-                        Pickup Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                        value={searchData.pickupDate}
-                        onChange={(e) => setSearchData({...searchData, pickupDate: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-green-700 font-medium mb-2">
-                        <Clock className="inline w-4 h-4 mr-2" />
-                        Pickup Time
-                      </label>
-                      <input
-                        type="time"
-                        required
-                        className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                        value={searchData.pickupTime}
-                        onChange={(e) => setSearchData({...searchData, pickupTime: e.target.value})}
-                      />
+                <div className="grid md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-green-800 flex items-center">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Thời gian đón xe
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-green-700 font-medium mb-2">Ngày đón</label>
+                        <input
+                          type="date"
+                         
+                          min={new Date().toISOString().split('T')[0]}
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                            errors.pickupDate 
+                              ? 'border-red-300 focus:border-red-500' 
+                              : 'border-green-200 focus:border-green-500'
+                          }`}
+                          onChange={(e) => {
+                            setSearchData(prev => ({ ...prev, pickupDate: e.target.value }));
+                            if (errors.pickupDate) setErrors(prev => ({ ...prev, pickupDate: '' }));
+                          }}
+                        />
+                        {errors.pickupDate && (
+                          <p className="text-red-500 text-sm mt-1">{errors.pickupDate}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-green-700 font-medium mb-2">Giờ đón</label>
+                        <input
+                          type="time"
+                          value={searchData.pickupTime}
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                            errors.pickupTime 
+                              ? 'border-red-300 focus:border-red-500' 
+                              : 'border-green-200 focus:border-green-500'
+                          }`}
+                          onChange={(e) => {
+                            setSearchData({...searchData, pickupTime: e.target.value});
+                            if (errors.pickupTime) setErrors({...errors, pickupTime: ''});
+                          }}
+                        />
+                        {errors.pickupTime && (
+                          <p className="text-red-500 text-sm mt-1">{errors.pickupTime}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-green-700 font-medium mb-2">
-                        <Calendar className="inline w-4 h-4 mr-2" />
-                        Drop-off Date
-                      </label>
-                      <input
-                        type="date"
-                        required
-                        className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                        value={searchData.dropoffDate}
-                        onChange={(e) => setSearchData({...searchData, dropoffDate: e.target.value})}
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-green-700 font-medium mb-2">
-                        <Clock className="inline w-4 h-4 mr-2" />
-                        Drop-off Time
-                      </label>
-                      <input
-                        type="time"
-                        required
-                        className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                        value={searchData.dropoffTime}
-                        onChange={(e) => setSearchData({...searchData, dropoffTime: e.target.value})}
-                      />
+                  <div className="space-y-4">
+                    <h3 className="text-xl font-semibold text-green-800 flex items-center">
+                      <Calendar className="w-5 h-5 mr-2" />
+                      Thời gian trả xe
+                    </h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-green-700 font-medium mb-2">Ngày trả</label>
+                        <input
+                          type="date"
+                          min={searchData.pickupDate || new Date().toISOString().split('T')[0]}
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                            errors.dropoffDate 
+                              ? 'border-red-300 focus:border-red-500' 
+                              : 'border-green-200 focus:border-green-500'
+                          }`}
+                          value={searchData.dropoffDate}
+                          onChange={(e) => {
+                            setSearchData({...searchData, dropoffDate: e.target.value});
+                            if (errors.dropoffDate) setErrors({...errors, dropoffDate: ''});
+                          }}
+                        />
+                        {errors.dropoffDate && (
+                          <p className="text-red-500 text-sm mt-1">{errors.dropoffDate}</p>
+                        )}
+                      </div>
+                      
+                      <div>
+                        <label className="block text-green-700 font-medium mb-2">Giờ trả</label>
+                        <input
+                          type="time"
+                          value={searchData.dropoffTime}
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                            errors.dropoffTime 
+                              ? 'border-red-300 focus:border-red-500' 
+                              : 'border-green-200 focus:border-green-500'
+                          }`}
+                          onChange={(e) => {
+                            setSearchData({...searchData, dropoffTime: e.target.value});
+                            if (errors.dropoffTime) setErrors({...errors, dropoffTime: ''});
+                          }}
+                        />
+                        {errors.dropoffTime && (
+                          <p className="text-red-500 text-sm mt-1">{errors.dropoffTime}</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
+
+                {/* Price Preview */}
+                {searchData.pickupDate && searchData.dropoffDate && (
+                  <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className="text-green-700 font-medium">Số ngày thuê: {getDayCount()} ngày</p>
+                        <p className="text-green-600">Giá: ${selectedCar.price} x {getDayCount()} ngày</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-green-600">${calculateTotal()}</p>
+                        <p className="text-green-500">({formatCurrency(calculateTotal())})</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <button
                   onClick={handleSearchSubmit}
-                  className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition duration-300 text-lg"
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
                 >
-                  Search Available Cars
+                  Tiếp tục
+                  <ArrowRight className="ml-3 w-6 h-6" />
                 </button>
               </div>
             </div>
-
-
           </div>
         )}
 
         {/* Step 2: User Information */}
         {currentStep === 2 && (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
-                <User className="mr-3" /> Your Information
-              </h2>
+          <div className="max-w-3xl mx-auto">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-green-100">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl font-bold text-green-800 flex items-center">
+                  <div className="bg-green-100 p-3 rounded-2xl mr-4">
+                    <User className="w-6 h-6 text-green-600" />
+                  </div>
+                  Thông tin cá nhân
+                </h2>
+                <button
+                  onClick={() => setCurrentStep(1)}
+                  className="flex items-center text-green-600 hover:text-green-800 transition-colors"
+                >
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  Quay lại
+                </button>
+              </div>
               
               <div className="space-y-6">
-                <div>
-                  <label className="block text-green-700 font-medium mb-2">
-                    <User className="inline w-4 h-4 mr-2" />
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="Enter your full name"
-                    value={userInfo.fullName}
-                    onChange={(e) => setUserInfo({...userInfo, fullName: e.target.value})}
-                  />
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-green-700 font-semibold mb-3">
+                      <User className="inline w-4 h-4 mr-2" />
+                      Họ và tên *
+                    </label>
+                    <input
+                      type="text"
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                        errors.fullName 
+                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      }`}
+                      placeholder="Nguyễn Văn A"
+                      value={userInfo.fullName}
+                      onChange={(e) => {
+                        setUserInfo({...userInfo, fullName: e.target.value});
+                        if (errors.fullName) setErrors({...errors, fullName: ''});
+                      }}
+                    />
+                    {errors.fullName && (
+                      <p className="text-red-500 text-sm mt-1">{errors.fullName}</p>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-green-700 font-semibold mb-3">
+                      <Phone className="inline w-4 h-4 mr-2" />
+                      Số điện thoại *
+                    </label>
+                    <input
+                      type="tel"
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                        errors.phone 
+                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      }`}
+                      placeholder="0123 456 789"
+                      value={userInfo.phone}
+                      onChange={(e) => {
+                        setUserInfo({...userInfo, phone: e.target.value});
+                        if (errors.phone) setErrors({...errors, phone: ''});
+                      }}
+                    />
+                    {errors.phone && (
+                      <p className="text-red-500 text-sm mt-1">{errors.phone}</p>
+                    )}
+                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-green-700 font-medium mb-2">
+                  <label className="block text-green-700 font-semibold mb-3">
                     <Mail className="inline w-4 h-4 mr-2" />
-                    Email Address
+                    Email *
                   </label>
                   <input
                     type="email"
-                    required
-                    className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="Enter your email"
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                      errors.email 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                    }`}
+                    placeholder="example@email.com"
                     value={userInfo.email}
-                    onChange={(e) => setUserInfo({...userInfo, email: e.target.value})}
+                    onChange={(e) => {
+                      setUserInfo({...userInfo, email: e.target.value});
+                      if (errors.email) setErrors({...errors, email: ''});
+                    }}
                   />
+                  {errors.email && (
+                    <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-green-700 font-medium mb-2">
-                    <Phone className="inline w-4 h-4 mr-2" />
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    required
-                    className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="Enter your phone number"
-                    value={userInfo.phone}
-                    onChange={(e) => setUserInfo({...userInfo, phone: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-green-700 font-medium mb-2">
+                  <label className="block text-green-700 font-semibold mb-3">
                     <MapPin className="inline w-4 h-4 mr-2" />
-                    Address
+                    Địa chỉ *
                   </label>
                   <textarea
-                    required
-                    className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="Enter your full address"
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 resize-none ${
+                      errors.address 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                    }`}
+                    placeholder="123 Đường ABC, Phường XYZ, Quận/Huyện, Thành phố"
                     rows="3"
                     value={userInfo.address}
-                    onChange={(e) => setUserInfo({...userInfo, address: e.target.value})}
+                    onChange={(e) => {
+                      setUserInfo({...userInfo, address: e.target.value});
+                      if (errors.address) setErrors({...errors, address: ''});
+                    }}
                   />
+                  {errors.address && (
+                    <p className="text-red-500 text-sm mt-1">{errors.address}</p>
+                  )}
                 </div>
 
                 <div>
-                  <label className="block text-green-700 font-medium mb-2">
+                  <label className="block text-green-700 font-semibold mb-3">
                     <CreditCard className="inline w-4 h-4 mr-2" />
-                    Driver's License Number
+                    Số giấy phép lái xe *
                   </label>
                   <input
                     type="text"
-                    required
-                    className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none"
-                    placeholder="Enter your driver's license number"
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                      errors.driverLicense 
+                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                    }`}
+                    placeholder="123456789"
                     value={userInfo.driverLicense}
-                    onChange={(e) => setUserInfo({...userInfo, driverLicense: e.target.value})}
+                    onChange={(e) => {
+                      setUserInfo({...userInfo, driverLicense: e.target.value});
+                      if (errors.driverLicense) setErrors({...errors, driverLicense: ''});
+                    }}
                   />
+                  {errors.driverLicense && (
+                    <p className="text-red-500 text-sm mt-1">{errors.driverLicense}</p>
+                  )}
                 </div>
 
-                <div className="flex space-x-4">
-                  <button
-                    onClick={() => setCurrentStep(1)}
-                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-                  >
-                    Back
-                  </button>
-                  <button
-                    onClick={handleUserInfoSubmit}
-                    className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
-                  >
-                    Continue
-                  </button>
+                {/* Important Notice */}
+                <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                  <div className="flex items-start">
+                    <Shield className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
+                    <div>
+                      <h4 className="font-semibold text-blue-800 mb-1">Lưu ý quan trọng</h4>
+                      <p className="text-blue-700 text-sm">
+                        Vui lòng mang theo giấy phép lái xe gốc và CCCD/CMND khi nhận xe. 
+                        Thông tin phải khớp với thông tin đã khai báo.
+                      </p>
+                    </div>
+                  </div>
                 </div>
+
+                <button
+                  onClick={handleUserInfoSubmit}
+                  className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
+                >
+                  Tiếp tục
+                  <ArrowRight className="ml-3 w-6 h-6" />
+                </button>
               </div>
             </div>
           </div>
         )}
 
-        {/* Step 3: Payment Method */}
+        {/* Step 3: Payment */}
         {currentStep === 3 && (
-          <div className="max-w-2xl mx-auto">
-            <div className="bg-white rounded-2xl shadow-lg p-8">
-              <h2 className="text-2xl font-bold text-green-800 mb-6 flex items-center">
-                <CreditCard className="mr-3" /> Payment Method
-              </h2>
-
-              {/* Booking Summary */}
-              <div className="bg-green-50 rounded-lg p-6 mb-6">
-                <h3 className="text-lg font-bold text-green-800 mb-4">Booking Summary</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span>Service:</span>
-                    <span className="font-medium">Car Rental</span>
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white rounded-3xl shadow-xl p-8 border border-green-100">
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-3xl font-bold text-green-800 flex items-center">
+                  <div className="bg-green-100 p-3 rounded-2xl mr-4">
+                    <CreditCard className="w-6 h-6 text-green-600" />
                   </div>
-                  <div className="flex justify-between">
-                    <span>Pickup:</span>
-                    <span>{searchData.pickupLocation} - {searchData.pickupDate} {searchData.pickupTime}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Drop-off:</span>
-                    <span>{searchData.dropoffLocation} - {searchData.dropoffDate} {searchData.dropoffTime}</span>
-                  </div>
-                  <div className="border-t pt-2 mt-4">
-                    <div className="flex justify-between font-bold text-lg">
-                      <span>Total:</span>
-                      <span className="text-green-600">${calculateTotal()}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Options */}
-              <div className="space-y-4 mb-8">
-                <div 
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                    paymentMethod === 'cash' 
-                      ? 'border-green-500 bg-green-50' 
-                      : 'border-gray-200 hover:border-green-300'
-                  }`}
-                  onClick={() => setPaymentMethod('cash')}
-                >
-                  <div className="flex items-center">
-                    <Banknote className="w-6 h-6 text-green-600 mr-4" />
-                    <div>
-                      <h3 className="font-bold text-green-800">Cash on Delivery</h3>
-                      <p className="text-green-600">Pay when you pick up the car</p>
-                    </div>
-                    <div className="ml-auto">
-                      <div className={`w-6 h-6 rounded-full border-2 ${
-                        paymentMethod === 'cash' 
-                          ? 'border-green-500 bg-green-500' 
-                          : 'border-gray-300'
-                      }`}>
-                        {paymentMethod === 'cash' && (
-                          <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div 
-                  className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-300 ${
-                    paymentMethod === 'bank' 
-                      ? 'border-green-500 bg-green-50' 
-                      : 'border-gray-200 hover:border-green-300'
-                  }`}
-                  onClick={() => setPaymentMethod('bank')}
-                >
-                  <div className="flex items-center">
-                    <CreditCard className="w-6 h-6 text-green-600 mr-4" />
-                    <div>
-                      <h3 className="font-bold text-green-800">Bank Transfer</h3>
-                      <p className="text-green-600">Pay in advance online</p>
-                    </div>
-                    <div className="ml-auto">
-                      <div className={`w-6 h-6 rounded-full border-2 ${
-                        paymentMethod === 'bank' 
-                          ? 'border-green-500 bg-green-500' 
-                          : 'border-gray-300'
-                      }`}>
-                        {paymentMethod === 'bank' && (
-                          <div className="w-2 h-2 bg-white rounded-full mx-auto mt-1"></div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bank Transfer Details */}
-              {paymentMethod === 'bank' && (
-                <div className="bg-green-50 rounded-lg p-6 mb-6">
-                  <h3 className="font-bold text-green-800 mb-4">Bank Transfer Details</h3>
-                  <div className="space-y-2 text-sm">
-                    <div><strong>Bank:</strong> Green Bank</div>
-                    <div><strong>Account Name:</strong> Car Rental Service</div>
-                    <div><strong>Account Number:</strong> 1234567890</div>
-                    <div><strong>SWIFT Code:</strong> GRNBVNVX</div>
-                    <div><strong>Amount:</strong> ${calculateTotal()}</div>
-                  </div>
-                  <p className="text-green-700 mt-4 text-sm">
-                    Please include your booking reference in the transfer description.
-                  </p>
-                </div>
-              )}
-
-              <div className="flex space-x-4">
+                  Thanh toán
+                </h2>
                 <button
                   onClick={() => setCurrentStep(2)}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
+                  className="flex items-center text-green-600 hover:text-green-800 transition-colors"
                 >
-                  Back
+                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  Quay lại
                 </button>
-                <button
-                  onClick={handleBookingComplete}
-                  className="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-6 rounded-lg transition duration-300 text-lg"
-                >
-                  Complete Booking
-                </button>
+              </div>
+
+              <div className="grid lg:grid-cols-2 gap-8">
+                {/* Payment Methods */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-green-800 mb-6">Chọn phương thức thanh toán</h3>
+                  
+                  <div className="space-y-4">
+                    <div 
+                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+                        paymentMethod === 'cash' 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-green-300'
+                      }`}
+                      onClick={() => setPaymentMethod('cash')}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
+                          paymentMethod === 'cash' ? 'border-green-500' : 'border-gray-300'
+                        }`}>
+                          {paymentMethod === 'cash' && <div className="w-3 h-3 bg-green-500 rounded-full"></div>}
+                        </div>
+                        <div className="flex items-center">
+                          <Banknote className="w-6 h-6 text-green-600 mr-3" />
+                          <div>
+                            <h4 className="font-semibold text-green-800">Thanh toán khi nhận xe</h4>
+                            <p className="text-green-600 text-sm">Thanh toán bằng tiền mặt hoặc thẻ tại điểm nhận xe</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div 
+                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
+                        paymentMethod === 'bank' 
+                          ? 'border-green-500 bg-green-50' 
+                          : 'border-gray-200 hover:border-green-300'
+                      }`}
+                      onClick={() => setPaymentMethod('bank')}
+                    >
+                      <div className="flex items-center">
+                        <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
+                          paymentMethod === 'bank' ? 'border-green-500' : 'border-gray-300'
+                        }`}>
+                          {paymentMethod === 'bank' && <div className="w-3 h-3 bg-green-500 rounded-full"></div>}
+                        </div>
+                        <div className="flex items-center">
+                          <CreditCard className="w-6 h-6 text-green-600 mr-3" />
+                          <div>
+                            <h4 className="font-semibold text-green-800">Chuyển khoản ngân hàng</h4>
+                            <p className="text-green-600 text-sm">Chuyển khoản trước 30% - Thanh toán còn lại khi nhận xe</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Bank Transfer Details */}
+                  {paymentMethod === 'bank' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
+                      <h4 className="font-semibold text-blue-800 mb-4 flex items-center">
+                        <CreditCard className="w-5 h-5 mr-2" />
+                        Thông tin chuyển khoản
+                      </h4>
+                      <div className="space-y-3 text-blue-700">
+                        <div className="flex justify-between">
+                          <span>Ngân hàng:</span>
+                          <span className="font-semibold">Vietcombank</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Số tài khoản:</span>
+                          <span className="font-semibold">1234567890</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Chủ tài khoản:</span>
+                          <span className="font-semibold">CÔNG TY TNHH THUÊ XE ABC</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Số tiền cần chuyển:</span>
+                          <span className="font-semibold text-lg">${Math.round(calculateTotal() * 0.3)}</span>
+                        </div>
+                        <div className="border-t border-blue-300 pt-3 mt-3">
+                          <p className="text-sm">
+                            <strong>Nội dung chuyển khoản:</strong> "Dat xe [Họ tên] [Số điện thoại]"
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Terms and Conditions */}
+                  <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
+                    <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
+                      <Shield className="w-5 h-5 mr-2" />
+                      Điều khoản và điều kiện
+                    </h4>
+                    <div className="space-y-2 text-gray-700 text-sm">
+                      <div className="flex items-start">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>Khách hàng phải có giấy phép lái xe hợp lệ và CCCD/CMND</span>
+                      </div>
+                      <div className="flex items-start">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>Đặt cọc bảo hiểm 2.000.000 VND khi nhận xe</span>
+                      </div>
+                      <div className="flex items-start">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>Hoàn cọc trong vòng 7 ngày sau khi trả xe</span>
+                      </div>
+                      <div className="flex items-start">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>Hủy miễn phí trước 24h, sau đó phí hủy 20%</span>
+                      </div>
+                      <div className="flex items-start">
+                        <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
+                        <span>Bảo hiểm cơ bản được bao gồm trong giá thuê</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Order Summary */}
+                <div className="space-y-6">
+                  <h3 className="text-xl font-semibold text-green-800 mb-6">Tóm tắt đơn hàng</h3>
+                  
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-6">
+                    {/* Car Info Summary */}
+                    <div className="flex items-center mb-4">
+                      <div className="text-3xl mr-4">{selectedCar.image}</div>
+                      <div>
+                        <h4 className="font-semibold text-green-800">{selectedCar.name}</h4>
+                        <p className="text-green-600 text-sm">{selectedCar.type} • {selectedCar.seats} chỗ</p>
+                      </div>
+                    </div>
+
+                    {/* Trip Details */}
+                    <div className="space-y-3 border-t border-green-200 pt-4">
+                      <div className="flex items-center text-green-700">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        <span className="text-sm">
+                          <strong>Đón:</strong> {searchData.pickupLocation}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-green-700">
+                        <MapPin className="w-4 h-4 mr-2" />
+                        <span className="text-sm">
+                          <strong>Trả:</strong> {searchData.dropoffLocation}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-green-700">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        <span className="text-sm">
+                          <strong>Thời gian:</strong> {searchData.pickupDate} {searchData.pickupTime} → {searchData.dropoffDate} {searchData.dropoffTime}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div className="space-y-2 border-t border-green-200 pt-4 mt-4">
+                      <div className="flex items-center text-green-700">
+                        <User className="w-4 h-4 mr-2" />
+                        <span className="text-sm">
+                          <strong>Khách hàng:</strong> {userInfo.fullName}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-green-700">
+                        <Phone className="w-4 h-4 mr-2" />
+                        <span className="text-sm">
+                          <strong>SĐT:</strong> {userInfo.phone}
+                        </span>
+                      </div>
+                      <div className="flex items-center text-green-700">
+                        <Mail className="w-4 h-4 mr-2" />
+                        <span className="text-sm">
+                          <strong>Email:</strong> {userInfo.email}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Price Breakdown */}
+                  <div className="bg-white border border-gray-200 rounded-xl p-6">
+                    <h4 className="font-semibold text-gray-800 mb-4">Chi tiết giá</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Giá thuê ({getDayCount()} ngày)</span>
+                        <span className="font-medium">${calculateTotal()}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Phí dịch vụ</span>
+                        <span className="font-medium">$0</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Thuế VAT (10%)</span>
+                        <span className="font-medium">${Math.round(calculateTotal() * 0.1)}</span>
+                      </div>
+                      <div className="border-t border-gray-200 pt-3">
+                        <div className="flex justify-between text-lg font-bold">
+                          <span>Tổng cộng</span>
+                          <span className="text-green-600">${Math.round(calculateTotal() * 1.1)}</span>
+                        </div>
+                        <p className="text-green-500 text-right text-sm">
+                          ({formatCurrency(Math.round(calculateTotal() * 1.1))})
+                        </p>
+                      </div>
+                    </div>
+
+                    {paymentMethod === 'bank' && (
+                      <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                        <div className="flex justify-between text-sm">
+                          <span>Cần thanh toán trước:</span>
+                          <span className="font-semibold">${Math.round(calculateTotal() * 1.1 * 0.3)}</span>
+                        </div>
+                        <div className="flex justify-between text-sm">
+                          <span>Thanh toán khi nhận xe:</span>
+                          <span className="font-semibold">${Math.round(calculateTotal() * 1.1 * 0.7)}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Confirm Button */}
+                  <button
+                    onClick={handleBookingComplete}
+                    disabled={isSubmitting}
+                    className={`w-full font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg flex items-center justify-center ${
+                      isSubmitting
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white hover:shadow-xl transform hover:scale-105'
+                    }`}
+                  >
+                    {isSubmitting ? (
+                      <>
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
+                        Đang xử lý...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="mr-3 w-6 h-6" />
+                        Xác nhận đặt xe
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
+
+        {/* Features/Benefits Section */}
+        <div className="max-w-4xl mx-auto mt-12">
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Shield className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="font-bold text-green-800 mb-2">Bảo hiểm toàn diện</h3>
+              <p className="text-green-600 text-sm">Xe được bảo hiểm đầy đủ, khách hàng yên tâm trải nghiệm</p>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="font-bold text-green-800 mb-2">Hỗ trợ 24/7</h3>
+              <p className="text-green-600 text-sm">Đội ngũ hỗ trợ khách hàng luôn sẵn sàng phục vụ</p>
+            </div>
+            
+            <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Award className="w-8 h-8 text-green-600" />
+              </div>
+              <h3 className="font-bold text-green-800 mb-2">Giá tốt nhất</h3>
+              <p className="text-green-600 text-sm">Cam kết giá cạnh tranh nhất thị trường</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
