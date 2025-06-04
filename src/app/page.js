@@ -1076,6 +1076,42 @@ export default function HomePage() {
       </section>
 
       <Footer />
+
+      {/* Floating Chat Bubbles */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-4">
+        {/* Phone Bubble */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg cursor-pointer transition-colors duration-300"
+          onClick={() => window.open('tel:+1234567890', '_self')}
+        >
+          <Image
+            src="/icons/phone_bubble.svg"
+            alt="Phone"
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
+        </motion.div>
+
+        {/* Email Bubble */}
+        <motion.div
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg cursor-pointer transition-colors duration-300"
+          onClick={() => window.open('mailto:contact@carrental.com', '_self')}
+        >
+          <Image
+            src="/icons/email_bubble.svg"
+            alt="Email"
+            width={24}
+            height={24}
+            className="w-6 h-6"
+          />
+        </motion.div>
+      </div>
+
     </div>
   );
 }
