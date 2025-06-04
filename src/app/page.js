@@ -1170,37 +1170,251 @@ export default function HomePage() {
       <Footer />
 
       {/* Floating Chat Bubbles */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col space-y-4">
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
         {/* Phone Bubble */}
         <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-lg cursor-pointer transition-colors duration-300"
-          onClick={() => window.open('tel:+1234567890', '_self')}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+            delay: 0.8,
+          }}
+          className="relative"
         >
-          <Image
-            src="/icons/phone_bubble.svg"
-            alt="Phone"
-            width={24}
-            height={24}
-            className="w-6 h-6"
-          />
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+              delay: 1.0,
+            }}
+            className="absolute -top-2 -right-2 z-10"
+          >
+            <NotificationDot color="bg-red-500" delay={0}>
+              !
+            </NotificationDot>
+          </motion.div>
+          <motion.div
+            whileHover={{
+              scale: 1.1,
+              boxShadow:
+                "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(34, 197, 94, 0.2)",
+              y: -5,
+            }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowPhoneBubble(!showPhoneBubble)}
+            className="w-16 h-16 bg-gradient-to-br from-green-400 to-green-600 rounded-full shadow-lg cursor-pointer flex items-center justify-center relative overflow-hidden"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.5, 0, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+              className="absolute inset-0 bg-white rounded-full"
+            />
+            <motion.svg
+              whileHover={{ rotate: [0, -10, 10, 0] }}
+              transition={{ duration: 0.5 }}
+              className="w-8 h-8 text-white z-10"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+            </motion.svg>
+          </motion.div>
+          <motion.div
+            initial={{ scale: 0, x: 20, opacity: 0 }}
+            animate={{
+              scale: showPhoneBubble ? 1 : 0,
+              x: showPhoneBubble ? 0 : 20,
+              opacity: showPhoneBubble ? 1 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 25,
+            }}
+            className="absolute bottom-0 right-20 bg-white rounded-2xl shadow-2xl p-6 w-80 border border-gray-100 z-50"
+            style={{
+              transformOrigin: "bottom right",
+              right: "80px",
+              bottom: "0px",
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPhoneBubble(false);
+              }}
+              className="absolute top-3 right-3 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors z-10"
+            >
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <img
+                  src="/icons/phone_bubble.svg"
+                  alt="Phone Support"
+                  className="w-7 h-7 rounded-4 object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "block";
+                  }}
+                />
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" style={{ display: "none" }}>
+                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-800 mb-1">Call Us Now</h4>
+                <p className="text-gray-600 text-sm mb-3">Need immediate assistance? Our support team is ready to help!</p>
+                <a
+                  href="tel:+84-0236-3738-399"
+                  className="inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors text-sm font-medium"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                  </svg>
+                  +84 0236 3738 399
+                </a>
+              </div>
+              <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
+            </div>
+          </motion.div>
         </motion.div>
-
         {/* Email Bubble */}
         <motion.div
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.95 }}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-lg cursor-pointer transition-colors duration-300"
-          onClick={() => window.open('mailto:contact@carrental.com', '_self')}
+          initial={{ scale: 0, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+            delay: 1.0,
+          }}
+          className="relative"
         >
-          <Image
-            src="/icons/email_bubble.svg"
-            alt="Email"
-            width={24}
-            height={24}
-            className="w-6 h-6"
-          />
+          <motion.div
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 20,
+              delay: 1.2,
+            }}
+            className="absolute -top-2 -right-2 z-10"
+          >
+            <NotificationDot color="bg-orange-500" delay={0.1}>
+              @
+            </NotificationDot>
+          </motion.div>
+          <motion.div
+            whileHover={{
+              scale: 1.1,
+              boxShadow:
+                "0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)",
+              y: -5,
+            }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setShowEmailBubble(!showEmailBubble)}
+            className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full shadow-lg cursor-pointer flex items-center justify-center relative overflow-hidden"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.5, 0, 0.5],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5,
+              }}
+              className="absolute inset-0 bg-white rounded-full"
+            />
+            <motion.svg
+              whileHover={{ rotateY: 180 }}
+              transition={{ duration: 0.6 }}
+              className="w-8 h-8 text-white z-10"
+              fill="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+            </motion.svg>
+          </motion.div>
+          <motion.div
+            initial={{ scale: 0, x: 20, opacity: 0 }}
+            animate={{
+              scale: showEmailBubble ? 1 : 0,
+              x: showEmailBubble ? 0 : 20,
+              opacity: showEmailBubble ? 1 : 0,
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 25,
+            }}
+            className="absolute bottom-0 right-20 bg-white rounded-2xl shadow-2xl p-6 w-80 border border-gray-100 z-50"
+            style={{
+              transformOrigin: "bottom right",
+              right: "80px",
+              bottom: "0px",
+            }}
+          >
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowEmailBubble(false);
+              }}
+              className="absolute top-3 right-3 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors z-10"
+            >
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <div className="flex items-start gap-3">
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                <img
+                  src="/icons/email_bubble.svg"
+                  alt="Email Support"
+                  className="w-full h-full rounded-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    e.target.nextSibling.style.display = "block";
+                  }}
+                />
+                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" style={{ display: "none" }}>
+                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h4 className="font-semibold text-gray-800 mb-1">Send Email</h4>
+                <p className="text-gray-600 text-sm mb-3">Have questions? Drop us a message and we'll get back to you!</p>
+                <a
+                  href="mailto:contact@whalexe.com"
+                  className="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                >
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                  </svg>
+                  contact@whalexe.com
+                </a>
+              </div>
+              <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
+            </div>
+          </motion.div>
         </motion.div>
       </div>
 
