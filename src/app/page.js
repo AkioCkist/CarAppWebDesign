@@ -408,7 +408,7 @@ export default function HomePage() {
           ref={heroImageRef}
           className="absolute inset-0 bg-cover bg-center pointer-events-none"
           style={{
-            backgroundImage: "url('/hero/hero_profile.webp')",
+            backgroundImage: "url('/hero/hero.webp')",
             filter: "brightness(0.7)",
             top: `-48px`,
             height: "calc(100% + 48px)",
