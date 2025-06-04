@@ -132,6 +132,13 @@ export default function Header() {
               <button onClick={() => handleNavigation("/#renting")} className="hover:text-green-400">Cars</button>
               <button onClick={() => handleNavigation("/#gallery")} className="hover:text-green-400">Gallery</button>
               <button onClick={() => handleNavigation("/#about")} className="hover:text-green-400">News</button>
+              <button 
+  onClick={() => handleNavigation("/about_us")} 
+  className="hover:text-green-400"
+>
+  About Us
+</button>
+
             </nav>
           </div>
 
