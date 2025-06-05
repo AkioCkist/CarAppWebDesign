@@ -40,7 +40,7 @@ export default function Footer() {
                         <div className="flex items-center mb-4">
                             <div className="mr-3">
                                 <Image
-                                    src="/logo/logo.png"
+                                    src="/logo/logo.webp"
                                     alt="Whale Xe Logo"
                                     width={40}
                                     height={40}
