@@ -71,7 +71,7 @@ const CarListingPage = () => {
         const mapped = (data.vehicles || []).map(v => ({
           id: v.vehicle_id,
           name: v.name,
-          brand: v.name?.split(' ')[0] || '', // nếu cần brand
+          brand: v.name?.split(' ')[0] || '',
           image: v.vehicle_images?.find(img => img.is_primary)?.image_url || (v.vehicle_images?.[0]?.image_url ?? "/default-car.png"),
           transmission: v.transmission,
           seats: v.seats,
@@ -85,7 +85,7 @@ const CarListingPage = () => {
           pricePer: "ngày",
           priceDiscount: null,
           description: v.description,
-          isFavorite: v.is_favorite,
+          is_favorite: v.is_favorite,
           vehicle_type: v.vehicle_type,
           // Thêm các trường khác nếu cần
         }));
