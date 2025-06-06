@@ -21,7 +21,7 @@ export const metadata = {
   },
   // Cập nhật mã xác minh Google Search Console tại đây
   verification: {
-    google: "MÃ_XÁC_MINH_CỦA_BẠN", // THAY THẾ CHÍNH XÁC MÃ XÁC MINH TỪ GOOGLE SEARCH CONSOLE
+    google: "1OljjVxrBT53WzaY6Fr6vgahcbwa1KXPdhCJ-kiW_Mg", // Đây là mã xác minh mới của bạn
   },
 };
 
