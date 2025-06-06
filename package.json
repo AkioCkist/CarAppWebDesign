@@ -26,12 +26,12 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "prisma": "^6.9.0",
-    "@types/node": "^22.15.29",
+    "@types/node": "22.15.30",
     "@types/react": "19.1.6",
+    "prisma": "^6.9.0",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "typescript": "5.8.3"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
