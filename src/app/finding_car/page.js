@@ -64,10 +64,32 @@ const CarListingPage = () => {
 
   useEffect(() => {
     setIsLoading(true);
-    fetch('http://localhost/myapi/vehicles.php')
+    fetch('/api/vehicles')
       .then(res => res.json())
       .then(data => {
-        setCars(data.records || []);
+        // Map dữ liệu từ Prisma về format VehicleList cần
+        const mapped = (data.vehicles || []).map(v => ({
+          id: v.vehicle_id,
+          name: v.name,
+          brand: v.name?.split(' ')[0] || '', // nếu cần brand
+          image: v.vehicle_images?.find(img => img.is_primary)?.image_url || (v.vehicle_images?.[0]?.image_url ?? "/default-car.png"),
+          transmission: v.transmission,
+          seats: v.seats,
+          fuel: v.fuel_type,
+          location: v.location,
+          rating: Number(v.rating),
+          trips: v.total_trips,
+          base_price: Number(v.base_price),
+          priceDisplay: `${(Number(v.base_price) / 1000).toFixed(0)}K/ngày`,
+          oldPrice: null,
+          pricePer: "ngày",
+          priceDiscount: null,
+          description: v.description,
+          isFavorite: v.is_favorite,
+          vehicle_type: v.vehicle_type,
+          // Thêm các trường khác nếu cần
+        }));
+        setCars(mapped);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
