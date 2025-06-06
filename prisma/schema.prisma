@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Account {
+  account_id   Int            @id @default(autoincrement())
+  username     String         @unique
+  phone_number String?        @unique
+  password     String
+  created_at   DateTime?      @default(now())
+
+  roles        AccountRole[]
+  bookings     Booking[]      @relation("RenterBookings")
+  vehicles     Vehicle[]      @relation("LessorVehicles")
+}
+
+model Role {
+  role_id   Int           @id @default(autoincrement())
+  role_name String        @unique
+
+  accounts  AccountRole[]
+}
+
+model AccountRole {
+  account_id Int
+  role_id    Int
+
+  account    Account @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+  role       Role    @relation(fields: [role_id], references: [role_id], onDelete: Cascade)
+
+  @@id([account_id, role_id])
+}
+
+model Vehicle {
+  vehicle_id    Int                   @id @default(autoincrement())
+  lessor_id     Int
+  name          String
+  rating        Decimal?              @default("0.0")
+  total_trips   Int?                  @default(0)
+  location      String
+  transmission  String?
+  seats         Int?
+  fuel_type     String?
+  base_price    Decimal
+  vehicle_type  String?
+  description   String?
+  status        VehicleStatus         @default(available)
+  is_favorite   Boolean?              @default(false)
+  created_at    DateTime?             @default(now())
+  updated_at    DateTime?             @updatedAt
+
+  lessor        Account               @relation("LessorVehicles", fields: [lessor_id], references: [account_id], onDelete: Cascade)
+  bookings      Booking[]             @relation("VehicleBookings")
+  amenities     VehicleAmenityMapping[]
+  images        VehicleImage[]
+}
+
+enum VehicleStatus {
+  available
+  rented
+  maintenance
+  inactive
+}
+
+model Booking {
+  booking_id       Int       @id @default(autoincrement())
+  vehicle_id       Int
+  renter_id        Int
+  pickup_date      DateTime
+  pickup_time      DateTime
+  return_date      DateTime
+  return_time      DateTime
+  pickup_location  String
+  return_location  String
+  total_price      Decimal
+  discount_applied Decimal?  @default("0.00")
+  final_price      Decimal
+  status           BookingStatus     @default(pending)
+  created_at       DateTime?         @default(now())
+  updated_at       DateTime?         @updatedAt
+
+  vehicle          Vehicle           @relation("VehicleBookings", fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade)
+  renter           Account           @relation("RenterBookings", fields: [renter_id], references: [account_id], onDelete: Cascade)
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  ongoing
+  completed
+  cancelled
+}
+
+model VehicleAmenity {
+  amenity_id   Int    @id @default(autoincrement())
+  amenity_name String @unique
+  amenity_icon String?
+  description  String?
+
+  mappings     VehicleAmenityMapping[]
+}
+
+model VehicleAmenityMapping {
+  vehicle_id Int
+  amenity_id Int
+
+  vehicle    Vehicle       @relation(fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade)
+  amenity    VehicleAmenity @relation(fields: [amenity_id], references: [amenity_id], onDelete: Cascade)
+
+  @@id([vehicle_id, amenity_id])
+}
+
+model VehicleImage {
+  image_id      Int       @id @default(autoincrement())
+  vehicle_id    Int
+  image_url     String
+  is_primary    Boolean?  @default(false)
+  display_order Int?      @default(0)
+  created_at    DateTime? @default(now())
+
+  vehicle       Vehicle   @relation(fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade)
+}
