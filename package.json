@@ -1,12 +1,14 @@
 {
   "name": "whalexe",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:seed": "npx prisma db seed"
   },
   "dependencies": {
     "@prisma/client": "^6.9.0",
@@ -24,11 +26,14 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^22.15.29",
+    "@types/node": "22.15.30",
     "@types/react": "19.1.6",
     "prisma": "^6.9.0",
     "tailwindcss": "^4",
     "tsx": "^4.19.4",
-    "typescript": "^5.8.3"
+    "typescript": "5.8.3"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }
