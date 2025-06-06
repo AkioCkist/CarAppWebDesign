@@ -6,9 +6,11 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "db:seed": "npx prisma db seed"
   },
   "dependencies": {
+    "@prisma/client": "^6.9.0",
     "bcrypt": "^6.0.0",
     "framer-motion": "^12.12.1",
     "lucide-react": "^0.511.0",
@@ -23,6 +25,10 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "prisma": "^6.9.0",
     "tailwindcss": "^4"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
   }
 }

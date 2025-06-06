@@ -1,0 +1,159 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model accounts {
+  account_id   Int      @id @default(autoincrement())
+  username     String   @unique @db.VarChar(50)
+  phone_number String?  @unique @db.VarChar(20)
+  password     String   @db.VarChar(255)
+  created_at   DateTime @default(now())
+
+  // Relations
+  account_roles account_roles[]
+  bookings      bookings[]
+  vehicles      vehicles[]
+
+  @@map("accounts")
+}
+
+model roles {
+  role_id   Int    @id @default(autoincrement())
+  role_name String @unique @db.VarChar(50)
+
+  // Relations
+  account_roles account_roles[]
+
+  @@map("roles")
+}
+
+model account_roles {
+  account_id Int
+  role_id    Int
+
+  // Relations
+  account accounts @relation(fields: [account_id], references: [account_id], onDelete: Cascade)
+  role    roles    @relation(fields: [role_id], references: [role_id], onDelete: Cascade)
+
+  @@id([account_id, role_id])
+  @@map("account_roles")
+}
+
+model vehicles {
+  vehicle_id   Int      @id @default(autoincrement())
+  lessor_id    Int
+  name         String   @db.VarChar(255)
+  rating       Decimal? @default(0.0) @db.Decimal(2, 1)
+  total_trips  Int?     @default(0)
+  location     String
+  transmission String?  @db.VarChar(50)
+  seats        Int?
+  fuel_type    String?  @db.VarChar(50)
+  base_price   Decimal  @db.Decimal(10, 2)
+  vehicle_type String?  @db.VarChar(50)
+  description  String?
+  status       VehicleStatus @default(available)
+  is_favorite  Boolean  @default(false)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @default(now()) @updatedAt
+
+  // Relations
+  lessor                    accounts                    @relation(fields: [lessor_id], references: [account_id], onDelete: Cascade)
+  bookings                  bookings[]
+  vehicle_amenity_mapping   vehicle_amenity_mapping[]
+  vehicle_images            vehicle_images[]
+
+  @@map("vehicles")
+}
+
+model bookings {
+  booking_id       Int           @id @default(autoincrement())
+  vehicle_id       Int
+  renter_id        Int
+  pickup_date      DateTime      @db.Date
+  pickup_time      DateTime      @db.Time
+  return_date      DateTime      @db.Date
+  return_time      DateTime      @db.Time
+  pickup_location  String
+  return_location  String
+  total_price      Decimal       @db.Decimal(10, 2)
+  discount_applied Decimal?      @default(0.00) @db.Decimal(10, 2)
+  final_price      Decimal       @db.Decimal(10, 2)
+  status           BookingStatus @default(pending)
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @default(now()) @updatedAt
+
+  // Relations
+  vehicle vehicles @relation(fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade)
+  renter  accounts @relation(fields: [renter_id], references: [account_id], onDelete: Cascade)
+
+  @@map("bookings")
+}
+
+model vehicle_amenities {
+  amenity_id   Int     @id @default(autoincrement())
+  amenity_name String  @unique @db.VarChar(50)
+  amenity_icon String? @db.VarChar(50)
+  description  String?
+
+  // Relations
+  vehicle_amenity_mapping vehicle_amenity_mapping[]
+
+  @@map("vehicle_amenities")
+}
+
+model vehicle_amenity_mapping {
+  vehicle_id  Int
+  amenity_id  Int
+
+  // Relations
+  vehicle vehicles          @relation(fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade)
+  amenity vehicle_amenities @relation(fields: [amenity_id], references: [amenity_id], onDelete: Cascade)
+
+  @@id([vehicle_id, amenity_id])
+  @@map("vehicle_amenity_mapping")
+}
+
+model vehicle_images {
+  image_id      Int      @id @default(autoincrement())
+  vehicle_id    Int
+  image_url     String
+  is_primary    Boolean  @default(false)
+  display_order Int?     @default(0)
+  created_at    DateTime @default(now())
+
+  // Relations
+  vehicle vehicles @relation(fields: [vehicle_id], references: [vehicle_id], onDelete: Cascade)
+
+  @@index([is_primary])
+  @@map("vehicle_images")
+}
+
+// Enums
+enum VehicleStatus {
+  available
+  rented
+  maintenance
+  inactive
+}
+
+enum BookingStatus {
+  pending
+  confirmed
+  ongoing
+  completed
+  cancelled
+}
