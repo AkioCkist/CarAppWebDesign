@@ -873,10 +873,11 @@ export default function HomePage() {
                   className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200"
                   onClick={() => {
                     startLoading();
-                    // Tạo query string từ form
+                    // Nếu chọn same, dropOffLocation = pickUpLocation
+                    const dropOffLoc = form.dropOffLocation === "same" ? form.pickUpLocation : form.dropOffLocation;
                     const params = new URLSearchParams({
                       pickUpLocation: form.pickUpLocation,
-                      dropOffLocation: form.dropOffLocation,
+                      dropOffLocation: dropOffLoc,
                       pickUpDate: form.pickUpDate,
                       pickUpTime: form.pickUpTime,
                       dropOffDate: form.dropOffDate,

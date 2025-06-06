@@ -55,45 +55,42 @@ const CarListingPage = () => {
     fuel: [],
     discount: false
   });
-  const [displayedCount, setDisplayedCount] = useState(8); // Initial number of vehicles to display
+  const [displayedCount, setDisplayedCount] = useState(8);
   const loaderRef = useRef(null);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false); // đã có
 
+  // Đặt các state này lên TRƯỚC useEffect!
+  const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
+  const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
+  const [pickUpDate, setPickUpDate] = useState('');
+  const [pickUpTime, setPickUpTime] = useState('');
+  const [dropOffDate, setDropOffDate] = useState('');
+  const [dropOffTime, setDropOffTime] = useState('');
+
   useEffect(() => {
     setIsLoading(true);
-    fetch('/api/vehicles')
+    // Xây dựng query string dựa trên filter
+    const params = new URLSearchParams();
+    if (pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe') {
+      params.append('location', pickUpLocation);
+    }
+    if (searchTerm) params.append('search', searchTerm);
+    if (selectedCarType && selectedCarType !== 'Tất cả loại xe') params.append('type', selectedCarType);
+    if (filters.discount) params.append('discount', 'true');
+    if (filters.favorites) params.append('favorites', 'true');
+    // Thêm các filter khác nếu cần
+
+    fetch(`/api/vehicles?${params.toString()}`)
       .then(res => res.json())
       .then(data => {
-        // Map dữ liệu từ Prisma về format VehicleList cần
-        const mapped = (data.vehicles || []).map(v => ({
-          id: v.vehicle_id,
-          name: v.name,
-          brand: v.name?.split(' ')[0] || '',
-          image: v.vehicle_images?.find(img => img.is_primary)?.image_url || (v.vehicle_images?.[0]?.image_url ?? "/default-car.png"),
-          transmission: v.transmission,
-          seats: v.seats,
-          fuel: v.fuel_type,
-          location: v.location,
-          rating: Number(v.rating),
-          trips: v.total_trips,
-          base_price: Number(v.base_price),
-          priceDisplay: `${(Number(v.base_price) / 1000).toFixed(0)}K/ngày`,
-          oldPrice: null,
-          pricePer: "ngày",
-          priceDiscount: null,
-          description: v.description,
-          is_favorite: v.is_favorite,
-          vehicle_type: v.vehicle_type,
-          // Thêm các trường khác nếu cần
-        }));
-        setCars(mapped);
+        setCars(data.records || []);
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
-  }, []);
+  }, [pickUpLocation, searchTerm, selectedCarType, filters]);
   const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
 
   // Filter options
@@ -113,13 +110,6 @@ const CarListingPage = () => {
     };
     return typeMap[type] || type;
   };
-
-  const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
-  const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
-  const [pickUpDate, setPickUpDate] = useState('');
-  const [pickUpTime, setPickUpTime] = useState('');
-  const [dropOffDate, setDropOffDate] = useState('');
-  const [dropOffTime, setDropOffTime] = useState('');
 
   // Lấy search params sau khi mounted
   useEffect(() => {
