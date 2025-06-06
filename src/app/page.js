@@ -11,6 +11,7 @@ import CarRentalModal from "../../components/CarRentalModal";
 import vehicles from "../../lib/seed";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
+import Script from "next/script";
 
 // Make sure this declaration is present!
 const vehicleTypes = [
@@ -1418,6 +1419,19 @@ export default function HomePage() {
         </motion.div>
       </div>
 
+      {/* Google Tag Script */}
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-M6FED393ST"
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-M6FED393ST');
+        `}
+      </Script>
     </div>
   );
 }
