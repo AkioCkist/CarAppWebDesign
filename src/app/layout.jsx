@@ -19,16 +19,14 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  // Cập nhật mã xác minh Google Search Console tại đây
-  verification: {
-    google: "1OljjVxrBT53WzaY6Fr6vgahcbwa1KXPdhCJ-kiW_Mg", // Đây là mã xác minh mới của bạn
-  },
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
+        <meta name="google-site-verification" content="1OljjVxrBT53WzaY6Fr6vgahcbwa1KXPdhCJ-kiW_Mg" />
+        
         {/* Google Tag Script */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=G-M6FED393ST"
