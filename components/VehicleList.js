@@ -17,7 +17,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
   };
 
   const handleBookClick = () => {
-    onBookClick(vehicle.id); // Truyền id thay vì object
+    onBookClick(vehicle.id);
   };
 
   if (!isMounted) {
@@ -360,7 +360,7 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
     setLoadingDetail(true);
     setIsModalOpen(true);
     try {
-      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const res = await fetch(`/api/vehicles/${vehicleId}`);
       const data = await res.json();
       setSelectedCar(data);
     } catch (e) {

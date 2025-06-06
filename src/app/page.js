@@ -399,11 +399,31 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Fetch 4 xe đầu tiên từ API
-    fetch("http://localhost/myapi/vehicles.php?limit=4")
+    // Fetch 4 xe đầu tiên từ API Next.js (App Router)
+    fetch("/api/vehicles")
       .then(res => res.json())
       .then(data => {
-        setFleetVehicles(data.records ? data.records : []);
+        // Map dữ liệu từ Prisma về format card cần
+        const mapped = (data.vehicles || [])
+          .slice(0, 4) // Lấy 4 xe đầu tiên
+          .map(v => ({
+            id: v.vehicle_id,
+            name: v.name,
+            image: v.vehicle_images?.find(img => img.is_primary)?.image_url || (v.vehicle_images?.[0]?.image_url ?? "/default-car.png"),
+            transmission: v.transmission,
+            seats: v.seats,
+            fuel: v.fuel_type,
+            location: v.location,
+            rating: Number(v.rating),
+            trips: v.total_trips,
+            priceDisplay: `${(Number(v.base_price) / 1000).toFixed(0)}K/ngày`,
+            oldPrice: null,
+            pricePer: "ngày",
+            priceDiscount: null,
+            description: v.description,
+            isFavorite: v.is_favorite,
+          }));
+        setFleetVehicles(mapped);
         setFleetLoading(false);
       })
       .catch(() => setFleetLoading(false));
