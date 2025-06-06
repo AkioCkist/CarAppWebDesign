@@ -1,63 +1,8 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "VehicleStatus" AS ENUM ('available', 'rented', 'maintenance', 'inactive');
 
-  - You are about to drop the `Account` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `AccountRole` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Booking` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Role` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `Vehicle` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `VehicleAmenity` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `VehicleAmenityMapping` table. If the table is not empty, all the data it contains will be lost.
-  - You are about to drop the `VehicleImage` table. If the table is not empty, all the data it contains will be lost.
-
-*/
--- DropForeignKey
-ALTER TABLE "AccountRole" DROP CONSTRAINT "AccountRole_account_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "AccountRole" DROP CONSTRAINT "AccountRole_role_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "Booking" DROP CONSTRAINT "Booking_renter_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "Booking" DROP CONSTRAINT "Booking_vehicle_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "Vehicle" DROP CONSTRAINT "Vehicle_lessor_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "VehicleAmenityMapping" DROP CONSTRAINT "VehicleAmenityMapping_amenity_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "VehicleAmenityMapping" DROP CONSTRAINT "VehicleAmenityMapping_vehicle_id_fkey";
-
--- DropForeignKey
-ALTER TABLE "VehicleImage" DROP CONSTRAINT "VehicleImage_vehicle_id_fkey";
-
--- DropTable
-DROP TABLE "Account";
-
--- DropTable
-DROP TABLE "AccountRole";
-
--- DropTable
-DROP TABLE "Booking";
-
--- DropTable
-DROP TABLE "Role";
-
--- DropTable
-DROP TABLE "Vehicle";
-
--- DropTable
-DROP TABLE "VehicleAmenity";
-
--- DropTable
-DROP TABLE "VehicleAmenityMapping";
-
--- DropTable
-DROP TABLE "VehicleImage";
+-- CreateEnum
+CREATE TYPE "BookingStatus" AS ENUM ('pending', 'confirmed', 'ongoing', 'completed', 'cancelled');
 
 -- CreateTable
 CREATE TABLE "accounts" (
