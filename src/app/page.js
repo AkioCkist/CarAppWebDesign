@@ -400,29 +400,27 @@ export default function HomePage() {
 
   useEffect(() => {
     // Fetch 4 xe đầu tiên từ API Next.js (App Router)
-    fetch("/api/vehicles")
+    fetch("/api/vehicles?limit=4")
       .then(res => res.json())
       .then(data => {
         // Map dữ liệu từ Prisma về format card cần
-        const mapped = (data.vehicles || [])
-          .slice(0, 4) // Lấy 4 xe đầu tiên
-          .map(v => ({
-            id: v.vehicle_id,
-            name: v.name,
-            image: v.vehicle_images?.find(img => img.is_primary)?.image_url || (v.vehicle_images?.[0]?.image_url ?? "/default-car.png"),
-            transmission: v.transmission,
-            seats: v.seats,
-            fuel: v.fuel_type,
-            location: v.location,
-            rating: Number(v.rating),
-            trips: v.total_trips,
-            priceDisplay: `${(Number(v.base_price) / 1000).toFixed(0)}K/ngày`,
-            oldPrice: null,
-            pricePer: "ngày",
-            priceDiscount: null,
-            description: v.description,
-            isFavorite: v.is_favorite,
-          }));
+        const mapped = (data.records || []).map(v => ({
+          id: v.id,
+          name: v.name,
+          image: v.image,
+          transmission: v.transmission,
+          seats: v.seats,
+          fuel: v.fuel,
+          location: v.location,
+          rating: v.rating,
+          trips: v.trips,
+          priceDisplay: v.priceDisplay,
+          oldPrice: v.oldPrice,
+          pricePer: v.pricePer,
+          priceDiscount: v.priceDiscount,
+          description: v.description,
+          isFavorite: v.is_favorite,
+        }));
         setFleetVehicles(mapped);
         setFleetLoading(false);
       })
@@ -434,7 +432,7 @@ export default function HomePage() {
     setLoadingDetail(true);
     setIsModalOpen(true);
     try {
-      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const res = await fetch(`/api/vehicles?id=${vehicleId}`);
       const data = await res.json();
       setSelectedCar(data);
     } catch (e) {
