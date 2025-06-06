@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <head>
-        <meta name="google-site-verification" content="1OljjVxrBT53WzaY6Fr6vgahcbwa1KXPdhCJ-kiW_Mg" />
+        <meta name="google-site-verification" content="SCx4W1SgYOB--s-ZGHDB69wRC-SghAPXpiEQZv2l-kc" />
         
         {/* Google Tag Script */}
         <Script
