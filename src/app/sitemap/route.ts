@@ -3,7 +3,7 @@ import Sitemap from "./sitemap";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const baseUrl = "https://your-domain.com"; // Change to your real domain
+  const baseUrl = "https://car-app-web-design-git-main-akio-ckists-projects.vercel.app"; // Change to your real domain
 
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
   <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
