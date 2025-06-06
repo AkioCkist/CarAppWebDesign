@@ -140,7 +140,7 @@ export default function Header() {
             <div className="flex items-center">
               <button onClick={() => handleNavigation("/")} className="flex items-center group">
                 <motion.img
-                  src="/logo/logo.png"
+                  src="/logo/logo.webp"
                   alt="Logo"
                   className="h-8 sm:h-10 lg:h-12 w-auto object-contain"
                   whileHover={{ scale: 0.96 }}

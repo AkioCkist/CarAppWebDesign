@@ -375,7 +375,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-2">
               {/* Logo */}
               <a href="../" className="flex items-center">
-                <img src="/logo/logo.png" alt="Logo" className="h-12" />
+                <img src="/logo/logo.webp" alt="Logo" className="h-12" />
                 <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
               </a>
             </div>

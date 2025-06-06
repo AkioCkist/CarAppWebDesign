@@ -55,7 +55,7 @@ export default function AboutUs() {
               <h2 className={`text-green-600 font-bold text-5xl md:text-6xl mb-4 transition-all duration-1000 delay-200 transform ${
                 isVisible.hero ? 'translate-x-0 opacity-100' : '-translate-x-full opacity-0'
               }`}>
-                Whalecar
+                Whale Xe
               </h2>
             </div>
             <div className="overflow-hidden">
@@ -74,10 +74,10 @@ export default function AboutUs() {
           }`}>
             <div className="bg-gradient-to-r from-gray-50 to-green-50 p-6 rounded-2xl border-l-4 border-green-500 hover:shadow-lg transition-all duration-300 hover:scale-105">
               <p className="mb-4 text-base text-gray-800 leading-relaxed">
-                Every trip is a journey to explore life and the world around us, an opportunity for each individual to learn and conquer new things to become better. Therefore, customer experience quality is our top priority and also the inspiration for the Whalecar team.
+                Every trip is a journey to explore life and the world around us, an opportunity for each individual to learn and conquer new things to become better. Therefore, customer experience quality is our top priority and also the inspiration for the Whale Xe team.
               </p>
               <p className="text-base text-gray-800 leading-relaxed">
-                Whalecar is a car sharing platform. Our mission is not only to connect car owners and customers quickly – safely – conveniently, but also to inspire the community to explore new things through journeys on our platform.
+                Whale Xe is a car sharing platform. Our mission is not only to connect car owners and customers quickly – safely – conveniently, but also to inspire the community to explore new things through journeys on our platform.
               </p>
             </div>
           </div>
@@ -135,10 +135,10 @@ export default function AboutUs() {
                   </p>
                 </div>
                 <p className="text-base text-gray-700 leading-relaxed hover:text-gray-900 transition-colors duration-300">
-                  Whalecar aims to become the number one reputable and civilized car user community in Vietnam, bringing practical values to all members and towards a better life.
+                  Whale Xe aims to become the number one reputable and civilized car user community in Vietnam, bringing practical values to all members and towards a better life.
                 </p>
                 <p className="text-base text-gray-700 leading-relaxed hover:text-gray-900 transition-colors duration-300">
-                  We believe every journey matters. Therefore, the Whalecar team and partners with extensive experience in car rental, technology, insurance, and tourism will bring you new, exciting, and safe experiences on your journey.
+                  We believe every journey matters. Therefore, the Whale Xe team and partners with extensive experience in car rental, technology, insurance, and tourism will bring you new, exciting, and safe experiences on your journey.
                 </p>
               </div>
             </div>
@@ -174,15 +174,15 @@ export default function AboutUs() {
             <h2 className={`text-3xl md:text-4xl font-extrabold text-gray-900 mb-12 transition-all duration-1000 delay-200 transform ${
               isVisible.stats ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
             } bg-gradient-to-r from-gray-900 to-green-600 bg-clip-text text-transparent`}>
-              Whalecar in Numbers
+              Whale Xe in Numbers
             </h2>
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 mb-12">
             {[
-              { icon: BarChart, number: "200,000+", text: "Inspiring trips\nWhalecar has accompanied", delay: "delay-300" },
+              { icon: BarChart, number: "200,000+", text: "Inspiring trips\nWhale Xe has accompanied", delay: "delay-300" },
               { icon: Users, number: "100,000+", text: "Customers have\nexperienced our service", delay: "delay-400" },
-              { icon: Car, number: "10,000+", text: "Car owner partners in\nthe Whalecar community", delay: "delay-500" }
+              { icon: Car, number: "10,000+", text: "Car owner partners in\nthe Whale Xe community", delay: "delay-500" }
             ].map((stat, index) => (
               <div key={index} className={`group transition-all duration-1000 ${stat.delay} transform ${
                 isVisible.stats ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
@@ -203,7 +203,7 @@ export default function AboutUs() {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { icon: Car, number: "100+", text: "Different car models for rent", delay: "delay-600" },
-              { icon: BarChart, number: "20+", text: "Cities\nWhalecar is present in", delay: "delay-700" },
+              { icon: BarChart, number: "20+", text: "Cities\nWhale Xe is present in", delay: "delay-700" },
               { icon: Star, number: "4.95/5*", text: "Average rating from over 1,000,000 customer reviews of our service", delay: "delay-800" }
             ].map((stat, index) => (
               <div key={index} className={`group transition-all duration-1000 ${stat.delay} transform ${
