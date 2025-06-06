@@ -8,7 +8,7 @@ import CarRentalModal from "../../../components/CarRentalModal";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
-import { useSearchParams } from 'next/navigation'; // Thêm dòng này
+import { useSearchParams } from 'next/navigation';
 
 const cityNameMap = {
   hcm: "Hồ Chí Minh",
@@ -25,15 +25,12 @@ const cityNameMap = {
 
 function beautifyCityName(val) {
   if (!val) return "";
-  // Nếu là mã thì chuyển, nếu là tên thì giữ nguyên
   return cityNameMap[val] || val;
 }
 
-// Chuẩn hóa tên thành phố để so sánh
 function normalizeCity(str) {
   if (!str) return "";
   str = str.toLowerCase().trim();
-  // Quy về dạng không dấu, viết thường, bỏ ký tự đặc biệt
   str = str.replace(/tp\.?\s*hcm|thành phố hồ chí minh|hồ chí minh/g, "hcm");
   str = str.replace(/hà nội/g, "hanoi");
   str = str.replace(/đà nẵng/g, "danang");
@@ -60,28 +57,34 @@ const CarListingPage = () => {
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // đã có
-
-  // Đặt các state này lên TRƯỚC useEffect!
+  const [isLoading, setIsLoading] = useState(false);
   const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
   const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
   const [pickUpDate, setPickUpDate] = useState('');
   const [pickUpTime, setPickUpTime] = useState('');
   const [dropOffDate, setDropOffDate] = useState('');
   const [dropOffTime, setDropOffTime] = useState('');
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [showRentalModal, setShowRentalModal] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+
+  const searchParams = useSearchParams();
 
   useEffect(() => {
-    setIsLoading(true);
-    // Xây dựng query string dựa trên filter
-    const params = new URLSearchParams();
-    if (pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe') {
-      params.append('location', pickUpLocation);
+    const pickUpLocationFromURL = searchParams.get('pickUpLocation');
+    if (pickUpLocationFromURL) {
+      setPickUpLocation(beautifyCityName(pickUpLocationFromURL));
+      setSelectedLocation(normalizeCity(pickUpLocationFromURL));
     }
-    if (searchTerm) params.append('search', searchTerm);
-    if (selectedCarType && selectedCarType !== 'Tất cả loại xe') params.append('type', selectedCarType);
-    if (filters.discount) params.append('discount', 'true');
-    if (filters.favorites) params.append('favorites', 'true');
-    // Thêm các filter khác nếu cần
+  }, [searchParams]);
+
+  // Chỉ fetch API khi đổi location (hoặc lần đầu vào trang)
+  useEffect(() => {
+    if (!selectedLocation) return;
+    setIsLoading(true);
+
+    const params = new URLSearchParams();
+    if (selectedLocation) params.append('location', selectedLocation);
 
     fetch(`/api/vehicles?${params.toString()}`)
       .then(res => res.json())
@@ -89,17 +92,72 @@ const CarListingPage = () => {
         setCars(data.records || []);
         setIsLoading(false);
       })
-      .catch(() => setIsLoading(false));
-  }, [pickUpLocation, searchTerm, selectedCarType, filters]);
-  const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
+      .catch(error => {
+        console.error('Error fetching cars:', error);
+        setIsLoading(false);
+      });
+  }, [selectedLocation]);
 
-  // Filter options
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const searchParams = new URLSearchParams(window.location.search);
+      const pickUpParam = searchParams.get('pickUpLocation');
+      const dropOffParam = searchParams.get('dropOffLocation');
+      setSelectedLocation(normalizeCity(pickUpParam) || '');
+      setPickUpLocation(beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe');
+      setDropOffLocation(beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe');
+      setPickUpDate(searchParams.get('pickUpDate') || '');
+      setPickUpTime(searchParams.get('pickUpTime') || '');
+      setDropOffDate(searchParams.get('dropOffDate') || '');
+      setDropOffTime(searchParams.get('dropOffTime') || '');
+    }
+  }, []);
+
+  const handleFavoriteToggle = async (vehicleId) => {
+    const isCurrentlyFavorite = favorites.includes(vehicleId);
+    setFavorites(prev =>
+      isCurrentlyFavorite
+        ? prev.filter(id => id !== vehicleId)
+        : [...prev, vehicleId]
+    );
+
+    try {
+      const response = await fetch('/api/vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_favorite',
+          vehicle_id: vehicleId,
+          is_favorite: !isCurrentlyFavorite
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        console.error('Failed to toggle favorite:', result.message);
+        setFavorites(prev =>
+          isCurrentlyFavorite
+            ? [...prev, vehicleId]
+            : prev.filter(id => id !== vehicleId)
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setFavorites(prev =>
+        isCurrentlyFavorite
+          ? [...prev, vehicleId]
+          : prev.filter(id => id !== vehicleId)
+      );
+    }
+  };
+
+  const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
   const filterOptions = {
     carType: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
-    brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Porsche', 'Lamborghini', 'Suzuki'],
+    brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan'],
     seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
     fuel: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
   };
+
   const formatCarTypeDisplay = (type) => {
     const typeMap = {
       'sedan': 'Sedan',
@@ -111,59 +169,67 @@ const CarListingPage = () => {
     return typeMap[type] || type;
   };
 
-  // Lấy search params sau khi mounted
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      setPickUpLocation(beautifyCityName(searchParams.get('pickUpLocation')) || 'Địa điểm nhận xe');
-      setDropOffLocation(beautifyCityName(searchParams.get('dropOffLocation')) || 'Địa điểm trả xe');
-      setPickUpDate(searchParams.get('pickUpDate') || '');
-      setPickUpTime(searchParams.get('pickUpTime') || '');
-      setDropOffDate(searchParams.get('dropOffDate') || '');
-      setDropOffTime(searchParams.get('dropOffTime') || '');
-    }
-  }, []);
-
-  // Filter cars based on search term and filters
+  // filteredCars: lọc tất cả filter ở client
   const filteredCars = cars.filter(car => {
-    const matchesSearch = car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.brand?.toLowerCase().includes(searchTerm.toLowerCase());
-
-    // Lọc theo thành phố lấy từ pickUpLocation
+    // Search - Sửa lại để tìm trong cả name và location
+    const matchesSearch = !searchTerm ||
+      car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      car.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      car.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Location
     let matchesLocation = true;
-    if (pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe') {
-      // Lấy phần tên thành phố đầu tiên trong location của xe
+    if (selectedLocation) {
       const carCityRaw = car.location?.split('-')[0]?.trim();
       const carCity = normalizeCity(carCityRaw);
-      const pickUpCity = normalizeCity(pickUpLocation);
-      matchesLocation = carCity === pickUpCity;
+      matchesLocation = carCity === selectedLocation;
     }
 
-    //filter loại xe: dùng vehicle_type
-    const matchesCarType = selectedCarType === 'Tất cả loại xe' || !selectedCarType ||
-      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType :
-        car.vehicle_type?.toLowerCase() === selectedCarType?.toLowerCase());
+    // CarType
+    const matchesCarType = !filters.carType.length ||
+      filters.carType.some(type =>
+        car.vehicle_type?.toLowerCase() === type?.toLowerCase()
+      );
 
-    // Sửa filter giá: dùng base_price (giả sử đơn vị là VND)
+    // Brand
+    const carBrand = car.name?.split(' ')[0];
+    const matchesBrand = !filters.brand.length ||
+      filters.brand.some(brand =>
+        carBrand?.toLowerCase().includes(brand.toLowerCase())
+      );
+
+    // Seats
+    const matchesSeats = !filters.seats.length ||
+      filters.seats.some(seatFilter => {
+        const seatNumber = parseInt(seatFilter.split(' ')[0]);
+        return car.seats === seatNumber;
+      });
+
+    // Fuel
+    const matchesFuel = !filters.fuel.length ||
+      filters.fuel.some(fuel =>
+        car.fuel_type?.toLowerCase() === fuel.toLowerCase() ||
+        car.fuel?.toLowerCase() === fuel.toLowerCase()
+      );
+
+    // Discount
+    const matchesDiscount = !filters.discount || Boolean(car.priceDiscount);
+
+    // Price
     const priceValue = car.base_price ? Number(car.base_price) : 0;
-    const matchesPrice = priceRange === 'Tất cả giá' || !priceRange ||
-      (priceRange === 'Dưới 1 triệu' && priceValue < 1000000) ||
-      (priceRange === '1-2 triệu' && priceValue >= 1000000 && priceValue <= 2000000) ||
-      (priceRange === '2-5 triệu' && priceValue > 2000000 && priceValue <= 5000000) ||
-      (priceRange === 'Trên 5 triệu' && priceValue > 5000000);
+    const matchesPrice = priceValue >= priceMin && priceValue <= priceMax;
 
-    // Sửa filter nâng cao: dùng vehicle_type thay vì carType
-    const matchesFilters =
-      (!filters.carType.length || filters.carType.some(type =>
-        car.vehicle_type?.toLowerCase() === type?.toLowerCase())) &&
-      (!filters.brand.length || filters.brand.includes(car.name?.split(' ')[0])) &&
-      (!filters.seats.length || filters.seats.includes(`${car.seats} chỗ`)) &&
-      (!filters.fuel.length || filters.fuel.includes(car.fuel_type || car.fuel)) &&
-      (!filters.discount || car.priceDiscount);
-    return matchesSearch && matchesLocation && matchesCarType && matchesPrice && matchesFilters;
+    return (
+      matchesSearch &&
+      matchesLocation &&
+      matchesCarType &&
+      matchesBrand &&
+      matchesSeats &&
+      matchesFuel &&
+      matchesDiscount &&
+      matchesPrice
+    );
   });
 
-  // Handle filter toggle
   const handleFilterToggle = (category, value) => {
     setFilters(prev => ({
       ...prev,
@@ -184,9 +250,6 @@ const CarListingPage = () => {
     setActivePopup(null);
   };
 
-  
-
-  // Thêm useEffect để khóa scroll khi popup mở
   useEffect(() => {
     if (activePopup) {
       document.body.classList.add('overflow-hidden');
@@ -267,7 +330,6 @@ const CarListingPage = () => {
       <PopupOverlay onClose={onClose}>
         <div className="p-6">
           <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-
           <div className="flex space-x-4 mt-4">
             <div className="flex-1">
               <label className="block text-sm text-black">Từ</label>
@@ -296,7 +358,6 @@ const CarListingPage = () => {
               />
             </div>
           </div>
-
           <div className="mt-6 px-2">
             <Slider
               range
@@ -314,7 +375,7 @@ const CarListingPage = () => {
                   border: '2px solid #22c55e',
                   width: 22,
                   height: 22,
-                  marginTop: -8, // căn giữa dot với thanh trượt cao 6px
+                  marginTop: -8,
                   boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
                 },
                 {
@@ -326,7 +387,7 @@ const CarListingPage = () => {
                   boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
                 }
               ]}
-              railStyle={{ background: '#e5e7eb', height: 6 }} // màu xám nhạt cho rail
+              railStyle={{ background: '#e5e7eb', height: 6 }}
             />
           </div>
           <button
@@ -339,24 +400,6 @@ const CarListingPage = () => {
     );
   };
 
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [showRentalModal, setShowRentalModal] = useState(false);
-
-  // Thêm state favorites
-  const [favorites, setFavorites] = useState([]);
-
-  // Thêm hàm xử lý favorite toggle
-  const handleFavoriteToggle = (vehicleId) => {
-    setFavorites(prev => {
-      if (prev.includes(vehicleId)) {
-        return prev.filter(id => id !== vehicleId);
-      } else {
-        return [...prev, vehicleId];
-      }
-    });
-  };
-
-  // Infinite scrolling logic
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -385,18 +428,16 @@ const CarListingPage = () => {
           <CarLoadingScreen />
         </div>
       )}
-      {/* Navigation Header */}
       <Header />
-      {/* Spacer để header chiếm chỗ, chỉnh h-20 cho đúng chiều cao Header */}
       <div className="h-21 bg-gray-800/95"></div>
-
-      {/* Location & Time Bar */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <MapPin className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-gray-900">{pickUpLocation}</span>
+              <span className="font-medium text-gray-900">
+                {beautifyCityName(selectedLocation) || 'Địa điểm nhận xe'}
+              </span>
               <span className="text-gray-500">→</span>
               <span className="font-medium text-gray-900">{dropOffLocation}</span>
               <Calendar className="h-4 w-4 text-gray-500" />
@@ -407,8 +448,6 @@ const CarListingPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Filter Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-3">
@@ -425,7 +464,6 @@ const CarListingPage = () => {
                     {filters.carType.length}
                   </span>
                 )}
-
               </button>
               <button
                 onClick={() => setActivePopup('brand')}
@@ -484,8 +522,6 @@ const CarListingPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Search Section */}
       <div className="bg-gray-50 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
@@ -500,8 +536,6 @@ const CarListingPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Car Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <VehicleList
           vehicles={filteredCars.slice(0, displayedCount)}
@@ -546,8 +580,6 @@ const CarListingPage = () => {
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>
-
-      {/* Popups */}
       {activePopup === 'carType' && (
         <FilterPopup
           title="Loại Xe"
@@ -583,8 +615,18 @@ const CarListingPage = () => {
       {activePopup === 'price' && (
         <PricePopup onClose={closePopup} />
       )}
-
-      {/* Footer */}
+      {showRentalModal && selectedCar && (
+        <CarRentalModal
+          car={selectedCar}
+          onClose={() => setShowRentalModal(false)}
+          pickUpLocation={pickUpLocation}
+          dropOffLocation={dropOffLocation}
+          pickUpDate={pickUpDate}
+          pickUpTime={pickUpTime}
+          dropOffDate={dropOffDate}
+          dropOffTime={dropOffTime}
+        />
+      )}
       <Footer />
     </div>
   );
