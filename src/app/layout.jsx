@@ -19,6 +19,10 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
+  // Thêm xác minh Google Search Console tại đây
+  verification: {
+    google: "googleb309bb82e5c1a235.html", // Thay thế bằng mã xác minh của bạn từ Google Search Console
+  },
 };
 
 export default function RootLayout({ children }) {
