@@ -1,8 +1,8 @@
 // app/privacy-policy/page.tsx
 
 export const metadata = {
-  title: 'Privacy Policy - Your App Name',
-  description: 'Learn how we collect, use, and protect your data.',
+  title: 'Privacy Policy - Whale Xe',
+  description: 'Learn how Whale Xe collects, uses, and protects your data.',
 };
 
 export default function PrivacyPolicy() {
@@ -12,13 +12,13 @@ export default function PrivacyPolicy() {
       <p className="text-sm text-gray-500 mb-6">Last Updated: April 5, 2025</p>
 
       <section className="mb-6">
-        <p>Welcome to [Your App/Website Name] (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). We are committed to protecting your privacy and ensuring you understand how we collect, use, and share your personal information. This Privacy Policy applies to our website, mobile application, or service that integrates Facebook Login via Facebook’s OAuth system.</p>
+        <p>Welcome to Whale Xe (&quot;we&quot;, &quot;our&quot;, or &quot;us&quot;). We are committed to protecting your privacy and ensuring you understand how we collect, use, and share your personal information. This Privacy Policy applies to our website, mobile application, or service that integrates Facebook Login via Facebook’s OAuth system.</p>
         <p>By using our service, you agree to the terms of this Privacy Policy.</p>
       </section>
 
       <section className="mb-6">
         <h2 className="text-xl font-semibold mb-2">1. Information We Collect</h2>
-        <p>When you log in to [Your App/Website Name] using Facebook Login, we may collect the following information from your Facebook profile:</p>
+        <p>When you log in to Whale Xe using Facebook Login, we may collect the following information from your Facebook profile:</p>
         <ul className="list-disc ml-6 mt-2 space-y-1">
           <li>Your name</li>
           <li>Email address</li>
@@ -72,13 +72,15 @@ export default function PrivacyPolicy() {
         <h2 className="text-xl font-semibold mb-2">8. Contact Us</h2>
         <p>If you have questions about this Privacy Policy or our data practices, please contact us at:</p>
         <ul className="mt-2 list-none ml-0 space-y-1">
-          <li>📧 Email: <a href="mailto:your-contact-email@example.com" className="text-blue-600 underline">your-contact-email@example.com</a></li>
-          <li>🌐 Website: <a href="https://yourwebsite.com"  className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">https://yourwebsite.com</a></li> 
+          <li>📧 Email: <a href="mailto:contact@whalexe.com" className="text-blue-600 underline">contact@whalexe.com</a></li>
+          <li>📞 Phone: <a href="tel:+8402363738399" className="text-blue-600 underline">+84 0236 3738 399</a></li>
+          <li>🏢 Address: 158a Lê Lợi, Hải Châu 1, Hải Châu, Đà Nẵng</li>
+          <li>🌐 Website: <a href="https://whalexe.com" className="text-blue-600 underline" target="_blank" rel="noopener noreferrer">https://whalexe.com</a></li>
         </ul>
       </section>
 
       <p className="text-center text-gray-600 text-sm mt-8">
-        Thank you for trusting [Your App/Website Name]. We value your privacy and strive to be transparent about how we handle your data.
+        Thank you for trusting Whale Xe. We value your privacy and strive to be transparent about how we handle your data.
       </p>
     </div>
   );
