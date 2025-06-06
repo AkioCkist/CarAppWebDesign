@@ -47,6 +47,7 @@ export async function GET() {
       <changefreq>weekly</changefreq>
       <priority>0.7</priority>
     </url>
+    <!-- Add more <url> entries here if needed -->
   </urlset>`;
 
   return new Response(sitemap, {
