@@ -8,7 +8,7 @@ import CarRentalModal from "../../../components/CarRentalModal";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const cityNameMap = {
   hcm: "Hồ Chí Minh",
@@ -69,6 +69,7 @@ const CarListingPage = () => {
   const [favorites, setFavorites] = useState([]);
 
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   useEffect(() => {
     const pickUpLocationFromURL = searchParams.get('pickUpLocation');
@@ -110,6 +111,20 @@ const CarListingPage = () => {
       setPickUpTime(searchParams.get('pickUpTime') || '');
       setDropOffDate(searchParams.get('dropOffDate') || '');
       setDropOffTime(searchParams.get('dropOffTime') || '');
+
+      // Đọc filter từ URL
+      setFilters({
+        carType: searchParams.get('carType') ? searchParams.get('carType').split(',') : [],
+        brand: searchParams.get('brand') ? searchParams.get('brand').split(',') : [],
+        seats: searchParams.get('seats') ? searchParams.get('seats').split(',') : [],
+        fuel: searchParams.get('fuel') ? searchParams.get('fuel').split(',') : [],
+        discount: searchParams.get('discount') === '1'
+      });
+
+      setPriceMin(Number(searchParams.get('priceMin')) || 0);
+      setPriceMax(Number(searchParams.get('priceMax')) || 10000000);
+
+      setSearchTerm(searchParams.get('search') || '');
     }
   }, []);
 
@@ -420,6 +435,35 @@ const CarListingPage = () => {
       }
     };
   }, [filteredCars.length]);
+
+  // Đồng bộ filter vào URL khi filter thay đổi
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+
+    if (filters.carType.length) params.set('carType', filters.carType.join(','));
+    else params.delete('carType');
+
+    if (filters.brand.length) params.set('brand', filters.brand.join(','));
+    else params.delete('brand');
+
+    if (filters.seats.length) params.set('seats', filters.seats.join(','));
+    else params.delete('seats');
+
+    if (filters.fuel.length) params.set('fuel', filters.fuel.join(','));
+    else params.delete('fuel');
+
+    if (filters.discount) params.set('discount', '1');
+    else params.delete('discount');
+
+    params.set('priceMin', priceMin);
+    params.set('priceMax', priceMax);
+
+    if (searchTerm) params.set('search', searchTerm);
+    else params.delete('search');
+
+    // Giữ các param khác (pickUpLocation, dropOffLocation, ...)
+    router.replace(`?${params.toString()}`);
+  }, [filters, priceMin, priceMax, searchTerm]);
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
