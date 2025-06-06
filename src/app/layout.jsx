@@ -19,9 +19,9 @@ export const metadata = {
   icons: {
     icon: "/favicon.ico",
   },
-  // Thêm xác minh Google Search Console tại đây
+  // Cập nhật mã xác minh Google Search Console tại đây
   verification: {
-    google: "googleb309bb82e5c1a235.html", // Thay thế bằng mã xác minh của bạn từ Google Search Console
+    google: "MÃ_XÁC_MINH_CỦA_BẠN", // THAY THẾ CHÍNH XÁC MÃ XÁC MINH TỪ GOOGLE SEARCH CONSOLE
   },
 };
 
