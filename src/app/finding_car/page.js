@@ -309,91 +309,180 @@ const CarListingPage = () => {
   );
 
   const PricePopup = ({ onClose }) => {
+    const [isVisible, setIsVisible] = useState(false);
     const minLimit = 0;
     const maxLimit = 10000000;
     const step = 100000;
-    const [values, setValues] = useState([priceMin, priceMax]);
-    const formatNumber = (num) => num.toLocaleString();
-    const handleChange = (newValues) => {
-      setValues(newValues);
+    // Chỉ sử dụng internal state trong component này
+    const [internalValues, setInternalValues] = useState([priceMin, priceMax]);
+
+    useEffect(() => {
+      // Trigger animation sau khi component mount
+      const timer = setTimeout(() => setIsVisible(true), 50);
+      return () => clearTimeout(timer);
+    }, []);
+
+    const handleClose = () => {
+      setIsVisible(false);
+      setTimeout(onClose, 300); // Đợi animation xong mới close
     };
 
+    const formatNumber = (num) => num.toLocaleString();
+
+    // Cập nhật internal state khi kéo slider
+    const handleChange = (newValues) => {
+      setInternalValues(newValues);
+    };
+
+    // Cũng chỉ cập nhật internal state khi thả tay
     const handleAfterChange = (newValues) => {
-      setPriceMin(newValues[0]);
-      setPriceMax(newValues[1]);
+      setInternalValues(newValues);
+    };
+
+    // Xử lý khi thay đổi input
+    const handleInputChange = (index, value) => {
+      const numValue = parseInt(value.replace(/,/g, '')) || 0;
+      const newValues = [...internalValues];
+
+      if (index === 0 && numValue <= internalValues[1]) {
+        newValues[0] = numValue;
+      } else if (index === 1 && numValue >= internalValues[0]) {
+        newValues[1] = numValue;
+      }
+
+      setInternalValues(newValues);
+    };
+
+    // Áp dụng thay đổi - cập nhật priceMin/priceMax ở component cha
+    const handleApply = () => {
+      setPriceMin(internalValues[0]);
+      setPriceMax(internalValues[1]);
+      handleClose();
+    };
+
+    // Reset về giá trị mặc định
+    const handleReset = () => {
+      const resetValues = [0, 10000000];
+      setInternalValues(resetValues);
+      setPriceMin(0);
+      setPriceMax(10000000);
+      setTimeout(handleClose, 100);
     };
 
     return (
-      <PopupOverlay onClose={onClose}>
-        <div className="p-6">
-          <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-          <div className="flex space-x-4 mt-4">
-            <div className="flex-1">
-              <label className="block text-sm text-black">Từ</label>
-              <input
-                type="text"
-                value={formatNumber(values[0])}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                  if (v <= values[1]) setValues([v, values[1]]);
-                }}
-                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
-                placeholder="0"
-              />
+      <div
+        className={`
+          fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4
+          transition-opacity duration-300 ease-out
+          ${isVisible ? 'opacity-100' : 'opacity-0'}
+        `}
+        onClick={handleClose}
+      >
+        <div
+          className={`
+            bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden
+            transition-all duration-300 ease-out
+            ${isVisible
+              ? 'opacity-100 scale-100'
+              : 'opacity-0 scale-95'
+            }
+          `}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Chọn khoảng giá</h3>
+              <button
+                onClick={handleClose}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+              >
+                <X className="h-5 w-5 text-white" />
+              </button>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm text-black">Đến</label>
-              <input
-                type="text"
-                value={formatNumber(values[1])}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                  if (v >= values[0]) setValues([values[0], v]);
-                }}
-                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
-                placeholder="10.000.000"
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            <div className="flex space-x-4 mb-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Từ</label>
+                <input
+                  type="text"
+                  value={formatNumber(internalValues[0])}
+                  onChange={(e) => handleInputChange(0, e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                  placeholder="0"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Đến</label>
+                <input
+                  type="text"
+                  value={formatNumber(internalValues[1])}
+                  onChange={(e) => handleInputChange(1, e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                  placeholder="10.000.000"
+                />
+              </div>
+            </div>
+            <div className="px-2">
+              <Slider
+                range
+                min={minLimit}
+                max={maxLimit}
+                step={step}
+                defaultValue={[priceMin, priceMax]}
+                value={internalValues}
+                onChange={handleChange}
+                onChangeComplete={handleAfterChange}
+                trackStyle={[{ background: '#22c55e', height: 6 }]}
+                handleStyle={[
+                  {
+                    backgroundColor: '#fff',
+                    border: '2px solid #22c55e',
+                    width: 22,
+                    height: 22,
+                    marginTop: -8,
+                    boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                  },
+                  {
+                    backgroundColor: '#fff',
+                    border: '2px solid #22c55e',
+                    width: 22,
+                    height: 22,
+                    marginTop: -8,
+                    boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                  }
+                ]}
+                railStyle={{ background: '#e5e7eb', height: 6 }}
               />
             </div>
           </div>
-          <div className="mt-6 px-2">
-            <Slider
-              range
-              min={minLimit}
-              max={maxLimit}
-              step={step}
-              defaultValue={[priceMin, priceMax]}
-              value={values}
-              onChange={handleChange}
-              onChangeComplete={handleAfterChange}
-              trackStyle={[{ background: '#22c55e', height: 6 }]}
-              handleStyle={[
-                {
-                  backgroundColor: '#fff',
-                  border: '2px solid #22c55e',
-                  width: 22,
-                  height: 22,
-                  marginTop: -8,
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-                },
-                {
-                  backgroundColor: '#fff',
-                  border: '2px solid #22c55e',
-                  width: 22,
-                  height: 22,
-                  marginTop: -8,
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-                }
-              ]}
-              railStyle={{ background: '#e5e7eb', height: 6 }}
-            />
+
+          {/* Footer Actions - CỐ Ý CHỈ CẬP NHẬT PRICE KHI BẤM "ÁP DỤNG" */}
+          <div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">
+            <button
+              onClick={handleApply}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold
+                         hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95 shadow-md hover:shadow-lg"
+            >
+              Áp dụng
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex-1 px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg font-semibold
+                         hover:bg-green-50 transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95"
+            >
+              Đặt lại
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="mt-6 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-            Áp dụng
-          </button>
         </div>
-      </PopupOverlay>
+      </div>
     );
   };
 
