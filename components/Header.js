@@ -236,7 +236,10 @@ export default function Header() {
                         </ul>
                         <div className="py-1 border-t border-gray-100">
                           <button
-                            onClick={() => signOut({ callbackUrl: "/" })}
+                            onClick={() => {
+                              localStorage.removeItem('user');
+                              window.location.href = "/";
+                            }}
                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           >
                             <i className="fas fa-sign-out-alt mr-2"></i> Sign out

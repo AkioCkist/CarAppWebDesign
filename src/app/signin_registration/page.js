@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
 import { TypeAnimation } from 'react-type-animation';
 
 // Animation variant for pull-up
@@ -22,6 +22,30 @@ const glassStyle = {
   borderRadius: "1rem",
   border: "1px solid rgba(255,255,255,0.3)"
   // No backdrop-filter here
+};
+
+// New variants for the popup animation
+const popupVariants = {
+  hidden: { opacity: 0, scale: 0.8, y: -50 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    y: -50,
+    transition: {
+      ease: "easeOut",
+      duration: 0.3,
+    },
+  },
 };
 
 function useFocusState() {
@@ -391,26 +415,39 @@ export default function LoginPage() {
       </motion.header>
 
       {/* Auth Message Popup */}
-      {authMessage.show && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`p-6 rounded-lg shadow-lg text-center ${
-            authMessage.success ? 'bg-green-500' : 'bg-red-500'
-          } text-white max-w-sm mx-4`}>
-            <div className="flex items-center justify-center mb-2">
-              {authMessage.success ? (
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              ) : (
-                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-              )}
+      <AnimatePresence> {/* Wrap with AnimatePresence */}
+        {authMessage.show && (
+          <motion.div
+            key="auth-popup" // Add a unique key when using AnimatePresence
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            variants={popupVariants}
+          >
+            <div className={`p-6 rounded-lg shadow-lg text-center backdrop-filter backdrop-blur-lg ${
+              authMessage.success ? 'bg-green-600/80' : 'bg-red-600/80' // Slightly more opaque
+            } text-white max-w-sm mx-4 border border-white/30`} // Added border for cleaner look
+            style={{
+              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)", // Retain glass-like shadow
+              borderRadius: "1rem",
+            }}>
+              <div className="flex items-center justify-center mb-4"> {/* Increased margin-bottom */}
+                {authMessage.success ? (
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Larger icon */}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                ) : (
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Larger icon */}
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                )}
+              </div>
+              <p className="text-xl font-semibold">{authMessage.message}</p> {/* Larger font size */}
             </div>
-            <p className="text-lg font-semibold">{authMessage.message}</p>
-          </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Login Section */}
       <section className="h-screen flex items-center justify-center relative overflow-hidden">
