@@ -60,9 +60,6 @@ async function getVehicles(searchParams) {
         const statusFilter = searchParams.get('status') || 'available'
         const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')) : undefined
         const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')) : undefined
-        const search = searchParams.get('search')
-        const type = searchParams.get('type')
-        const location = searchParams.get('location')
         const favoritesOnly = searchParams.get('favorites') === 'true'
 
         let whereClause = {
@@ -73,25 +70,60 @@ async function getVehicles(searchParams) {
         if (favoritesOnly) {
             whereClause.is_favorite = true
         }
-        // Xử lý search
+
+        // Price
+        const priceMin = searchParams.get('priceMin');
+        const priceMax = searchParams.get('priceMax');
+        if (priceMin || priceMax) {
+            whereClause.base_price = {};
+            if (priceMin) whereClause.base_price.gte = parseFloat(priceMin);
+            if (priceMax) whereClause.base_price.lte = parseFloat(priceMax);
+        }
+
+        // Seats
+        const seats = searchParams.get('seats');
+        if (seats) {
+            whereClause.seats = {
+                in: seats.split(',').map(s => parseInt(s))
+            };
+        }
+
+        // Fuel
+        const fuel = searchParams.get('fuel_type');
+        if (fuel) {
+            whereClause.fuel_type = {
+                in: fuel.split(',').map(f => f.trim().toLowerCase())
+            };
+        }
+
+        // Search term
+        const search = searchParams.get('search');
         if (search) {
             whereClause.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } },
-                { location: { contains: search, mode: 'insensitive' } }
-            ]
+                { description: { contains: search, mode: 'insensitive' } }
+            ];
         }
-        // Xử lý type
-        if (type) {
-            whereClause.vehicle_type = type
+
+        // Xử lý loại xe
+        const carType = searchParams.get('vehicle_type');
+        console.log('Filter loại xe (vehicle_type):', carType);
+        if (carType) {
+            whereClause.vehicle_type = {
+                in: carType.split(',')
+            };
         }
-        // Xử lý location
+        
+        // Location
+        const location = searchParams.get('location');
         if (location) {
             whereClause.location = {
                 contains: location,
                 mode: 'insensitive'
-            }
+            };
         }
+        console.log('Điều kiện whereClause:', whereClause);
+
         const vehicles = await prisma.vehicles.findMany({
             where: whereClause,
             include: {
@@ -118,13 +150,12 @@ async function getVehicles(searchParams) {
                     }
                 }
             },
-            take: limit,
-            skip: offset,
-            orderBy: favoritesOnly ?
-                { updated_at: 'desc' } : // Favorites theo updated_at
-                [{ rating: 'desc' }, { created_at: 'desc' }] // Search theo rating rồi created_at
+            take: parseInt(searchParams.get('limit')) || undefined,
+            skip: parseInt(searchParams.get('offset')) || undefined,
+            orderBy: [
+                { rating: 'desc' },
+                { created_at: 'desc' }]
         })
-
         const total = vehicles.length
 
         if (total > 0) {
