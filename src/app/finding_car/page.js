@@ -10,33 +10,50 @@ import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-const cityNameMap = {
-  hcm: "Hồ Chí Minh",
-  hanoi: "Hà Nội",
-  danang: "Đà Nẵng",
-  hue: "Huế",
-  bacninh: "Bắc Ninh",
-  "TP. Hồ Chí Minh": "Hồ Chí Minh",
-  "Hà Nội": "Hà Nội",
-  "Đà Nẵng": "Đà Nẵng",
-  "Huế": "Huế",
-  "Bắc Ninh": "Bắc Ninh"
-};
-
-function beautifyCityName(val) {
-  if (!val) return "";
-  return cityNameMap[val] || val;
+function beautifyCityName(str) {
+  if (!str) return "";
+  // Nếu đã là tên đẹp thì trả về luôn
+  if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
+  // Nếu là tên không dấu hoặc viết thường thì chuyển sang tên đẹp
+  const mapping = {
+    'hcm': 'TP.HCM',
+    'tp.hcm': 'TP.HCM',
+    'hanoi': 'Hà Nội',
+    'ha noi': 'Hà Nội',
+    'danang': 'Đà Nẵng',
+    'da nang': 'Đà Nẵng',
+    'hue': 'Huế',
+    'bacninh': 'Bắc Ninh',
+    'bac ninh': 'Bắc Ninh'
+  };
+  const normalized = str.trim().toLowerCase();
+  return mapping[normalized] || str;
 }
+
+const cityMapping = {
+  // Từ URL (không dấu)
+  'hcm': 'TP.HCM',
+  'tp.hcm': 'TP.HCM',
+  'hanoi': 'Hà Nội',
+  'ha noi': 'Hà Nội',
+  'danang': 'Đà Nẵng',
+  'da nang': 'Đà Nẵng',
+  'hue': 'Huế',
+  'bacninh': 'Bắc Ninh',
+  'bac ninh': 'Bắc Ninh',
+
+  // Từ database (có dấu) - giữ nguyên
+  'TP.HCM': 'TP.HCM',
+  'Hà Nội': 'Hà Nội',
+  'Đà Nẵng': 'Đà Nẵng',
+  'Huế': 'Huế',
+  'Bắc Ninh': 'Bắc Ninh'
+};
 
 function normalizeCity(str) {
   if (!str) return "";
-  str = str.toLowerCase().trim();
-  str = str.replace(/tp\.?\s*hcm|thành phố hồ chí minh|hồ chí minh/g, "hcm");
-  str = str.replace(/hà nội/g, "hanoi");
-  str = str.replace(/đà nẵng/g, "danang");
-  str = str.replace(/huế/g, "hue");
-  str = str.replace(/bắc ninh/g, "bacninh");
-  return str;
+  const normalized = str.trim().toLowerCase();
+  return cityMapping[normalized] || cityMapping[str.trim()] || str;
 }
 
 const CarListingPage = () => {
@@ -46,10 +63,10 @@ const CarListingPage = () => {
   const [priceRange, setPriceRange] = useState('');
   const [activePopup, setActivePopup] = useState(null);
   const [filters, setFilters] = useState({
-    carType: [],
+    vehicle_type: [],
     brand: [],
     seats: [],
-    fuel: [],
+    fuel_type: [],
     discount: false
   });
   const [displayedCount, setDisplayedCount] = useState(8);
@@ -67,9 +84,40 @@ const CarListingPage = () => {
   const [selectedCar, setSelectedCar] = useState(null);
   const [showRentalModal, setShowRentalModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
-
   const searchParams = useSearchParams();
   const router = useRouter();
+  const didInitRef = useRef(false); // Thêm dòng này
+
+  useEffect(() => {
+    // Chỉ chạy 1 lần khi mount
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const pickUpParam = params.get('pickUpLocation');
+      const dropOffParam = params.get('dropOffLocation');
+      setSelectedLocation(normalizeCity(pickUpParam) || '');
+      setPickUpLocation(beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe');
+      setDropOffLocation(beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe');
+      setPickUpDate(params.get('pickUpDate') || '');
+      setPickUpTime(params.get('pickUpTime') || '');
+      setDropOffDate(params.get('dropOffDate') || '');
+      setDropOffTime(params.get('dropOffTime') || '');
+
+      // Đọc filter từ URL
+      setFilters({
+        vehicle_type: params.get('vehicle_type') ? params.get('vehicle_type').split(',') : [],
+        brand: params.get('brand') ? params.get('brand').split(',') : [],
+        seats: params.get('seats') ? params.get('seats').split(',').map(s => `${s} chỗ`) : [],
+        fuel_type: params.get('fuel_type') ? params.get('fuel_type').split(',') : [],
+        discount: params.get('discount') === '1'
+      });
+      setPriceMin(Number(params.get('priceMin')) || 0);
+      setPriceMax(Number(params.get('priceMax')) || 10000000);
+      setSearchTerm(params.get('search') || '');
+    }
+  }, []);
 
   useEffect(() => {
     const pickUpLocationFromURL = searchParams.get('pickUpLocation');
@@ -81,52 +129,38 @@ const CarListingPage = () => {
 
   // Chỉ fetch API khi đổi location (hoặc lần đầu vào trang)
   useEffect(() => {
-    if (!selectedLocation) return;
-    setIsLoading(true);
+    const fetchData = async () => {
+      setIsLoading(true);
+      const params = new URLSearchParams();
+      // Thêm các param vào URL
+      if (selectedLocation) params.append('location', selectedLocation);
+      if (filters.vehicle_type.length) params.append('vehicle_type', filters.vehicle_type.join(','));
+      if (filters.brand.length) params.append('brand', filters.brand.join(','));
+      if (filters.seats.length) params.append('seats', filters.seats.map(s => s.split(' ')[0]).join(','));
+      if (filters.fuel_type.length) params.append('fuel_type', filters.fuel_type.join(','));
+      if (filters.discount) params.append('discount', '1');
+      params.append('priceMin', priceMin);
+      params.append('priceMax', priceMax);
+      if (searchTerm) params.append('search', searchTerm);
 
-    const params = new URLSearchParams();
-    if (selectedLocation) params.append('location', selectedLocation);
+      // Thêm log để kiểm tra params gửi lên API
+      console.log('Fetching API with params:', params.toString());
+      console.log('Current filters:', filters);
+      console.log('selectedLocation:', selectedLocation);
 
-    fetch(`/api/vehicles?${params.toString()}`)
-      .then(res => res.json())
-      .then(data => {
+      try {
+        const res = await fetch(`/api/vehicles?${params.toString()}`);
+        const data = await res.json();
+        console.log('API response:', data);
         setCars(data.records || []);
-        setIsLoading(false);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error('Error fetching cars:', error);
+      } finally {
         setIsLoading(false);
-      });
-  }, [selectedLocation]);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      const pickUpParam = searchParams.get('pickUpLocation');
-      const dropOffParam = searchParams.get('dropOffLocation');
-      setSelectedLocation(normalizeCity(pickUpParam) || '');
-      setPickUpLocation(beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe');
-      setDropOffLocation(beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe');
-      setPickUpDate(searchParams.get('pickUpDate') || '');
-      setPickUpTime(searchParams.get('pickUpTime') || '');
-      setDropOffDate(searchParams.get('dropOffDate') || '');
-      setDropOffTime(searchParams.get('dropOffTime') || '');
-
-      // Đọc filter từ URL
-      setFilters({
-        carType: searchParams.get('carType') ? searchParams.get('carType').split(',') : [],
-        brand: searchParams.get('brand') ? searchParams.get('brand').split(',') : [],
-        seats: searchParams.get('seats') ? searchParams.get('seats').split(',') : [],
-        fuel: searchParams.get('fuel') ? searchParams.get('fuel').split(',') : [],
-        discount: searchParams.get('discount') === '1'
-      });
-
-      setPriceMin(Number(searchParams.get('priceMin')) || 0);
-      setPriceMax(Number(searchParams.get('priceMax')) || 10000000);
-
-      setSearchTerm(searchParams.get('search') || '');
-    }
-  }, []);
+      }
+    };
+    fetchData();
+  }, [selectedLocation, filters, priceMin, priceMax, searchTerm]);
 
   const handleFavoriteToggle = async (vehicleId) => {
     const isCurrentlyFavorite = favorites.includes(vehicleId);
@@ -167,10 +201,10 @@ const CarListingPage = () => {
 
   const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
   const filterOptions = {
-    carType: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
+    vehicle_type: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
     brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan'],
     seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
-    fuel: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
+    fuel_type: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
   };
 
   const formatCarTypeDisplay = (type) => {
@@ -183,75 +217,23 @@ const CarListingPage = () => {
     };
     return typeMap[type] || type;
   };
-
-  // filteredCars: lọc tất cả filter ở client
-  const filteredCars = cars.filter(car => {
-    // Search - Sửa lại để tìm trong cả name và location
-    const matchesSearch = !searchTerm ||
-      car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    // Location
-    let matchesLocation = true;
-    if (selectedLocation) {
-      const carCityRaw = car.location?.split('-')[0]?.trim();
-      const carCity = normalizeCity(carCityRaw);
-      matchesLocation = carCity === selectedLocation;
-    }
-
-    // CarType
-    const matchesCarType = !filters.carType.length ||
-      filters.carType.some(type =>
-        car.vehicle_type?.toLowerCase() === type?.toLowerCase()
-      );
-
-    // Brand
-    const carBrand = car.name?.split(' ')[0];
-    const matchesBrand = !filters.brand.length ||
-      filters.brand.some(brand =>
-        carBrand?.toLowerCase().includes(brand.toLowerCase())
-      );
-
-    // Seats
-    const matchesSeats = !filters.seats.length ||
-      filters.seats.some(seatFilter => {
-        const seatNumber = parseInt(seatFilter.split(' ')[0]);
-        return car.seats === seatNumber;
-      });
-
-    // Fuel
-    const matchesFuel = !filters.fuel.length ||
-      filters.fuel.some(fuel =>
-        car.fuel_type?.toLowerCase() === fuel.toLowerCase() ||
-        car.fuel?.toLowerCase() === fuel.toLowerCase()
-      );
-
-    // Discount
-    const matchesDiscount = !filters.discount || Boolean(car.priceDiscount);
-
-    // Price
-    const priceValue = car.base_price ? Number(car.base_price) : 0;
-    const matchesPrice = priceValue >= priceMin && priceValue <= priceMax;
-
-    return (
-      matchesSearch &&
-      matchesLocation &&
-      matchesCarType &&
-      matchesBrand &&
-      matchesSeats &&
-      matchesFuel &&
-      matchesDiscount &&
-      matchesPrice
-    );
-  });
+  // const filteredCars = cars;
+  const filteredCars = React.useMemo(() => {
+    console.log('Filtering cars:', cars);
+    return cars;
+  }, [cars]);
 
   const handleFilterToggle = (category, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [category]: prev[category].includes(value)
-        ? prev[category].filter(item => item !== value)
-        : [...prev[category], value]
-    }));
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [category]: prev[category].includes(value)
+          ? prev[category].filter(item => item !== value)
+          : [...prev[category], value]
+      };
+      // console.log('Filter toggled:', category, value, newFilters);
+      return newFilters;
+    });
   };
 
   const handleDiscountToggle = () => {
@@ -302,7 +284,7 @@ const CarListingPage = () => {
                 onChange={() => handleFilterToggle(category, option)}
                 className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
               <span className="text-black">
-                {category === 'carType' ? formatCarTypeDisplay(option) : option}
+                {category === 'vehicle_type' ? formatCarTypeDisplay(option) : option}
               </span>
             </label>
           ))}
@@ -440,8 +422,8 @@ const CarListingPage = () => {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
 
-    if (filters.carType.length) params.set('carType', filters.carType.join(','));
-    else params.delete('carType');
+    if (filters.vehicle_type.length) params.set('vehicle_type', filters.vehicle_type.join(','));
+    else params.delete('vehicle_type');
 
     if (filters.brand.length) params.set('brand', filters.brand.join(','));
     else params.delete('brand');
@@ -449,8 +431,8 @@ const CarListingPage = () => {
     if (filters.seats.length) params.set('seats', filters.seats.join(','));
     else params.delete('seats');
 
-    if (filters.fuel.length) params.set('fuel', filters.fuel.join(','));
-    else params.delete('fuel');
+    if (filters.fuel_type.length) params.set('fuel_type', filters.fuel_type.join(','));
+    else params.delete('fuel_type');
 
     if (filters.discount) params.set('discount', '1');
     else params.delete('discount');
@@ -498,14 +480,14 @@ const CarListingPage = () => {
             <span className="text-sm text-black font-semibold mr-4">Bộ Lọc:</span>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setActivePopup('carType')}
+                onClick={() => setActivePopup('vehicle_type')}
                 className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal"
               >
                 Loại Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
-                {filters.carType.length > 0 && (
+                {filters.vehicle_type.length > 0 && (
                   <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {filters.carType.length}
+                    {filters.vehicle_type.length}
                   </span>
                 )}
               </button>
@@ -532,13 +514,13 @@ const CarListingPage = () => {
                 )}
               </button>
               <button
-                onClick={() => setActivePopup('fuel')}
+                onClick={() => setActivePopup('fuel_type')}
                 className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
-                {filters.fuel.length > 0 && (
+                {filters.fuel_type.length > 0 && (
                   <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {filters.fuel.length}
+                    {filters.fuel_type.length}
                   </span>
                 )}
               </button>
@@ -582,6 +564,7 @@ const CarListingPage = () => {
       </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <VehicleList
+          key={`${filteredCars.length}-${JSON.stringify(filters)}`}
           vehicles={filteredCars.slice(0, displayedCount)}
           onFavoriteToggle={handleFavoriteToggle}
           favorites={favorites}
@@ -592,13 +575,13 @@ const CarListingPage = () => {
           noResultType={
             pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
               ? "location"
-              : filters.carType.length
+              : filters.vehicle_type.length
                 ? "filter"
                 : filters.brand.length
                   ? "filter"
                   : filters.seats.length
                     ? "filter"
-                    : filters.fuel.length
+                    : filters.fuel_type.length
                       ? "filter"
                       : filters.discount
                         ? "filter"
@@ -607,14 +590,14 @@ const CarListingPage = () => {
                           : undefined
           }
           noResultFilter={
-            filters.carType.length
-              ? "carType"
+            filters.vehicle_type.length
+              ? "vehicle_type"
               : filters.brand.length
                 ? "brand"
                 : filters.seats.length
                   ? "seats"
-                  : filters.fuel.length
-                    ? "fuel"
+                  : filters.fuel_type.length
+                    ? "fuel_type"
                     : filters.discount
                       ? "discount"
                       : priceRange && priceRange !== 'Tất cả giá'
@@ -624,11 +607,11 @@ const CarListingPage = () => {
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>
-      {activePopup === 'carType' && (
+      {activePopup === 'vehicle_type' && (
         <FilterPopup
           title="Loại Xe"
-          options={filterOptions.carType}
-          category="carType"
+          options={filterOptions.vehicle_type}
+          category="vehicle_type"
           onClose={closePopup}
         />
       )}
@@ -648,11 +631,11 @@ const CarListingPage = () => {
           onClose={closePopup}
         />
       )}
-      {activePopup === 'fuel' && (
+      {activePopup === 'fuel_type' && (
         <FilterPopup
           title="Nguyên Liệu"
-          options={filterOptions.fuel}
-          category="fuel"
+          options={filterOptions.fuel_type}
+          category="fuel_type"
           onClose={closePopup}
         />
       )}

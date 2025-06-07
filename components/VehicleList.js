@@ -336,30 +336,45 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
 }
 
 // Main VehicleList component with Modal integration
-export default function VehicleList({ onFavoriteToggle, favorites = [], noResultType, noResultFilter }) {
-  const [vehicles, setVehicles] = useState([]);
+export default function VehicleList({
+  vehicles: vehiclesProp,
+  onFavoriteToggle,
+  favorites = [],
+  noResultType,
+  noResultFilter,
+  onBookClick
+}) {
+  const [vehicles, setVehicles] = useState(vehiclesProp || []);
   const [isMounted, setIsMounted] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!vehiclesProp);
 
   useEffect(() => {
     setIsMounted(true);
-    // Fetch vehicles data tại đây
-    async function fetchVehicles() {
+  }, []);
+
+  // Nếu không có vehiclesProp thì mới fetch
+  useEffect(() => {
+    if (!vehiclesProp) {
       setLoading(true);
-      try {
-        const res = await fetch('/api/vehicles');
-        const data = await res.json();
-        setVehicles(data.records || []);
-      } catch (e) {
-        setVehicles([]);
+      async function fetchVehicles() {
+        try {
+          const res = await fetch('/api/vehicles');
+          const data = await res.json();
+          setVehicles(data.records || []);
+        } catch (e) {
+          setVehicles([]);
+        }
+        setLoading(false);
       }
+      fetchVehicles();
+    } else {
+      setVehicles(vehiclesProp);
       setLoading(false);
     }
-    fetchVehicles();
-  }, []);
+  }, [vehiclesProp]);
 
   const handleBookClick = async (vehicleId) => {
     setLoadingDetail(true);
