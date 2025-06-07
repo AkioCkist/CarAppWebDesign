@@ -286,20 +286,28 @@ const CarRentalModal = ({
                                     </label>
                                     <span>{additionalInsurance ? "50.000 VNĐ/ngày" : "0 VNĐ"}</span>
                                 </div>
-                                <div className="flex items-center justify-between font-semibold border-t pt-2 mt-2">
+                                <div className="flex items-center justify-between font-bold text-black border-t pt-2 mt-2">
                                     <span>Tổng cộng</span>
                                     <span className="text-green-600">{total.toLocaleString()} VNĐ</span>
                                 </div>
                             </div>
 
                             {/* Additional Fees */}
-                            <div>
-                                <div className="font-semibold text-gray-900 mb-3">Phụ phí có thể phát sinh</div>
-                                <div className="space-y-3">
+                            <div className="bg-white rounded-lg border border-gray-100 shadow-sm p-4">
+                                <div className="font-semibold text-gray-900 mb-4">Phụ phí có thể phát sinh</div>
+                                <div className="space-y-4">
                                     {ADDITIONAL_FEES.map((fee, i) => (
-                                        <div key={i} className="flex flex-col text-sm">
-                                            <span className="font-medium">{fee.label}: <span className="text-green-700">{fee.value}</span></span>
-                                            <span className="text-gray-500">{fee.desc}</span>
+                                        <div key={i} className="flex gap-3">
+                                            <div className="mt-1 flex-shrink-0">
+                                                <div className="w-2.5 h-2.5 rounded-full bg-gray-600"></div>
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="flex justify-between">
+                                                    <span className="font-medium text-gray-800">{fee.label}</span>
+                                                    <span className="font-medium text-green-600">{fee.value}</span>
+                                                </div>
+                                                <p className="text-sm text-gray-500 mt-1">{fee.desc}</p>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
