@@ -5,20 +5,21 @@ import {
 } from "lucide-react";
 
 const AMENITY_ICONS = {
-    bluetooth: { icon: <Bluetooth className="w-5 h-5" />, label: "Bluetooth" },
-    camera: { icon: <Camera className="w-5 h-5" />, label: "Camera hành trình" },
-    airbag: { icon: <ShieldCheck className="w-5 h-5" />, label: "Túi khí an toàn" },
-    etc: { icon: <CreditCard className="w-5 h-5" />, label: "ETC" },
-    sunroof: { icon: <Sun className="w-5 h-5" />, label: "Cửa sổ trời" },
-    sportMode: { icon: <Zap className="w-5 h-5" />, label: "Chế độ thể thao" },
-    tablet: { icon: <Tablet className="w-5 h-5" />, label: "Màn hình tablet" },
-    camera360: { icon: <RotateCw className="w-5 h-5" />, label: "Camera 360 độ" },
-    map: { icon: <Map className="w-5 h-5" />, label: "Bản đồ" },
-    rotateCcw: { icon: <RotateCcw className="w-5 h-5" />, label: "Camera lùi" },
-    circle: { icon: <Circle className="w-5 h-5" />, label: "Cảm biến lốp" },
-    package: { icon: <Package className="w-5 h-5" />, label: "Cốp xe rộng" },
-    shield: { icon: <Shield className="w-5 h-5" />, label: "Cảm biến va chạm" },
-    radar: { icon: <Radar className="w-5 h-5" />, label: "Cảm biến lùi xe" },
+    bluetooth: { icon: <img src="/icons/IconDetailCarCard/Detail/bluetooth.svg" alt="Bluetooth" className="w-5 h-5" />, label: "Bluetooth" },
+    camera: { icon: <img src="/icons/IconDetailCarCard/Detail/AdventureCamera.svg" alt="Camera hành trình" className="w-5 h-5" />, label: "Camera hành trình" },
+    airbag: { icon: <img src="/icons/IconDetailCarCard/Detail/airbag.svg" alt="Túi khí an toàn" className="w-5 h-5" />, label: "Túi khí an toàn" },
+    etc: { icon: <img src="/icons/IconDetailCarCard/Detail/ETC.svg" alt="ETC" className="w-5 h-5" />, label: "ETC" },
+    sunroof: { icon: <img src="/icons/IconDetailCarCard/Detail/carroof.svg" alt="Cửa sổ trời" className="w-5 h-5" />, label: "Cửa sổ trời" },
+    sportMode: { icon: <img src="/icons/IconDetailCarCard/Detail/sportMode.svg" alt="Chế độ thể thao" className="w-5 h-5" />, label: "Chế độ thể thao" },
+    tablet: { icon: <img src="/icons/IconDetailCarCard/Detail/screencar.svg" alt="Màn hình tablet" className="w-5 h-5" />, label: "Màn hình tablet" },
+    camera360: { icon: <img src="/icons/IconDetailCarCard/Detail/camera360.svg" alt="Camera 360 độ" className="w-5 h-5" />, label: "Camera 360 độ" },
+    map: { icon: <img src="/icons/IconDetailCarCard/Detail/map.svg" alt="Bản đồ" className="w-5 h-5" />, label: "Bản đồ" },
+    rotateCcw: { icon: <img src="/icons/IconDetailCarCard/Detail/rearviewcamera.svg" alt="Camera lùi" className="w-5 h-5" />, label: "Camera lùi" },
+    circle: { icon: <img src="/icons/IconDetailCarCard/Detail/tirepressure.svg" alt="Cảm biến lốp" className="w-5 h-5" />, label: "Cảm biến lốp" },
+    package: { icon: <img src="/icons/IconDetailCarCard/Detail/cartrunk.svg" alt="Cốp xe rộng" className="w-5 h-5" />, label: "Cốp xe rộng" },
+    shield: { icon: <img src="/icons/IconDetailCarCard/Detail/collisionsensor.svg" alt="Cảm biến va chạm" className="w-5 h-5" />, label: "Cảm biến va chạm" },
+    radar: { icon: <img src="/icons/IconDetailCarCard/Detail/reversesensor.svg" alt="Cảm biến lùi xe" className="w-5 h-5" />, label: "Cảm biến lùi xe" },
+    ChildSeat: { icon: <img src="/icons/IconDetailCarCard/Detail/childseat.svg" alt="Ghế trẻ cho trẻ em" className="w-5 h-5" />, label: "Ghế cho trẻ em" },
 };
 const TERMS = [
     "Sử dụng xe đúng mục đích, không sử dụng xe vào mục đích phi pháp, trái pháp luật",
@@ -181,29 +182,29 @@ const CarRentalModal = ({
                                     <div className="flex items-center gap-2">
                                         <img src="/icons/IconDetailCarCard/Transmission.svg" alt="Truyền động" className="w-5 h-5 text-blue-600" />
                                         <div>
-                                            <div className="text-xs text-gray-500">Truyền động</div>
-                                            <div className="text-sm">{carData.transmission}</div>
+                                            <div className="text-xxs text-black font-bold">Truyền động</div>
+                                            <div className="text-sm text-black">{carData.transmission}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <img src="/icons/IconDetailCarCard/seat.svg" alt="Số ghế" className="w-5 h-5 text-blue-600" />
                                         <div>
-                                            <div className="text-xs text-gray-500">Số ghế</div>
-                                            <div className="text-sm">{carData.seats} chỗ</div>
+                                            <div className="text-xxs text-black font-bold">Số ghế</div>
+                                            <div className="text-sm text-black">{carData.seats} chỗ</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <img src="/icons/IconDetailCarCard/fuel.svg" alt="Nhiên liệu" className="w-5 h-5 text-blue-600" />
                                         <div>
-                                            <div className="text-xs text-gray-500">Nhiên liệu</div>
-                                            <div className="text-sm">{carData.fuel}</div>
+                                            <div className="text-xxs text-black font-bold">Nhiên liệu</div>
+                                            <div className="text-sm text-black">{carData.fuel}</div>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <img src="/icons/IconDetailCarCard/fuelconsumption.svg" alt="Tiêu hao" className="w-5 h-5 text-blue-600" />
                                         <div>
-                                            <div className="text-xs text-gray-500">Tiêu hao</div>
-                                            <div className="text-sm">7L/100km</div>
+                                            <div className="text-xxs text-black font-bold">Tiêu hao</div>
+                                            <div className="text-sm text-black">7L/100km</div>
                                         </div>
                                     </div>
                                 </div>
