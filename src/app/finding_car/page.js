@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from 'lucide-react';
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
@@ -12,9 +12,7 @@ import { useSearchParams, useRouter } from 'next/navigation';
 
 function beautifyCityName(str) {
   if (!str) return "";
-  // Nếu đã là tên đẹp thì trả về luôn
   if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
-  // Nếu là tên không dấu hoặc viết thường thì chuyển sang tên đẹp
   const mapping = {
     'hcm': 'TP.HCM',
     'tp.hcm': 'TP.HCM',
@@ -31,7 +29,6 @@ function beautifyCityName(str) {
 }
 
 const cityMapping = {
-  // Từ URL (không dấu)
   'hcm': 'TP.HCM',
   'tp.hcm': 'TP.HCM',
   'hanoi': 'Hà Nội',
@@ -41,8 +38,6 @@ const cityMapping = {
   'hue': 'Huế',
   'bacninh': 'Bắc Ninh',
   'bac ninh': 'Bắc Ninh',
-
-  // Từ database (có dấu) - giữ nguyên
   'TP.HCM': 'TP.HCM',
   'Hà Nội': 'Hà Nội',
   'Đà Nẵng': 'Đà Nẵng',
@@ -86,10 +81,23 @@ const CarListingPage = () => {
   const [favorites, setFavorites] = useState([]);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const didInitRef = useRef(false); // Thêm dòng này
 
+  // Control refs để tránh multiple calls
+  const didInitRef = useRef(false);
+  const isInitializedRef = useRef(false);
+  const fetchController = useRef(null);
+
+  // Debounce search term
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   useEffect(() => {
-    // Chỉ chạy 1 lần khi mount
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  // Initialize từ URL - chỉ chạy 1 lần
+  useEffect(() => {
     if (didInitRef.current) return;
     didInitRef.current = true;
 
@@ -97,70 +105,102 @@ const CarListingPage = () => {
       const params = new URLSearchParams(window.location.search);
       const pickUpParam = params.get('pickUpLocation');
       const dropOffParam = params.get('dropOffLocation');
-      setSelectedLocation(normalizeCity(pickUpParam) || '');
-      setPickUpLocation(beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe');
-      setDropOffLocation(beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe');
-      setPickUpDate(params.get('pickUpDate') || '');
-      setPickUpTime(params.get('pickUpTime') || '');
-      setDropOffDate(params.get('dropOffDate') || '');
-      setDropOffTime(params.get('dropOffTime') || '');
 
-      // Đọc filter từ URL
-      setFilters({
+      // Set all states at once để tránh multiple renders
+      const newSelectedLocation = normalizeCity(pickUpParam) || '';
+      const newPickUpLocation = beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe';
+      const newDropOffLocation = beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe';
+      const newFilters = {
         vehicle_type: params.get('vehicle_type') ? params.get('vehicle_type').split(',') : [],
         brand: params.get('brand') ? params.get('brand').split(',') : [],
         seats: params.get('seats') ? params.get('seats').split(',').map(s => `${s} chỗ`) : [],
         fuel_type: params.get('fuel_type') ? params.get('fuel_type').split(',') : [],
         discount: params.get('discount') === '1'
-      });
-      setPriceMin(Number(params.get('priceMin')) || 0);
-      setPriceMax(Number(params.get('priceMax')) || 10000000);
-      setSearchTerm(params.get('search') || '');
+      };
+      const newPriceMin = Number(params.get('priceMin')) || 0;
+      const newPriceMax = Number(params.get('priceMax')) || 10000000;
+      const newSearchTerm = params.get('search') || '';
+
+      // Batch update tất cả states
+      setSelectedLocation(newSelectedLocation);
+      setPickUpLocation(newPickUpLocation);
+      setDropOffLocation(newDropOffLocation);
+      setPickUpDate(params.get('pickUpDate') || '');
+      setPickUpTime(params.get('pickUpTime') || '');
+      setDropOffDate(params.get('dropOffDate') || '');
+      setDropOffTime(params.get('dropOffTime') || '');
+      setFilters(newFilters);
+      setPriceMin(newPriceMin);
+      setPriceMax(newPriceMax);
+      setSearchTerm(newSearchTerm);
+      setDebouncedSearchTerm(newSearchTerm);
+
+      // Mark as initialized
+      isInitializedRef.current = true;
     }
   }, []);
 
-  useEffect(() => {
-    const pickUpLocationFromURL = searchParams.get('pickUpLocation');
-    if (pickUpLocationFromURL) {
-      setPickUpLocation(beautifyCityName(pickUpLocationFromURL));
-      setSelectedLocation(normalizeCity(pickUpLocationFromURL));
+  // Fetch API function với debounce và abort controller
+  const fetchData = useCallback(async () => {
+    // Chỉ fetch khi đã initialized
+    if (!isInitializedRef.current) return;
+    // Cancel previous request
+    if (fetchController.current) {
+      fetchController.current.abort();
     }
-  }, [searchParams]);
+    // Create new controller
+    fetchController.current = new AbortController();
 
-  // Chỉ fetch API khi đổi location (hoặc lần đầu vào trang)
+    setIsLoading(true);
+    const params = new URLSearchParams();
+
+    if (selectedLocation) params.append('location', selectedLocation);
+    if (filters.vehicle_type.length) params.append('vehicle_type', filters.vehicle_type.join(','));
+    if (filters.brand.length) params.append('brand', filters.brand.join(','));
+    if (filters.seats.length) params.append('seats', filters.seats.map(s => s.split(' ')[0]).join(','));
+    if (filters.fuel_type.length) params.append('fuel_type', filters.fuel_type.join(','));
+    if (filters.discount) params.append('discount', '1');
+    params.append('priceMin', priceMin);
+    params.append('priceMax', priceMax);
+    if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
+
+    console.log('🔍 Fetching API with params:', params.toString());
+
+    try {
+      const res = await fetch(`/api/vehicles?${params.toString()}`, {
+        signal: fetchController.current.signal
+      });
+
+      if (!res.ok) throw new Error('API call failed');
+
+      const data = await res.json();
+      console.log('✅ API response:', data);
+      setCars(data.records || []);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('❌ Error fetching cars:', error);
+        setCars([]);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm]);
+
+  // Effect để gọi API - chỉ chạy khi dependencies thay đổi và đã initialized
   useEffect(() => {
-    const fetchData = async () => {
-      setIsLoading(true);
-      const params = new URLSearchParams();
-      // Thêm các param vào URL
-      if (selectedLocation) params.append('location', selectedLocation);
-      if (filters.vehicle_type.length) params.append('vehicle_type', filters.vehicle_type.join(','));
-      if (filters.brand.length) params.append('brand', filters.brand.join(','));
-      if (filters.seats.length) params.append('seats', filters.seats.map(s => s.split(' ')[0]).join(','));
-      if (filters.fuel_type.length) params.append('fuel_type', filters.fuel_type.join(','));
-      if (filters.discount) params.append('discount', '1');
-      params.append('priceMin', priceMin);
-      params.append('priceMax', priceMax);
-      if (searchTerm) params.append('search', searchTerm);
+    if (isInitializedRef.current) {
+      fetchData();
+    }
+  }, [fetchData]);
 
-      // Thêm log để kiểm tra params gửi lên API
-      console.log('Fetching API with params:', params.toString());
-      console.log('Current filters:', filters);
-      console.log('selectedLocation:', selectedLocation);
-
-      try {
-        const res = await fetch(`/api/vehicles?${params.toString()}`);
-        const data = await res.json();
-        console.log('API response:', data);
-        setCars(data.records || []);
-      } catch (error) {
-        console.error('Error fetching cars:', error);
-      } finally {
-        setIsLoading(false);
+  // Cleanup function
+  useEffect(() => {
+    return () => {
+      if (fetchController.current) {
+        fetchController.current.abort();
       }
     };
-    fetchData();
-  }, [selectedLocation, filters, priceMin, priceMax, searchTerm]);
+  }, []);
 
   const handleFavoriteToggle = async (vehicleId) => {
     const isCurrentlyFavorite = favorites.includes(vehicleId);
@@ -217,9 +257,9 @@ const CarListingPage = () => {
     };
     return typeMap[type] || type;
   };
-  // const filteredCars = cars;
+
   const filteredCars = React.useMemo(() => {
-    console.log('Filtering cars:', cars);
+    console.log('🔄 Filtering cars:', cars.length, 'cars');
     return cars;
   }, [cars]);
 
@@ -231,7 +271,6 @@ const CarListingPage = () => {
           ? prev[category].filter(item => item !== value)
           : [...prev[category], value]
       };
-      // console.log('Filter toggled:', category, value, newFilters);
       return newFilters;
     });
   };
@@ -418,34 +457,39 @@ const CarListingPage = () => {
     };
   }, [filteredCars.length]);
 
-  // Đồng bộ filter vào URL khi filter thay đổi
+  // Đồng bộ filter vào URL khi filter thay đổi - với debounce
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
+    if (!isInitializedRef.current) return;
 
-    if (filters.vehicle_type.length) params.set('vehicle_type', filters.vehicle_type.join(','));
-    else params.delete('vehicle_type');
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
 
-    if (filters.brand.length) params.set('brand', filters.brand.join(','));
-    else params.delete('brand');
+      if (filters.vehicle_type.length) params.set('vehicle_type', filters.vehicle_type.join(','));
+      else params.delete('vehicle_type');
 
-    if (filters.seats.length) params.set('seats', filters.seats.join(','));
-    else params.delete('seats');
+      if (filters.brand.length) params.set('brand', filters.brand.join(','));
+      else params.delete('brand');
 
-    if (filters.fuel_type.length) params.set('fuel_type', filters.fuel_type.join(','));
-    else params.delete('fuel_type');
+      if (filters.seats.length) params.set('seats', filters.seats.join(','));
+      else params.delete('seats');
 
-    if (filters.discount) params.set('discount', '1');
-    else params.delete('discount');
+      if (filters.fuel_type.length) params.set('fuel_type', filters.fuel_type.join(','));
+      else params.delete('fuel_type');
 
-    params.set('priceMin', priceMin);
-    params.set('priceMax', priceMax);
+      if (filters.discount) params.set('discount', '1');
+      else params.delete('discount');
 
-    if (searchTerm) params.set('search', searchTerm);
-    else params.delete('search');
+      params.set('priceMin', priceMin);
+      params.set('priceMax', priceMax);
 
-    // Giữ các param khác (pickUpLocation, dropOffLocation, ...)
-    router.replace(`?${params.toString()}`);
-  }, [filters, priceMin, priceMax, searchTerm]);
+      if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
+      else params.delete('search');
+
+      router.replace(`?${params.toString()}`);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [filters, priceMin, priceMax, debouncedSearchTerm, router]);
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
