@@ -1,29 +1,16 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSession, signOut } from "next-auth/react"; // <-- Add signOut import
+import { useSession, signOut } from "next-auth/react";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import VehicleList from "../../../components/VehicleList";
 import ProfileEditPanel from "../../../components/ProfileEditPanel";
 
 export default function UserProfilePage() {
-  // Get user info from localStorage
-  const [user, setUser] = useState({ name: "", phone: "" });
-
-  useEffect(() => {
-    const userData = localStorage.getItem("user");
-    if (userData) {
-      const parsed = JSON.parse(userData);
-      setUser({
-        name: parsed.name || "",
-        phone: parsed.phone || ""
-      });
-    }
-  }, []);
-
+  // Use NextAuth session for user info
   const { data: session } = useSession();
-  // const user = session?.user; // <-- Commented out as we're using localStorage now
+  const user = session?.user || {};
 
   const [fadeIn, setFadeIn] = useState(false);
   const [showFade, setShowFade] = useState(true);
@@ -42,11 +29,11 @@ export default function UserProfilePage() {
     };
   }, []);
 
-  // Mock user data - replace with actual data from your backend
+  // Mock user data - replace with actual data from your backend if needed
   const userData = {
-    name: "Monica Lucas",
-    email: "monica@rentaly.com",
-    avatar: "/images/profile/1.jpg",
+    name: user.name || "Monica Lucas",
+    email: user.email || "monica@rentaly.com",
+    avatar: user.avatar || "/images/profile/1.jpg",
     totalOrders: 3,
     completedRides: 12,
     totalBookings: 58,
@@ -215,10 +202,10 @@ export default function UserProfilePage() {
   const name = user.name || "Unknown User";
   const phone = user.phone || "N/A";
 
-  // Thêm state để quản lý danh sách xe yêu thích
+  // State for favorite cars
   const [favoriteCars, setFavoriteCars] = useState(userData.favoriteCars);
 
-  // Thêm hàm xử lý favorite/unfavorite
+  // Handle favorite/unfavorite
   const handleFavoriteToggle = (vehicleId) => {
     setFavoriteCars(prev => {
       const isFavorite = prev.some(car => car.id === vehicleId);
@@ -353,12 +340,12 @@ export default function UserProfilePage() {
         </div>
       </section>
 
-      {/* Dashboard Content - MODIFIED: Removed -mt-8 for spacing */}
+      {/* Dashboard Content */}
       <section className="pt-16 pb-8 relative z-20">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex flex-col lg:flex-row gap-6">
 
-            {/* Sidebar with animated buttons */}
+            {/* Sidebar */}
             <motion.div
               variants={fadeVariant}
               initial="hidden"
@@ -380,7 +367,7 @@ export default function UserProfilePage() {
                     />
                   </div>
                   <h3 className="font-semibold text-lg text-gray-800">{name}</h3>
-                  <p className="text-gray-600 text-sm">{phone}</p>
+                  <p className="text-gray-600 text-sm">{user.phone || "N/A"}</p>
                 </div>
 
                 {/* Developer Badge - MODIFIED FOR ANIMATION */}

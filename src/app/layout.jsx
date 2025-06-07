@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "../../styles/globals.css";
 import ClientLayout from "../../components/ClientLayout";
 import Script from "next/script";
+import AuthProvider from "../../components/AuthProvider"; // Import the AuthProvider
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,9 +46,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning
       >
-        <ClientLayout>
-          {children}
-        </ClientLayout>
+        <AuthProvider> {/* Wrap your ClientLayout with AuthProvider */}
+          <ClientLayout>
+            {children}
+          </ClientLayout>
+        </AuthProvider>
       </body>
     </html>
   );
