@@ -69,7 +69,9 @@ const CarListingPage = () => {
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
+  const [setFilteredCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true); // Thêm state cho initial loading
   const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
   const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
   const [pickUpDate, setPickUpDate] = useState('');
@@ -140,10 +142,10 @@ const CarListingPage = () => {
     }
   }, []);
 
-  // Fetch API function với debounce và abort controller
+  // Sửa lại fetchData function với delay cho skeleton loading
   const fetchData = useCallback(async () => {
-    // Chỉ fetch khi đã initialized
     if (!isInitializedRef.current) return;
+
     // Cancel previous request
     if (fetchController.current) {
       fetchController.current.abort();
@@ -151,7 +153,12 @@ const CarListingPage = () => {
     // Create new controller
     fetchController.current = new AbortController();
 
+    // Set loading states
     setIsLoading(true);
+    if (cars.length === 0) { // Chỉ show initial loading khi chưa có data
+      setIsInitialLoading(true);
+    }
+
     const params = new URLSearchParams();
 
     if (selectedLocation) params.append('location', selectedLocation);
@@ -164,7 +171,7 @@ const CarListingPage = () => {
     params.append('priceMax', priceMax);
     if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
 
-    console.log('🔍 Fetching API with params:', params.toString());
+    console.log('Fetching API with params:', params.toString());
 
     try {
       const res = await fetch(`/api/vehicles?${params.toString()}`, {
@@ -174,17 +181,28 @@ const CarListingPage = () => {
       if (!res.ok) throw new Error('API call failed');
 
       const data = await res.json();
-      console.log('✅ API response:', data);
-      setCars(data.records || []);
+      console.log('API response:', data);
+
+      // Thêm delay cho skeleton loading effect
+      const minDelay = cars.length === 0 ? 1500 : 500; // 1.5s cho lần đầu, 0.5s cho filter
+
+      setTimeout(() => {
+        setCars(data.records || []);
+        setIsInitialLoading(false);
+        setIsLoading(false);
+      }, minDelay);
+
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error('❌ Error fetching cars:', error);
-        setCars([]);
+        console.error('Error fetching cars:', error);
+        setTimeout(() => {
+          setCars([]);
+          setIsInitialLoading(false);
+          setIsLoading(false);
+        }, cars.length === 0 ? 1500 : 500);
       }
-    } finally {
-      setIsLoading(false);
     }
-  }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm]);
+  }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm, cars.length]);
 
   // Effect để gọi API - chỉ chạy khi dependencies thay đổi và đã initialized
   useEffect(() => {
@@ -258,9 +276,10 @@ const CarListingPage = () => {
     return typeMap[type] || type;
   };
 
+  // Sửa lại filteredCars để sử dụng cars thay vì logic riêng
   const filteredCars = React.useMemo(() => {
-    console.log('🔄 Filtering cars:', cars.length, 'cars');
-    return cars;
+    console.log('🔄 Using cars as filteredCars:', cars.length, 'cars');
+    return cars; // API đã filter rồi, không cần filter thêm
   }, [cars]);
 
   const handleFilterToggle = (category, value) => {
@@ -612,23 +631,13 @@ const CarListingPage = () => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
-          isLoading={isLoading} // Truyền isLoading prop
+          isLoading={isInitialLoading}
           noResultType={
             pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
               ? "location"
-              : filters.vehicle_type.length
+              : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
                 ? "filter"
-                : filters.brand.length
-                  ? "filter"
-                  : filters.seats.length
-                    ? "filter"
-                    : filters.fuel_type.length
-                      ? "filter"
-                      : filters.discount
-                        ? "filter"
-                        : priceRange && priceRange !== 'Tất cả giá'
-                          ? "filter"
-                          : undefined
+                : undefined
           }
           noResultFilter={
             filters.vehicle_type.length
