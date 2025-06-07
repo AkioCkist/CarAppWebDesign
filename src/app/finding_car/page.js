@@ -54,7 +54,6 @@ function normalizeCity(str) {
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCarType, setSelectedCarType] = useState('');
   const [priceRange, setPriceRange] = useState('');
   const [activePopup, setActivePopup] = useState(null);
   const [filters, setFilters] = useState({
@@ -69,9 +68,8 @@ const CarListingPage = () => {
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
-  const [setFilteredCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true); // Thêm state cho initial loading
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
   const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
   const [pickUpDate, setPickUpDate] = useState('');
@@ -540,54 +538,66 @@ const CarListingPage = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivePopup('vehicle_type')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal"
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.vehicle_type.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}
               >
                 Loại Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.vehicle_type.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.vehicle_type.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('brand')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.brand.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Hãng Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.brand.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.brand.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('seats')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.seats.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Số Chỗ
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.seats.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.seats.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('fuel_type')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.fuel_type.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.fuel_type.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.fuel_type.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={handleDiscountToggle}
-                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.discount
                   ? 'border-green-600 bg-green-50 text-green-600'
-                  : 'border-gray-300 hover:bg-gray-50'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
                 Giảm Giá
                 {filters.discount && (
@@ -598,10 +608,13 @@ const CarListingPage = () => {
               </button>
               <button
                 onClick={() => setActivePopup('price')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full text-black font-normal hover:bg-gray-50"
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${(priceMin !== 0 || priceMax !== 10000000)
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}
               >
                 <span>Giá:</span>
-                <span className="ml-2 text-gray-700">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
+                <span className="ml-2">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
               </button>
             </div>
           </div>
@@ -650,9 +663,7 @@ const CarListingPage = () => {
                     ? "fuel_type"
                     : filters.discount
                       ? "discount"
-                      : priceRange && priceRange !== 'Tất cả giá'
-                        ? "price"
-                        : undefined
+                      : "price"
           }
         />
         <div ref={loaderRef} className="h-10"></div>
