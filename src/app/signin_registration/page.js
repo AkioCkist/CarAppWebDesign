@@ -2,8 +2,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
-import { motion, AnimatePresence } from "framer-motion"; // Import AnimatePresence
+import { motion, AnimatePresence } from "framer-motion";
 import { TypeAnimation } from 'react-type-animation';
+import { signIn, useSession } from "next-auth/react"; // Ensure signIn is imported
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -80,6 +81,7 @@ export default function LoginPage() {
   const [authMessage, setAuthMessage] = useState({ show: false, message: "", success: false });
 
   const { focusedInput, handleFocus, handleBlur } = useFocusState();
+  const { update } = useSession(); // Kept for potential future use or if next-auth is implicitly used
 
   useEffect(() => {
     const handleScroll = () => {
@@ -227,17 +229,24 @@ export default function LoginPage() {
     }
   };
 
+  // Modified handleSocialLogin to use NextAuth.js signIn
   const handleSocialLogin = async (provider) => {
-    console.log(`Social login with ${provider} - Feature coming soon!`);
-    setAuthMessage({
-      show: true,
-      message: `${provider} login will be available soon!`,
-      success: false,
-    });
-    
-    setTimeout(() => {
-      setAuthMessage({ show: false, message: "", success: false });
-    }, 2000);
+    setAuthMessage({ show: false, message: "", success: false });
+    setIsLoading(true); // Indicate loading for social login
+
+    try {
+      await signIn(provider, { callbackUrl: '/' }); // Redirect to home on success
+    } catch (error) {
+      console.error(`Social login with ${provider} failed:`, error);
+      setAuthMessage({
+        show: true,
+        message: `Failed to sign in with ${provider}. Please try again.`,
+        success: false,
+      });
+      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 3000);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleMode = () => {
@@ -415,35 +424,34 @@ export default function LoginPage() {
       </motion.header>
 
       {/* Auth Message Popup */}
-      <AnimatePresence> {/* Wrap with AnimatePresence */}
+      <AnimatePresence>
         {authMessage.show && (
           <motion.div
-            key="auth-popup" // Add a unique key when using AnimatePresence
+            key="auth-popup"
             className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
             initial="hidden"
             animate="visible"
             exit="exit"
             variants={popupVariants}
           >
-            <div className={`p-6 rounded-lg shadow-lg text-center backdrop-filter backdrop-blur-lg ${
-              authMessage.success ? 'bg-green-600/80' : 'bg-red-600/80' // Slightly more opaque
-            } text-white max-w-sm mx-4 border border-white/30`} // Added border for cleaner look
-            style={{
-              boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)", // Retain glass-like shadow
-              borderRadius: "1rem",
-            }}>
-              <div className="flex items-center justify-center mb-4"> {/* Increased margin-bottom */}
+            <div
+              className={`p-6 rounded-lg shadow-lg text-center backdrop-filter backdrop-blur-lg ${
+                authMessage.success ? 'bg-green-600/80' : 'bg-red-600/80'
+              } text-white max-w-sm mx-4 border border-white/30`}
+              style={{ boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)", borderRadius: "1rem" }}
+            >
+              <div className="flex items-center justify-center mb-4">
                 {authMessage.success ? (
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Larger icon */}
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
                   </svg>
                 ) : (
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"> {/* Larger icon */}
+                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
                   </svg>
                 )}
               </div>
-              <p className="text-xl font-semibold">{authMessage.message}</p> {/* Larger font size */}
+              <p className="text-xl font-semibold">{authMessage.message}</p>
             </div>
           </motion.div>
         )}
@@ -493,7 +501,7 @@ export default function LoginPage() {
                   className="w-full h-full relative preserve-3d"
                   style={{
                     transformStyle: "preserve-3d",
-                    minHeight: "700px"
+                    minHeight: "800px" // Ensure enough height for content
                   }}
                 >
                   {/* Front side (Login) */}
@@ -513,7 +521,7 @@ export default function LoginPage() {
                       animate={isLogin ? "visible" : "hidden"}
                       variants={contentVariants}
                     >
-                      {/* Header */}
+                      {/* Header with typing animation */}
                       <div className="text-center mb-8">
                         <motion.div
                           className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
@@ -537,12 +545,30 @@ export default function LoginPage() {
                           initial="hidden"
                           animate="visible"
                         >
-                          Welcome Back
+                          {isLogin ? 'Welcome Back' : 'Create Account'}
                         </motion.h2>
                       </div>
 
-                      {/* Form */}
+                      {/* Form with extended bottom padding */}
                       <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
+                        {!isLogin && (
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Full Name</label>
+                            <input
+                              type="text"
+                              name="name"
+                              value={formData.name}
+                              onChange={handleInputChange}
+                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
+                                errors.name ? 'border-red-500' : 'border-gray-300'
+                              } bg-white bg-opacity-80 text-gray-900`}
+                              placeholder="Enter your full name"
+                            />
+                            {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
+                          </div>
+                        )}
+
+                        {/* Phone number input for login */}
                         <motion.div
                           variants={inputVariants}
                           initial="hidden"
@@ -565,6 +591,12 @@ export default function LoginPage() {
                               placeholder="Enter your phone number"
                               pattern="^\+?\d{10,15}$"
                               inputMode="tel"
+                            />
+                            <motion.div
+                              className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-green-500 to-blue-500"
+                              initial={{ width: "0%" }}
+                              animate={{ width: focusedInput === "phone" ? "100%" : "0%" }}
+                              transition={{ duration: 0.3 }}
                             />
                             {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                           </div>
@@ -592,30 +624,65 @@ export default function LoginPage() {
                               <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
                               >
-                                {showPassword ? '🙈' : '👁️'}
+                                {showPassword ? '👁️' : '👁️‍🗨️'}
                               </button>
                             </div>
                             {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                           </div>
                         </motion.div>
 
-                        <div className="flex items-center justify-between">
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              name="rememberMe"
-                              checked={formData.rememberMe}
-                              onChange={handleInputChange}
-                              className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
-                            />
-                            <span className="ml-2 text-sm text-white">Remember me</span>
-                          </label>
-                          <a href="#" className="text-sm text-green-200 hover:text-green-100">
-                            Forgot password?
-                          </a>
-                        </div>
+                        {!isLogin && (
+                          <motion.div
+                            variants={inputVariants}
+                            initial="hidden"
+                            animate="visible"
+                            custom={3}
+                          >
+                            <div>
+                              <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
+                              <div className="relative">
+                                <input
+                                  type={showConfirmPassword ? "text" : "password"}
+                                  name="confirmPassword"
+                                  value={formData.confirmPassword}
+                                  onChange={handleInputChange}
+                                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                    errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                  } bg-white bg-opacity-80 text-gray-900`}
+                                  placeholder="Confirm your password"
+                                />
+                                <button
+                                  type="button"
+                                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                                >
+                                  {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                                </button>
+                              </div>
+                              {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
+                            </div>
+                          </motion.div>
+                        )}
+
+                        {isLogin && (
+                          <div className="flex items-center justify-between">
+                            <label className="flex items-center">
+                              <input
+                                type="checkbox"
+                                name="rememberMe"
+                                checked={formData.rememberMe}
+                                onChange={handleInputChange}
+                                className="h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                              />
+                              <span className="ml-2 text-sm text-white">Remember me</span>
+                            </label>
+                            <a href="#" className="text-sm text-green-200 hover:text-green-100">
+                              Forgot password?
+                            </a>
+                          </div>
+                        )}
 
                         <motion.button
                           type="submit"
@@ -630,21 +697,63 @@ export default function LoginPage() {
                           {isLoading ? (
                             <div className="flex items-center justify-center">
                               <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                              Signing in...
+                              {isLogin ? 'Signing in...' : 'Creating account...'}
                             </div>
-                          ) : 'Sign In'}
+                          ) : (
+                            isLogin ? 'Sign In' : 'Create Account'
+                          )}
                         </motion.button>
+
+                        {/* Divider */}
+                        <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
+                          ↓
+                        </div>
+                        <style jsx>{`
+                          .arrow-cycle {
+                            display: inline-block;
+                            animation: arrowSpinBounce 2.5s infinite ease-in-out;
+                            color: #9ca3af; /* Tailwind gray-400 */
+                          }
+                          @keyframes arrowSpinBounce {
+                            0% { transform: rotate(0deg) translateY(0); opacity: 0.6; color: #9ca3af; /* gray-400 */ }
+                            10% { transform: rotate(360deg) translateY(0); color: #9ca3af; }
+                            30% { transform: rotate(0deg) translateY(12px); opacity: 1; color: #fff; /* white */ }
+                            60% { transform: translateY(-6px); color: #fff; }
+                            90% { transform: rotate(360deg) translateY(0); opacity: 0.8; color: #9ca3af; }
+                            100% { transform: rotate(0deg) translateY(0); opacity: 0.6; color: #9ca3af; }
+                          }
+                        `}</style>
+
+                        {/* Social Login Buttons with Icons */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleSocialLogin('google')}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Google</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSocialLogin('facebook')}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Facebook</span>
+                          </button>
+                        </div>
 
                         {/* Toggle Mode */}
                         <div className="mt-6 text-center">
                           <p className="text-sm text-white">
-                            Don't have an account?
+                            {isLogin ? "Don't have an account?" : "Already have an account?"}
                             <button
                               type="button"
                               onClick={toggleMode}
                               className="ml-1 text-green-200 hover:text-green-100 font-medium"
                             >
-                              Sign up
+                              {isLogin ? 'Sign up' : 'Sign in'}
                             </button>
                           </p>
                         </div>
@@ -652,15 +761,15 @@ export default function LoginPage() {
                     </motion.div>
                   </motion.div>
 
-                  {/* Back side (Register) */}
+                  {/* Back side (Register) - Adjusted the text for the "Back" side for consistency */}
                   <motion.div
                     className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 border border-white/30"
                     style={{
                       ...glassStyle,
-                      backfaceVisibility: "hidden",
-                      transform: flipDirection === 'horizontal' ? 'rotateY(180deg)' : 'rotateX(180deg)',
+                      transform: flipDirection === 'horizontal' ? "rotateY(180deg)" : "rotateX(180deg)",
                       display: "flex",
-                      flexDirection: "column"
+                      flexDirection: "column",
+                      visibility: isLogin ? "hidden" : "visible" // Ensure it's only visible when isLogin is false
                     }}
                   >
                     <motion.div
@@ -669,20 +778,34 @@ export default function LoginPage() {
                       animate={isLogin ? "hidden" : "visible"}
                       variants={contentVariants}
                     >
-                      {/* Header */}
                       <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <motion.div
+                          className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 20,
+                            delay: 0.2
+                          }}
+                        >
                           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                        </div>
-                        <h2 className="text-3xl font-bold text-white mb-2">
+                        </motion.div>
+                        <motion.h2
+                          className="text-3xl font-bold text-white mb-2"
+                          variants={textVariants}
+                          initial="hidden"
+                          animate="visible"
+                        >
                           Create Account
-                        </h2>
+                        </motion.h2>
                       </div>
 
-                      {/* Form */}
                       <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
+                        {/* Name input for registration */}
                         <div>
                           <label className="block text-sm font-medium text-white mb-2">Full Name</label>
                           <input
@@ -698,70 +821,100 @@ export default function LoginPage() {
                           {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handlePhoneInput}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
-                              errors.phone ? 'border-red-500' : 'border-gray-300'
-                            } bg-white bg-opacity-80 text-gray-900`}
-                            placeholder="Enter your phone number"
-                            pattern="^\+?\d{10,15}$"
-                            inputMode="tel"
-                          />
-                          {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Password</label>
-                          <div className="relative">
+                        <motion.div
+                          variants={inputVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={1}
+                        >
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
                             <input
-                              type={showPassword ? "text" : "password"}
-                              name="password"
-                              value={formData.password}
-                              onChange={handleInputChange}
-                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
-                                errors.password ? 'border-red-500' : 'border-gray-300'
+                              type="tel"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handlePhoneInput}
+                              onFocus={() => handleFocus("phone")}
+                              onBlur={handleBlur}
+                              className={`w-full px-4 py-3 border rounded-lg transition-all duration-300 ${
+                                errors.phone ? 'border-red-500' :
+                                focusedInput === "phone" ? 'border-green-500 ring-2 ring-green-500 ring-opacity-50' : 'border-gray-300'
                               } bg-white bg-opacity-80 text-gray-900`}
-                              placeholder="Enter your password"
+                              placeholder="Enter your phone number"
+                              pattern="^\+?\d{10,15}$"
+                              inputMode="tel"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                            >
-                              {showPassword ? '🙈' : '👁️'}
-                            </button>
+                            <motion.div
+                              className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-green-500 to-blue-500"
+                              initial={{ width: "0%" }}
+                              animate={{ width: focusedInput === "phone" ? "100%" : "0%" }}
+                              transition={{ duration: 0.3 }}
+                            />
+                            {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                           </div>
-                          {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-                        </div>
+                        </motion.div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
-                          <div className="relative">
-                            <input
-                              type={showConfirmPassword ? "text" : "password"}
-                              name="confirmPassword"
-                              value={formData.confirmPassword}
-                              onChange={handleInputChange}
-                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
-                                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                              } bg-white bg-opacity-80 text-gray-900`}
-                              placeholder="Confirm your password"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
-                            >
-                              {showConfirmPassword ? '🙈' : '👁️'}
-                            </button>
+                        <motion.div
+                          variants={inputVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={2}
+                        >
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Password</label>
+                            <div className="relative">
+                              <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                  errors.password ? 'border-red-500' : 'border-gray-300'
+                                } bg-white bg-opacity-80 text-gray-900`}
+                                placeholder="Enter your password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                              >
+                                {showPassword ? '👁️' : '👁️‍🗨️'}
+                              </button>
+                            </div>
+                            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                           </div>
-                          {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
-                        </div>
+                        </motion.div>
+
+                        <motion.div
+                          variants={inputVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={3}
+                        >
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
+                            <div className="relative">
+                              <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleInputChange}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                  errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                } bg-white bg-opacity-80 text-gray-900`}
+                                placeholder="Confirm your password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                              >
+                                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                              </button>
+                            </div>
+                            {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
+                          </div>
+                        </motion.div>
 
                         <button
                           type="submit"
@@ -775,6 +928,31 @@ export default function LoginPage() {
                             </div>
                           ) : 'Create Account'}
                         </button>
+
+                        {/* Divider */}
+                        <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
+                          ↓
+                        </div>
+
+                        {/* Social Login Buttons with Icons (repeated for register side for consistency) */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleSocialLogin('google')}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Google</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSocialLogin('facebook')}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Facebook</span>
+                          </button>
+                        </div>
 
                         {/* Toggle Mode */}
                         <div className="mt-6 text-center">
