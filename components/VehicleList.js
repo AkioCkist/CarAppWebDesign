@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import CarRentalModal from "./CarRentalModal";
 import NoResultMessage from "./NoResultMessage";
+import VehicleCardSkeleton from "./VehicleCardSkeleton";
+import VehicleListSkeleton from './VehicleListSkeleton'; // Import VehicleListSkeleton
 
 // VehicleCard subcomponent for each vehicle
 function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
@@ -51,41 +53,6 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
             </span>
           </div>
 
-          {/* Thay đổi phần div chứa transmission, fuel và seat */}
-          <div className="grid grid-cols-3 gap-2 w-[600px] text-sm text-gray-600 mb-2">
-            <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
-                }`}
-            >
-              <img
-                src="/icons/IconDetailCarCard/transmission.svg"
-                alt="transmission"
-                className="w-4 h-4"
-              />
-              {vehicle.transmission}
-            </span>
-
-            <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
-                }`}
-            >
-              <img
-                src="/icons/IconDetailCarCard/seat.svg"
-                alt="seats"
-                className="w-4 h-4" />
-              {vehicle.seats} chỗ
-            </span>
-            <span
-              className={`flex items-center gap-2 transition-all duration-300 ${isHovered ? 'text-green-600 transform translate-x-1' : ''
-                }`}>
-              <img
-                src="/icons/IconDetailCarCard/fuel.svg"
-                alt="fuel"
-                className="w-4 h-4"
-              />
-              {vehicle.fuel}
-            </span>
-          </div>
           <div className="flex items-center text-sm text-gray-600 mb-2">
             <span className="flex items-center gap-2">
               <img
@@ -342,7 +309,8 @@ export default function VehicleList({
   favorites = [],
   noResultType,
   noResultFilter,
-  onBookClick
+  onBookClick,
+  isLoading = false // Thêm prop isLoading
 }) {
   const [vehicles, setVehicles] = useState(vehiclesProp || []);
   const [isMounted, setIsMounted] = useState(false);
@@ -394,7 +362,10 @@ export default function VehicleList({
     setSelectedCar(null);
   };
 
-  if (loading) return <div>Đang tải xe...</div>;
+  // Hiển thị skeleton loading khi đang tải
+  if (loading || isLoading) {
+    return <VehicleListSkeleton count={6} />; // Sử dụng VehicleListSkeleton thay vì code cũ
+  }
 
   return (
     <>
