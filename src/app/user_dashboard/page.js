@@ -8,8 +8,22 @@ import VehicleList from "../../../components/VehicleList";
 import ProfileEditPanel from "../../../components/ProfileEditPanel";
 
 export default function UserProfilePage() {
+  // Get user info from localStorage
+  const [user, setUser] = useState({ name: "", phone: "" });
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      const parsed = JSON.parse(userData);
+      setUser({
+        name: parsed.name || "",
+        phone: parsed.phone || ""
+      });
+    }
+  }, []);
+
   const { data: session } = useSession();
-  const user = session?.user;
+  // const user = session?.user; // <-- Commented out as we're using localStorage now
 
   const [fadeIn, setFadeIn] = useState(false);
   const [showFade, setShowFade] = useState(true);
@@ -195,11 +209,11 @@ export default function UserProfilePage() {
 
   // Use user info from session, fallback to defaults if not available
   const avatar =
-    user?.avatar && user.avatar.trim() !== ""
-      ? user.avatar
-      : "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
-  const name = user?.name || "Unknown User";
-  const phone = user?.phone || "N/A";
+  user.avatar && user.avatar.trim() !== ""
+    ? user.avatar
+    : "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
+  const name = user.name || "Unknown User";
+  const phone = user.phone || "N/A";
 
   // Thêm state để quản lý danh sách xe yêu thích
   const [favoriteCars, setFavoriteCars] = useState(userData.favoriteCars);

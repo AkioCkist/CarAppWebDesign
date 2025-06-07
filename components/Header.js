@@ -17,6 +17,7 @@ export default function Header() {
   const [fadeOut, setFadeOut] = useState(false);
   const [bgOpacity, setBgOpacity] = useState(0);
   const [showWhiteFade, setShowWhiteFade] = useState(false);
+  const [user, setUser] = useState(null);
 
   const isCarFindingPage = pathname?.includes('/finding_car');
 
@@ -98,7 +99,13 @@ export default function Header() {
     exit: { opacity: 0, height: 0 },
   };
 
-  const user = session?.user;
+  useEffect(() => {
+    // Get user info from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   return (
     <>
