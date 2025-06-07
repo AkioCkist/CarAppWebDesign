@@ -403,11 +403,29 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Fetch 4 xe đầu tiên từ API
-    fetch("http://localhost/myapi/vehicles.php?limit=4")
+    // Fetch 4 xe đầu tiên từ API Next.js (App Router)
+    fetch("/api/vehicles?limit=4")
       .then(res => res.json())
       .then(data => {
-        setFleetVehicles(data.records ? data.records : []);
+        // Map dữ liệu từ Prisma về format card cần
+        const mapped = (data.records || []).map(v => ({
+          id: v.id,
+          name: v.name,
+          image: v.image,
+          transmission: v.transmission,
+          seats: v.seats,
+          fuel: v.fuel,
+          location: v.location,
+          rating: v.rating,
+          trips: v.trips,
+          priceDisplay: v.priceDisplay,
+          oldPrice: v.oldPrice,
+          pricePer: v.pricePer,
+          priceDiscount: v.priceDiscount,
+          description: v.description,
+          isFavorite: v.is_favorite,
+        }));
+        setFleetVehicles(mapped);
         setFleetLoading(false);
       })
       .catch(() => setFleetLoading(false));
@@ -418,7 +436,7 @@ export default function HomePage() {
     setLoadingDetail(true);
     setIsModalOpen(true);
     try {
-      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const res = await fetch(`/api/vehicles?id=${vehicleId}`);
       const data = await res.json();
       setSelectedCar(data);
     } catch (e) {
@@ -859,10 +877,11 @@ export default function HomePage() {
                   className="bg-green-500 text-white font-medium py-3 w-full max-w-md mx-auto rounded-lg hover:bg-green-600 transition duration-200"
                   onClick={() => {
                     startLoading();
-                    // Tạo query string từ form
+                    // Nếu chọn same, dropOffLocation = pickUpLocation
+                    const dropOffLoc = form.dropOffLocation === "same" ? form.pickUpLocation : form.dropOffLocation;
                     const params = new URLSearchParams({
                       pickUpLocation: form.pickUpLocation,
-                      dropOffLocation: form.dropOffLocation,
+                      dropOffLocation: dropOffLoc,
                       pickUpDate: form.pickUpDate,
                       pickUpTime: form.pickUpTime,
                       dropOffDate: form.dropOffDate,

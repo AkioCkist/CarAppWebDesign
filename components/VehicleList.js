@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import CarRentalModal from "./CarRentalModal"; // Import CarRentalModal
+import CarRentalModal from "./CarRentalModal";
 import NoResultMessage from "./NoResultMessage";
 
 // VehicleCard subcomponent for each vehicle
@@ -17,7 +17,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
   };
 
   const handleBookClick = () => {
-    onBookClick(vehicle.id); // Truyền id thay vì object
+    onBookClick(vehicle.id);
   };
 
   if (!isMounted) {
@@ -336,31 +336,51 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
 }
 
 // Main VehicleList component with Modal integration
-export default function VehicleList({ vehicles, onFavoriteToggle, favorites = [], noResultType, noResultFilter }) {
+export default function VehicleList({
+  vehicles: vehiclesProp,
+  onFavoriteToggle,
+  favorites = [],
+  noResultType,
+  noResultFilter,
+  onBookClick
+}) {
+  const [vehicles, setVehicles] = useState(vehiclesProp || []);
   const [isMounted, setIsMounted] = useState(false);
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
-
-  // Dữ liệu tiện nghi mẫu cho các xe (bạn có thể customize theo dữ liệu thực)
-  const carAmenities = {
-    1: ['bluetooth', 'camera', 'airbag', 'etc'],
-    2: ['sunroof', 'sportMode', 'tablet', 'camera360'],
-    3: ['map', 'rotateCcw', 'circle', 'package'],
-    4: ['shield', 'radar', 'bluetooth', 'camera'],
-    // Thêm các ID xe khác...
-  };
+  const [loading, setLoading] = useState(!vehiclesProp);
 
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
-  // Sửa hàm này để fetch chi tiết xe
+  // Nếu không có vehiclesProp thì mới fetch
+  useEffect(() => {
+    if (!vehiclesProp) {
+      setLoading(true);
+      async function fetchVehicles() {
+        try {
+          const res = await fetch('/api/vehicles');
+          const data = await res.json();
+          setVehicles(data.records || []);
+        } catch (e) {
+          setVehicles([]);
+        }
+        setLoading(false);
+      }
+      fetchVehicles();
+    } else {
+      setVehicles(vehiclesProp);
+      setLoading(false);
+    }
+  }, [vehiclesProp]);
+
   const handleBookClick = async (vehicleId) => {
     setLoadingDetail(true);
     setIsModalOpen(true);
     try {
-      const res = await fetch(`http://localhost/myapi/vehicles.php?id=${vehicleId}`);
+      const res = await fetch(`/api/vehicles?id=${vehicleId}`);
       const data = await res.json();
       setSelectedCar(data);
     } catch (e) {
@@ -373,6 +393,8 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
     setIsModalOpen(false);
     setSelectedCar(null);
   };
+
+  if (loading) return <div>Đang tải xe...</div>;
 
   return (
     <>
@@ -404,11 +426,10 @@ export default function VehicleList({ vehicles, onFavoriteToggle, favorites = []
         <NoResultMessage type={noResultType} filter={noResultFilter} />
       )}
 
-      {/* CarRentalModal */}
       <CarRentalModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        carData={selectedCar} // Đúng tên prop
+        carData={selectedCar}
         loading={loadingDetail}
       />
     </>
