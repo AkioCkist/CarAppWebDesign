@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import CarRentalModal from "./CarRentalModal";
 import NoResultMessage from "./NoResultMessage";
+import VehicleCardSkeleton from "./VehicleCardSkeleton";
+import VehicleListSkeleton from './VehicleListSkeleton'; // Import VehicleListSkeleton
 
 // VehicleCard subcomponent for each vehicle
 function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
@@ -342,7 +344,8 @@ export default function VehicleList({
   favorites = [],
   noResultType,
   noResultFilter,
-  onBookClick
+  onBookClick,
+  isLoading = false // Thêm prop isLoading
 }) {
   const [vehicles, setVehicles] = useState(vehiclesProp || []);
   const [isMounted, setIsMounted] = useState(false);
@@ -394,7 +397,10 @@ export default function VehicleList({
     setSelectedCar(null);
   };
 
-  if (loading) return <div>Đang tải xe...</div>;
+  // Hiển thị skeleton loading khi đang tải
+  if (loading || isLoading) {
+    return <VehicleListSkeleton count={6} />; // Sử dụng VehicleListSkeleton thay vì code cũ
+  }
 
   return (
     <>

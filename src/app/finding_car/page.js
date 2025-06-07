@@ -493,11 +493,7 @@ const CarListingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {isLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60">
-          <CarLoadingScreen />
-        </div>
-      )}
+      {/* Bỏ CarLoadingScreen đen */}
       <Header />
       <div className="h-21 bg-gray-800/95"></div>
       <div className="bg-white shadow-sm border-b">
@@ -616,6 +612,7 @@ const CarListingPage = () => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
+          isLoading={isLoading} // Truyền isLoading prop
           noResultType={
             pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
               ? "location"
