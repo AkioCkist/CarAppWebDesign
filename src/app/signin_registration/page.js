@@ -2,8 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
-import { motion, AnimatePresence } from "framer-motion";
-import { TypeAnimation } from 'react-type-animation';
+import { motion } from "framer-motion";
 import { signIn, useSession } from "next-auth/react"; // Ensure signIn is imported
 
 // Animation variant for pull-up
@@ -175,20 +174,16 @@ export default function LoginPage() {
       if (response.ok && data.success) {
         setAuthMessage({
           show: true,
-          message: data.message,
+          message: isLogin ? 'Login successful! Redirecting...' : 'Account created successfully!',
           success: true,
         });
 
         if (isLogin) {
-          // Store user data in localStorage or session
           localStorage.setItem('user', JSON.stringify(data.user));
-          
-          // Redirect to home page after successful login
           setTimeout(() => {
             window.location.href = "/";
-          }, 1500);
+          }, 2500); // Updated to 2.5s to allow for 2s display + 0.5s fade
         } else {
-          // For registration, show success message and then switch to login
           setTimeout(() => {
             setAuthMessage({ show: false, message: "", success: false });
             setIsLogin(true);
@@ -200,30 +195,45 @@ export default function LoginPage() {
               rememberMe: false
             });
             setErrors({});
-          }, 2000);
+          }, 2500); // Updated timing for registration success
         }
       } else {
+        // Display specific error message for incorrect credentials
+        let errorMessage = 'An error occurred. Please try again.';
+        
+        if (isLogin) {
+          if (data.error?.includes('phone') || data.error?.includes('user') || data.error?.includes('found')) {
+            errorMessage = 'Phone number or password is incorrect.';
+          } else if (data.error?.includes('password')) {
+            errorMessage = 'Phone number or password is incorrect.';
+          } else {
+            errorMessage = data.error || 'Phone number or password is incorrect.';
+          }
+        } else {
+          errorMessage = data.error || 'Registration failed. Please try again.';
+        }
+
         setAuthMessage({
           show: true,
-          message: data.error || (isLogin ? 'Login failed' : 'Registration failed'),
+          message: errorMessage,
           success: false,
         });
         
         setTimeout(() => {
           setAuthMessage({ show: false, message: "", success: false });
-        }, 3000);
+        }, 2500); // Updated to 2.5s total (2s display + 0.5s fade)
       }
     } catch (error) {
       console.error('Auth error:', error);
       setAuthMessage({
         show: true,
-        message: 'Network error. Please try again.',
+        message: 'Network error. Please check your connection and try again.',
         success: false,
       });
       
       setTimeout(() => {
         setAuthMessage({ show: false, message: "", success: false });
-      }, 3000);
+      }, 2500); // Updated to 2.5s total (2s display + 0.5s fade)
     } finally {
       setIsLoading(false);
     }
@@ -243,7 +253,7 @@ export default function LoginPage() {
         message: `Failed to sign in with ${provider}. Please try again.`,
         success: false,
       });
-      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 3000);
+      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500); // Updated to 2.5s
     } finally {
       setIsLoading(false);
     }
@@ -367,6 +377,124 @@ export default function LoginPage() {
 
   return (
     <div className="font-sans bg-black text-gray-900 min-h-screen">
+      {/* Notification Component */}
+      {authMessage.show && (
+        <motion.div
+          initial={{ opacity: 0, y: -100, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -100, scale: 0.9 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            duration: 0.5
+          }}
+          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4"
+        >
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 2, duration: 0.8 }} // Start fade after 2 seconds, fade for 0.8 seconds
+            className={`relative overflow-hidden rounded-2xl shadow-2xl border backdrop-blur-md ${
+              authMessage.success
+                ? 'bg-gradient-to-r from-green-500/90 to-emerald-600/90 border-green-400/50'
+                : 'bg-gradient-to-r from-red-500/90 to-rose-600/90 border-red-400/50'
+            }`}
+            style={{
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+            }}
+          >
+            {/* Animated background glow */}
+            <div
+              className={`absolute inset-0 opacity-30 ${
+                authMessage.success ? 'bg-green-400' : 'bg-red-400'
+              }`}
+              style={{
+                background: authMessage.success
+                  ? 'radial-gradient(circle at 30% 50%, rgba(34, 197, 94, 0.4) 0%, transparent 50%)'
+                  : 'radial-gradient(circle at 30% 50%, rgba(239, 68, 68, 0.4) 0%, transparent 50%)'
+              }}
+            />
+            
+            <div className="relative p-4">
+              <div className="flex items-start space-x-3">
+                {/* Icon */}
+                <div className={`flex-shrink-0 ${authMessage.success ? 'text-green-100' : 'text-red-100'}`}>
+                  {authMessage.success ? (
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ scale: 0, rotate: 180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Message */}
+                <div className="flex-1 min-w-0">
+                  <motion.p
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className={`text-sm font-medium ${
+                      authMessage.success ? 'text-green-50' : 'text-red-50'
+                    }`}
+                  >
+                    {authMessage.message}
+                  </motion.p>
+                </div>
+
+                {/* Close button */}
+                <button
+                  onClick={() => setAuthMessage({ show: false, message: "", success: false })}
+                  className={`flex-shrink-0 rounded-full p-1 hover:bg-white/20 transition-colors ${
+                    authMessage.success ? 'text-green-100 hover:text-green-50' : 'text-red-100 hover:text-red-50'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Progress bar for auto-dismiss - Updated timing to match 2-second display */}
+              <motion.div
+                className="mt-3 h-1 bg-white/20 rounded-full overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <motion.div
+                  className={`h-full ${authMessage.success ? 'bg-green-200' : 'bg-red-200'}`}
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{
+                    duration: 2, // Changed to 2 seconds to match display time
+                    ease: "linear",
+                    delay: 0.5
+                  }}
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Header - Apply zoom out transition */}
       <motion.header
         variants={zoomOutVariant}
@@ -422,40 +550,6 @@ export default function LoginPage() {
           </div>
         </div>
       </motion.header>
-
-      {/* Auth Message Popup */}
-      <AnimatePresence>
-        {authMessage.show && (
-          <motion.div
-            key="auth-popup"
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            variants={popupVariants}
-          >
-            <div
-              className={`p-6 rounded-lg shadow-lg text-center backdrop-filter backdrop-blur-lg ${
-                authMessage.success ? 'bg-green-600/80' : 'bg-red-600/80'
-              } text-white max-w-sm mx-4 border border-white/30`}
-              style={{ boxShadow: "0 8px 32px 0 rgba(31, 38, 135, 0.37)", borderRadius: "1rem" }}
-            >
-              <div className="flex items-center justify-center mb-4">
-                {authMessage.success ? (
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                  </svg>
-                ) : (
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                  </svg>
-                )}
-              </div>
-              <p className="text-xl font-semibold">{authMessage.message}</p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
 
       {/* Login Section */}
       <section className="h-screen flex items-center justify-center relative overflow-hidden">
