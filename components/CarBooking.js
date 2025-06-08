@@ -299,7 +299,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div>
                     <h3 className="text-2xl font-bold text-green-800 mb-1">{normalizedCar?.name}</h3>
                     <p className="text-green-600 text-lg mb-2">
-                      {normalizedCar?.type} • {normalizedCar?.seats} chỗ • {normalizedCar?.transmission}
+                      {normalizedCar?.type} • {normalizedCar?.seats} seats • {normalizedCar?.transmission}
                     </p>
                     <div className="flex space-x-2">
                       {normalizedCar?.features?.map((feature, index) => (
