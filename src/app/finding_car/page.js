@@ -788,6 +788,14 @@ function CarListingPageContent() {
           pickUpTime={pickUpTime}
           dropOffDate={dropOffDate}
           dropOffTime={dropOffTime}
+          searchData={{
+            pickupLocation: pickUpLocation,
+            dropoffLocation: dropOffLocation,
+            pickupDate: pickUpDate,
+            pickupTime: pickUpTime,
+            dropoffDate: dropOffDate,
+            dropoffTime: dropOffTime
+          }}
         />
       )}
       <Footer />

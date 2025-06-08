@@ -62,10 +62,14 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   // Tự động fill thông tin tìm kiếm nếu đã có preFilledSearchData
   useEffect(() => {
     if (preFilledSearchData) {
-      setSearchData(prevData => ({
-        ...prevData,
-        ...preFilledSearchData
-      }));
+      setSearchData({
+        pickupLocation: preFilledSearchData.pickupLocation || '',
+        dropoffLocation: preFilledSearchData.dropoffLocation || '',
+        pickupDate: preFilledSearchData.pickupDate || '',
+        pickupTime: preFilledSearchData.pickupTime || '',
+        dropoffDate: preFilledSearchData.dropoffDate || '',
+        dropoffTime: preFilledSearchData.dropoffTime || ''
+      });
     }
   }, [preFilledSearchData]);
 
@@ -223,24 +227,28 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
-      <pre className="text-sm p-4 bg-gray-100 border rounded-md mb-4">
-        <strong>Xe chọn:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {normalizedCar?.price} đ/ngày
-      </pre>
-      <pre className="text-sm p-4 bg-yellow-50 border rounded-md mb-6">
-        <strong>Thông tin tìm kiếm:</strong><br />
-        Đón: {searchData.pickupLocation} lúc {searchData.pickupDate} {searchData.pickupTime}<br />
-        Trả: {searchData.dropoffLocation} lúc {searchData.dropoffDate} {searchData.dropoffTime}
-      </pre>
-      <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="text-center mb-8">
+      {/* Header Section */}
+      <div className="container mx-auto px-4 py-8 flex flex-col items-center">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-green-500 rounded-full mb-4">
             <Car className="w-10 h-10 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-green-800 mb-2">Đặt Xe Ngay</h1>
-          <p className="text-green-600 text-lg">Hoàn thành đặt xe chỉ trong 3 bước đơn giản</p>
+          <h1 className="text-4xl font-bold text-green-800 mb-2">Book Your Car</h1>
+          <p className="text-green-600 text-lg">Complete your booking in just 3 simple steps</p>
         </div>
-
+        {/* Info Boxes */}
+        <div className="w-full max-w-4xl flex flex-col gap-2 mb-8">
+          <div className="text-sm p-4 bg-gray-100 border border-green-200 rounded-md shadow text-green-900">
+            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {normalizedCar?.price} đ/day
+          </div>
+          <div className="text-sm p-4 bg-yellow-50 border border-yellow-200 rounded-md shadow text-yellow-900">
+            <strong>Search info:</strong><br />
+            Pickup: {searchData.pickupLocation} at {searchData.pickupDate} {searchData.pickupTime}<br />
+            Dropoff: {searchData.dropoffLocation} at {searchData.dropoffDate} {searchData.dropoffTime}
+          </div>
+        </div>
+      </div>
+      <div className="container mx-auto px-4 py-0">
         {/* Progress Bar */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-4">
@@ -267,13 +275,13 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         <div className="flex justify-center mb-8">
           <div className="flex space-x-24 text-sm">
             <span className={`transition-all duration-300 ${currentStep >= 1 ? 'font-bold text-green-700' : 'text-gray-500'}`}>
-              Thông tin chuyến đi
+              Trip Information
             </span>
             <span className={`transition-all duration-300 ${currentStep >= 2 ? 'font-bold text-green-700' : 'text-gray-500'}`}>
-              Thông tin cá nhân
+              Personal Information
             </span>
             <span className={`transition-all duration-300 ${currentStep >= 3 ? 'font-bold text-green-700' : 'text-gray-500'}`}>
-              Thanh toán
+              Payment
             </span>
           </div>
         </div>
@@ -325,7 +333,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 <div className="bg-green-100 p-3 rounded-2xl mr-4">
                   <MapPin className="w-6 h-6 text-green-600" />
                 </div>
-                Thông tin chuyến đi
+                Trip Information
               </h2>
               
               <div className="space-y-8">
@@ -333,7 +341,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div>
                     <label className="block text-green-700 font-semibold mb-3 text-lg">
                       <MapPin className="inline w-5 h-5 mr-2" />
-                      Điểm đón xe
+                      Pickup Location
                     </label>
                     <input
                       type="text"
@@ -355,7 +363,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div>
                     <label className="block text-green-700 font-semibold mb-3 text-lg">
                       <MapPin className="inline w-5 h-5 mr-2" />
-                      Điểm trả xe
+                      Dropoff Location
                     </label>
                     <input
                       type="text"
@@ -380,11 +388,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-green-800 flex items-center">
                       <Calendar className="w-5 h-5 mr-2" />
-                      Thời gian đón xe
+                      Pickup Time
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-green-700 font-medium mb-2">Ngày đón</label>
+                        <label className="block text-green-700 font-medium mb-2">Date</label>
                         <input
                           type="date"
                          
@@ -405,7 +413,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       </div>
                       
                       <div>
-                        <label className="block text-green-700 font-medium mb-2">Giờ đón</label>
+                        <label className="block text-green-700 font-medium mb-2">Time</label>
                         <input
                           type="time"
                           value={searchData.pickupTime}
@@ -429,11 +437,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="space-y-4">
                     <h3 className="text-xl font-semibold text-green-800 flex items-center">
                       <Calendar className="w-5 h-5 mr-2" />
-                      Thời gian trả xe
+                      Dropoff Time
                     </h3>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-green-700 font-medium mb-2">Ngày trả</label>
+                        <label className="block text-green-700 font-medium mb-2">Date</label>
                         <input
                           type="date"
                           min={searchData.pickupDate || new Date().toISOString().split('T')[0]}
@@ -454,7 +462,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       </div>
                       
                       <div>
-                        <label className="block text-green-700 font-medium mb-2">Giờ trả</label>
+                        <label className="block text-green-700 font-medium mb-2">Time</label>
                         <input
                           type="time"
                           value={searchData.dropoffTime}
@@ -481,8 +489,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="bg-green-50 rounded-2xl p-6 border border-green-200">
                     <div className="flex justify-between items-center">
                       <div>
-                        <p className="text-green-700 font-medium">Số ngày thuê: {getDayCount()} ngày</p>
-                        <p className="text-green-600">Giá: ${normalizedCar.price} x {getDayCount()} ngày</p>
+                        <p className="text-green-700 font-medium">Rental days: {getDayCount()} day(s)</p>
+                        <p className="text-green-600">Price: ${normalizedCar.price} x {getDayCount()} day(s)</p>
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-green-600">${calculateTotal()}</p>
@@ -496,7 +504,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   onClick={handleSearchSubmit}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
                 >
-                  Tiếp tục
+                  Continue
                   <ArrowRight className="ml-3 w-6 h-6" />
                 </button>
               </div>
@@ -513,14 +521,14 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="bg-green-100 p-3 rounded-2xl mr-4">
                     <User className="w-6 h-6 text-green-600" />
                   </div>
-                  Thông tin cá nhân
+                  Personal Information
                 </h2>
                 <button
                   onClick={() => setCurrentStep(1)}
                   className="flex items-center text-green-600 hover:text-green-800 transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5 mr-2" />
-                  Quay lại
+                  Back
                 </button>
               </div>
               
@@ -529,7 +537,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div>
                     <label className="block text-green-700 font-semibold mb-3">
                       <User className="inline w-4 h-4 mr-2" />
-                      Họ và tên *
+                      Full Name *
                     </label>
                     <input
                       type="text"
@@ -553,7 +561,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div>
                     <label className="block text-green-700 font-semibold mb-3">
                       <Phone className="inline w-4 h-4 mr-2" />
-                      Số điện thoại *
+                      Phone Number *
                     </label>
                     <input
                       type="tel"
@@ -602,7 +610,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 <div>
                   <label className="block text-green-700 font-semibold mb-3">
                     <MapPin className="inline w-4 h-4 mr-2" />
-                    Địa chỉ *
+                    Address *
                   </label>
                   <textarea
                     className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 resize-none ${
@@ -626,7 +634,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 <div>
                   <label className="block text-green-700 font-semibold mb-3">
                     <CreditCard className="inline w-4 h-4 mr-2" />
-                    Số giấy phép lái xe *
+                    Driver's License Number *
                   </label>
                   <input
                     type="text"
@@ -652,10 +660,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="flex items-start">
                     <Shield className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
                     <div>
-                      <h4 className="font-semibold text-blue-800 mb-1">Lưu ý quan trọng</h4>
+                      <h4 className="font-semibold text-blue-800 mb-1">Important Notice</h4>
                       <p className="text-blue-700 text-sm">
-                        Vui lòng mang theo giấy phép lái xe gốc và CCCD/CMND khi nhận xe. 
-                        Thông tin phải khớp với thông tin đã khai báo.
+                        Please bring your original driver's license and ID card when picking up the car.
+                        Information must match what you have provided.
                       </p>
                     </div>
                   </div>
@@ -665,7 +673,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   onClick={handleUserInfoSubmit}
                   className="w-full bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg hover:shadow-xl transform hover:scale-105 flex items-center justify-center"
                 >
-                  Tiếp tục
+                  Continue
                   <ArrowRight className="ml-3 w-6 h-6" />
                 </button>
               </div>
@@ -682,21 +690,21 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="bg-green-100 p-3 rounded-2xl mr-4">
                     <CreditCard className="w-6 h-6 text-green-600" />
                   </div>
-                  Thanh toán
+                  Payment
                 </h2>
                 <button
                   onClick={() => setCurrentStep(2)}
                   className="flex items-center text-green-600 hover:text-green-800 transition-colors"
                 >
                   <ArrowLeft className="w-5 h-5 mr-2" />
-                  Quay lại
+                  Back
                 </button>
               </div>
 
               <div className="grid lg:grid-cols-2 gap-8">
                 {/* Payment Methods */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-green-800 mb-6">Chọn phương thức thanh toán</h3>
+                  <h3 className="text-xl font-semibold text-green-800 mb-6">Choose payment method</h3>
                   
                   <div className="space-y-4">
                     <div 
@@ -716,8 +724,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <div className="flex items-center">
                           <Banknote className="w-6 h-6 text-green-600 mr-3" />
                           <div>
-                            <h4 className="font-semibold text-green-800">Thanh toán khi nhận xe</h4>
-                            <p className="text-green-600 text-sm">Thanh toán bằng tiền mặt hoặc thẻ tại điểm nhận xe</p>
+                            <h4 className="font-semibold text-green-800">Pay on Pickup</h4>
+                            <p className="text-green-600 text-sm">Pay by cash or card at pickup location</p>
                           </div>
                         </div>
                       </div>
@@ -740,8 +748,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <div className="flex items-center">
                           <CreditCard className="w-6 h-6 text-green-600 mr-3" />
                           <div>
-                            <h4 className="font-semibold text-green-800">Chuyển khoản ngân hàng</h4>
-                            <p className="text-green-600 text-sm">Chuyển khoản trước 30% - Thanh toán còn lại khi nhận xe</p>
+                            <h4 className="font-semibold text-green-800">Bank Transfer</h4>
+                            <p className="text-green-600 text-sm">Transfer 30% upfront - Pay the rest at pickup</p>
                           </div>
                         </div>
                       </div>
@@ -753,28 +761,28 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
                       <h4 className="font-semibold text-blue-800 mb-4 flex items-center">
                         <CreditCard className="w-5 h-5 mr-2" />
-                        Thông tin chuyển khoản
+                        Bank Transfer Details
                       </h4>
                       <div className="space-y-3 text-blue-700">
                         <div className="flex justify-between">
-                          <span>Ngân hàng:</span>
+                          <span>Bank:</span>
                           <span className="font-semibold">Vietcombank</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Số tài khoản:</span>
+                          <span>Account number:</span>
                           <span className="font-semibold">1234567890</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Chủ tài khoản:</span>
-                          <span className="font-semibold">CÔNG TY TNHH THUÊ XE ABC</span>
+                          <span>Account holder:</span>
+                          <span className="font-semibold">ABC CAR RENTAL CO., LTD</span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Số tiền cần chuyển:</span>
+                          <span>Amount to transfer:</span>
                           <span className="font-semibold text-lg">${Math.round(calculateTotal() * 0.3)}</span>
                         </div>
                         <div className="border-t border-blue-300 pt-3 mt-3">
                           <p className="text-sm">
-                            <strong>Nội dung chuyển khoản:</strong> "Dat xe [Họ tên] [Số điện thoại]"
+                            <strong>Transfer note:</strong> "Car booking [Full Name] [Phone Number]"
                           </p>
                         </div>
                       </div>
@@ -785,28 +793,28 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="bg-gray-50 border border-gray-200 rounded-xl p-6">
                     <h4 className="font-semibold text-gray-800 mb-4 flex items-center">
                       <Shield className="w-5 h-5 mr-2" />
-                      Điều khoản và điều kiện
+                      Terms and Conditions
                     </h4>
                     <div className="space-y-2 text-gray-700 text-sm">
                       <div className="flex items-start">
                         <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Khách hàng phải có giấy phép lái xe hợp lệ và CCCD/CMND</span>
+                        <span>Customer must have a valid driver's license and ID card</span>
                       </div>
                       <div className="flex items-start">
                         <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Đặt cọc bảo hiểm 2.000.000 VND khi nhận xe</span>
+                        <span>Insurance deposit of 2,000,000 VND required at pickup</span>
                       </div>
                       <div className="flex items-start">
                         <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Hoàn cọc trong vòng 7 ngày sau khi trả xe</span>
+                        <span>Deposit refunded within 7 days after return</span>
                       </div>
                       <div className="flex items-start">
                         <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Hủy miễn phí trước 24h, sau đó phí hủy 20%</span>
+                        <span>Free cancellation up to 24h before, 20% fee after</span>
                       </div>
                       <div className="flex items-start">
                         <CheckCircle className="w-4 h-4 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
-                        <span>Bảo hiểm cơ bản được bao gồm trong giá thuê</span>
+                        <span>Basic insurance included in rental price</span>
                       </div>
                     </div>
                   </div>
@@ -814,7 +822,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
                 {/* Order Summary */}
                 <div className="space-y-6">
-                  <h3 className="text-xl font-semibold text-green-800 mb-6">Tóm tắt đơn hàng</h3>
+                  <h3 className="text-xl font-semibold text-green-800 mb-6">Order Summary</h3>
                   
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6">
                     {/* Car Info Summary */}
@@ -822,7 +830,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <div className="text-3xl mr-4">{normalizedCar.image}</div>
                       <div>
                         <h4 className="font-semibold text-green-800">{normalizedCar.name}</h4>
-                        <p className="text-green-600 text-sm">{normalizedCar.type} • {normalizedCar.seats} chỗ</p>
+                        <p className="text-green-600 text-sm">{normalizedCar.type} • {normalizedCar.seats} seats</p>
                       </div>
                     </div>
 
@@ -831,19 +839,19 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <div className="flex items-center text-green-700">
                         <MapPin className="w-4 h-4 mr-2" />
                         <span className="text-sm">
-                          <strong>Đón:</strong> {searchData.pickupLocation}
+                          <strong>Pickup:</strong> {searchData.pickupLocation}
                         </span>
                       </div>
                       <div className="flex items-center text-green-700">
                         <MapPin className="w-4 h-4 mr-2" />
                         <span className="text-sm">
-                          <strong>Trả:</strong> {searchData.dropoffLocation}
+                          <strong>Dropoff:</strong> {searchData.dropoffLocation}
                         </span>
                       </div>
                       <div className="flex items-center text-green-700">
                         <Calendar className="w-4 h-4 mr-2" />
                         <span className="text-sm">
-                          <strong>Thời gian:</strong> {searchData.pickupDate} {searchData.pickupTime} → {searchData.dropoffDate} {searchData.dropoffTime}
+                          <strong>Time:</strong> {searchData.pickupDate} {searchData.pickupTime} → {searchData.dropoffDate} {searchData.dropoffTime}
                         </span>
                       </div>
                     </div>
@@ -853,13 +861,13 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <div className="flex items-center text-green-700">
                         <User className="w-4 h-4 mr-2" />
                         <span className="text-sm">
-                          <strong>Khách hàng:</strong> {userInfo.fullName}
+                          <strong>Customer:</strong> {userInfo.fullName}
                         </span>
                       </div>
                       <div className="flex items-center text-green-700">
                         <Phone className="w-4 h-4 mr-2" />
                         <span className="text-sm">
-                          <strong>SĐT:</strong> {userInfo.phone}
+                          <strong>Phone:</strong> {userInfo.phone}
                         </span>
                       </div>
                       <div className="flex items-center text-green-700">
@@ -873,23 +881,23 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
                   {/* Price Breakdown */}
                   <div className="bg-white border border-gray-200 rounded-xl p-6">
-                    <h4 className="font-semibold text-gray-800 mb-4">Chi tiết giá</h4>
+                    <h4 className="font-semibold text-gray-800 mb-4">Price Details</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Giá thuê ({getDayCount()} ngày)</span>
+                        <span className="text-gray-600">Rental price ({getDayCount()} day(s))</span>
                         <span className="font-medium">${calculateTotal()}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Phí dịch vụ</span>
+                        <span className="text-gray-600">Service fee</span>
                         <span className="font-medium">$0</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-gray-600">Thuế VAT (10%)</span>
+                        <span className="text-gray-600">VAT (10%)</span>
                         <span className="font-medium">${Math.round(calculateTotal() * 0.1)}</span>
                       </div>
                       <div className="border-t border-gray-200 pt-3">
                         <div className="flex justify-between text-lg font-bold">
-                          <span>Tổng cộng</span>
+                          <span>Total</span>
                           <span className="text-green-600">${Math.round(calculateTotal() * 1.1)}</span>
                         </div>
                         <p className="text-green-500 text-right text-sm">
@@ -901,11 +909,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     {paymentMethod === 'bank' && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                         <div className="flex justify-between text-sm">
-                          <span>Cần thanh toán trước:</span>
+                          <span>Pay upfront:</span>
                           <span className="font-semibold">${Math.round(calculateTotal() * 1.1 * 0.3)}</span>
                         </div>
                         <div className="flex justify-between text-sm">
-                          <span>Thanh toán khi nhận xe:</span>
+                          <span>Pay at pickup:</span>
                           <span className="font-semibold">${Math.round(calculateTotal() * 1.1 * 0.7)}</span>
                         </div>
                       </div>
@@ -925,12 +933,12 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     {isSubmitting ? (
                       <>
                         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white mr-3"></div>
-                        Đang xử lý...
+                        Processing...
                       </>
                     ) : (
                       <>
                         <CheckCircle className="mr-3 w-6 h-6" />
-                        Xác nhận đặt xe
+                        Confirm Booking
                       </>
                     )}
                   </button>
@@ -947,24 +955,24 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-bold text-green-800 mb-2">Bảo hiểm toàn diện</h3>
-              <p className="text-green-600 text-sm">Xe được bảo hiểm đầy đủ, khách hàng yên tâm trải nghiệm</p>
+              <h3 className="font-bold text-green-800 mb-2">Comprehensive Insurance</h3>
+              <p className="text-green-600 text-sm">Fully insured vehicles for your peace of mind</p>
             </div>
             
             <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-bold text-green-800 mb-2">Hỗ trợ 24/7</h3>
-              <p className="text-green-600 text-sm">Đội ngũ hỗ trợ khách hàng luôn sẵn sàng phục vụ</p>
+              <h3 className="font-bold text-green-800 mb-2">24/7 Support</h3>
+              <p className="text-green-600 text-sm">Our support team is always ready to assist you</p>
             </div>
             
             <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="w-8 h-8 text-green-600" />
               </div>
-              <h3 className="font-bold text-green-800 mb-2">Giá tốt nhất</h3>
-              <p className="text-green-600 text-sm">Cam kết giá cạnh tranh nhất thị trường</p>
+              <h3 className="font-bold text-green-800 mb-2">Best Price</h3>
+              <p className="text-green-600 text-sm">Guaranteed best price on the market</p>
             </div>
           </div>
         </div>
