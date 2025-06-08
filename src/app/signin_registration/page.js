@@ -148,12 +148,11 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateForm()) return;
-
     setIsLoading(true);
-    setAuthMessage({ show: false, message: "", success: false });    try {
+
+    try {
       if (isLogin) {
-        // Use custom auth API for login
+        // Login logic
         const response = await fetch('/api/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -162,29 +161,36 @@ export default function LoginPage() {
             phone: formData.phone,
             password: formData.password
           }),
-        });        const data = await response.json();
+        });
+
+        const data = await response.json();
         if (response.ok && data.success) {
-          // Store user data in localStorage
+          // Store user data in localStorage after successful login
           localStorage.setItem('user', JSON.stringify(data.user));
           
           setAuthMessage({
             show: true,
-            message: "Login successful! Redirecting...",
+            message: 'Login successful!',
             success: true,
           });
+
           setTimeout(() => {
-            window.location.href = "/";
+            setAuthMessage({ show: false, message: "", success: false });
+            // Check if user is administrator (role_id = 3)
+            const isAdmin = data.user.roles?.some(role => role.id === 3);
+            // Redirect to dashboard if admin, otherwise to home
+            window.location.href = isAdmin ? "/dashboard" : "/";
           }, 2500);
         } else {
           setAuthMessage({
             show: true,
-            message: data.error || "Phone number or password is incorrect.",
+            message: data.error || 'Login failed. Please try again.',
             success: false,
           });
           setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
         }
       } else {
-        // Registration logic (keep your custom API call for registration)
+        // Registration logic
         const response = await fetch('/api/auth', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -194,7 +200,9 @@ export default function LoginPage() {
             password: formData.password,
             name: formData.name
           }),
-        });        const data = await response.json();
+        });
+
+        const data = await response.json();
         if (response.ok && data.success) {
           // Store user data in localStorage after successful registration
           localStorage.setItem('user', JSON.stringify(data.user));
