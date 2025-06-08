@@ -1,4 +1,5 @@
-// app/api/auth/[...nextauth]/route.js
+// src/app/api/auth/[...nextauth]/route.js
+
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { createClient } from "@supabase/supabase-js";
@@ -10,7 +11,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-export const { handlers: { GET, POST }, signIn, signOut, auth } = NextAuth({
+const authOptions = {
   debug: true,
   providers: [
     CredentialsProvider({
@@ -86,4 +87,8 @@ export const { handlers: { GET, POST }, signIn, signOut, auth } = NextAuth({
   pages: {
     signIn: "/login"
   }
-});
+};
+
+const { GET, POST } = NextAuth(authOptions);
+
+export { GET, POST };
