@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import {
     X, Star, MapPin, Users, Fuel, Cog, Gauge, Camera, Bluetooth, RotateCcw, Circle, Package, Tablet, CreditCard, Shield, ShieldCheck, RotateCw, Zap, Radar, Sun, Map, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -58,10 +59,13 @@ const CarRentalModal = ({
     onClose,
     carData,
     carAmenities,
-    loading // thêm props này
+    loading,
+    searchData
 }) => {
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
+    const router = useRouter();
+
     // Khóa scroll khi mở modal
     useEffect(() => {
         if (isOpen) {
@@ -110,6 +114,20 @@ const CarRentalModal = ({
         // Nếu url bắt đầu bằng /cars thì giữ nguyên, nếu không thì thêm /cars/
         if (url.startsWith('/cars/')) return url;
         return `/cars/${url.replace(/^\/+/, '')}`;
+    }
+
+    // Helper to build booking URL with params
+    function buildBookingUrl() {
+        const params = new URLSearchParams({
+            carId: carData.id,
+            pickupLocation: searchData?.pickupLocation || "",
+            dropoffLocation: searchData?.dropoffLocation || "",
+            pickupDate: searchData?.pickupDate || "",
+            pickupTime: searchData?.pickupTime || "",
+            dropoffDate: searchData?.dropoffDate || "",
+            dropoffTime: searchData?.dropoffTime || ""
+        });
+        return `/booking_car?${params.toString()}`;
     }
 
     // Render modal vào cuối body để đảm bảo phủ toàn bộ trang
@@ -307,7 +325,10 @@ const CarRentalModal = ({
                             {/* Action Button */}
                             <button
                                 className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
-                                onClick={onClose}>
+                                onClick={() => {
+                                    router.push(buildBookingUrl());
+                                    onClose && onClose();
+                                }}>
                                 Chọn thuê
                             </button>
                         </div>
