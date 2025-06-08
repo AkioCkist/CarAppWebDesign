@@ -1066,7 +1066,7 @@ export default function HomePage() {
                           <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 gap-x-4 gap-y-1">
                             <div className="grid grid-cols-3 gap-2 w-full text-sm text-gray-600 mb-2">
                               <span className="flex items-center gap-2">
-                                <img src="/icons/IconDetailCarCard/transmission.svg" alt="transmission" className="w-4 h-4" />
+                                <img src="/icons/IconDetailCarCard/Transmission.svg" alt="transmission" className="w-4 h-4" />
                                 {vehicle.transmission}
                               </span>
                               <span className="flex items-center gap-2">
