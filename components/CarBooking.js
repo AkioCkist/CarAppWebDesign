@@ -82,22 +82,22 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     const newErrors = {};
     
     if (!searchData.pickupLocation?.trim()) {
-      newErrors.pickupLocation = 'Vui lòng nhập điểm đón';
+      newErrors.pickupLocation = 'Please enter pickup location';
     }
     if (!searchData.dropoffLocation?.trim()) {
-      newErrors.dropoffLocation = 'Vui lòng nhập điểm trả xe';
+      newErrors.dropoffLocation = 'Please enter dropoff location';
     }
     if (!searchData.pickupDate) {
-      newErrors.pickupDate = 'Vui lòng chọn ngày đón';
+      newErrors.pickupDate = 'Please select pickup date';
     }
     if (!searchData.pickupTime) {
-      newErrors.pickupTime = 'Vui lòng chọn giờ đón';
+      newErrors.pickupTime = 'Please select pickup time';
     }
     if (!searchData.dropoffDate) {
-      newErrors.dropoffDate = 'Vui lòng chọn ngày trả';
+      newErrors.dropoffDate = 'Please select dropoff date';
     }
     if (!searchData.dropoffTime) {
-      newErrors.dropoffTime = 'Vui lòng chọn giờ trả';
+      newErrors.dropoffTime = 'Please select dropoff time';
     }
 
     // Validate dates
@@ -106,7 +106,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
       const dropoffDateTime = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime || '00:00'}`);
       
       if (dropoffDateTime <= pickupDateTime) {
-        newErrors.dropoffDate = 'Ngày trả xe phải sau ngày đón xe';
+        newErrors.dropoffDate = 'Dropoff date must be after pickup date';
       }
     }
     
@@ -118,23 +118,23 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     const newErrors = {};
     
     if (!userInfo.fullName.trim()) {
-      newErrors.fullName = 'Vui lòng nhập họ và tên';
+      newErrors.fullName = 'Please enter your full name';
     }
     if (!userInfo.email.trim()) {
-      newErrors.email = 'Vui lòng nhập email';
+      newErrors.email = 'Please enter your email';
     } else if (!/\S+@\S+\.\S+/.test(userInfo.email)) {
-      newErrors.email = 'Email không hợp lệ';
+      newErrors.email = 'Invalid email address';
     }
     if (!userInfo.phone.trim()) {
-      newErrors.phone = 'Vui lòng nhập số điện thoại';
+      newErrors.phone = 'Please enter your phone number';
     } else if (!/^[0-9+\-\s()]{10,15}$/.test(userInfo.phone.replace(/\s/g, ''))) {
-      newErrors.phone = 'Số điện thoại không hợp lệ';
+      newErrors.phone = 'Invalid phone number';
     }
     if (!userInfo.address.trim()) {
-      newErrors.address = 'Vui lòng nhập địa chỉ';
+      newErrors.address = 'Please enter your address';
     }
     if (!userInfo.driverLicense.trim()) {
-      newErrors.driverLicense = 'Vui lòng nhập số giấy phép lái xe';
+      newErrors.driverLicense = 'Please enter your driver\'s license number';
     }
 
     setErrors(newErrors);
@@ -168,14 +168,14 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
       };
       
       console.log('Booking Data:', bookingData);
-      alert(`🎉 Đặt xe thành công! 
+      alert(`🎉 Booking successful! 
 
-📋 Mã đặt xe: ${bookingData.bookingId}
-💳 Phương thức thanh toán: ${paymentMethod === 'cash' ? 'Thanh toán khi nhận xe' : 'Chuyển khoản ngân hàng'}
-💰 Tổng tiền: $${calculateTotal()}
+📋 Booking ID: ${bookingData.bookingId}
+💳 Payment method: ${paymentMethod === 'cash' ? 'Pay on Pickup' : 'Bank Transfer'}
+💰 Total: ${formatCurrency(calculateTotal())}
 
-📧 Thông tin chi tiết đã được gửi tới email của bạn.
-📞 Chúng tôi sẽ liên hệ xác nhận trong vòng 30 phút.`);
+📧 Details have been sent to your email.
+📞 We will contact you for confirmation within 30 minutes.`);
       
       setIsSubmitting(false);
       // Reset form after success
@@ -239,7 +239,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         {/* Info Boxes */}
         <div className="w-full max-w-4xl flex flex-col gap-2 mb-8">
           <div className="text-sm p-4 bg-gray-100 border border-green-200 rounded-md shadow text-green-900">
-            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {normalizedCar?.price} đ/day
+            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {normalizedCar?.price} ₫/day
           </div>
           <div className="text-sm p-4 bg-yellow-50 border border-yellow-200 rounded-md shadow text-yellow-900">
             <strong>Search info:</strong><br />
@@ -299,7 +299,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div>
                     <h3 className="text-2xl font-bold text-green-800 mb-1">{normalizedCar?.name}</h3>
                     <p className="text-green-600 text-lg mb-2">
-                      {normalizedCar?.type} • {normalizedCar?.seats} chỗ • {normalizedCar?.transmission}
+                      {normalizedCar?.type} • {normalizedCar?.seats} seats • {normalizedCar?.transmission}
                     </p>
                     <div className="flex space-x-2">
                       {normalizedCar?.features?.map((feature, index) => (
@@ -312,8 +312,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 </div>
                 <div className="text-right">
                   <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl mb-2">
-                    <p className="text-2xl font-bold">${normalizedCar?.price}</p>
-                    <p className="text-sm opacity-90">/ngày</p>
+                    <p className="text-2xl font-bold">{normalizedCar?.price} ₫</p>
+                    <p className="text-sm opacity-90">/day</p>
                   </div>
                   <p className="text-green-600 font-medium flex items-center justify-end">
                     <Star className="w-4 h-4 mr-1 fill-yellow-400 text-yellow-400" />
@@ -490,11 +490,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="text-green-700 font-medium">Rental days: {getDayCount()} day(s)</p>
-                        <p className="text-green-600">Price: ${normalizedCar.price} x {getDayCount()} day(s)</p>
+                        <p className="text-green-600">Price: {normalizedCar.price} ₫ x {getDayCount()} day(s)</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600">${calculateTotal()}</p>
-                        <p className="text-green-500">({formatCurrency(calculateTotal())})</p>
+                        <p className="text-2xl font-bold text-green-600">{calculateTotal()} ₫</p>
                       </div>
                     </div>
                   </div>
@@ -766,19 +765,19 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <div className="space-y-3 text-blue-700">
                         <div className="flex justify-between">
                           <span>Bank:</span>
-                          <span className="font-semibold">Vietcombank</span>
+                          <span className="font-semibold">VNUK Bankrupt</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Account number:</span>
-                          <span className="font-semibold">1234567890</span>
+                          <span className="font-semibold">7355608</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Account holder:</span>
-                          <span className="font-semibold">ABC CAR RENTAL CO., LTD</span>
+                          <span className="font-semibold">wHALE XE RENTAL CO., LTD</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Amount to transfer:</span>
-                          <span className="font-semibold text-lg">${Math.round(calculateTotal() * 0.3)}</span>
+                          <span className="font-semibold text-lg">{Math.round(calculateTotal() * 0.3)} ₫</span>
                         </div>
                         <div className="border-t border-blue-300 pt-3 mt-3">
                           <p className="text-sm">
@@ -885,24 +884,21 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Rental price ({getDayCount()} day(s))</span>
-                        <span className="font-medium">${calculateTotal()}</span>
+                        <span className="font-medium">{calculateTotal()} ₫</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium">$0</span>
+                        <span className="font-medium">0 ₫</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">VAT (10%)</span>
-                        <span className="font-medium">${Math.round(calculateTotal() * 0.1)}</span>
+                        <span className="font-medium">{Math.round(calculateTotal() * 0.1)} ₫</span>
                       </div>
                       <div className="border-t border-gray-200 pt-3">
                         <div className="flex justify-between text-lg font-bold">
                           <span>Total</span>
-                          <span className="text-green-600">${Math.round(calculateTotal() * 1.1)}</span>
+                          <span className="text-green-600">{Math.round(calculateTotal() * 1.1)} ₫</span>
                         </div>
-                        <p className="text-green-500 text-right text-sm">
-                          ({formatCurrency(Math.round(calculateTotal() * 1.1))})
-                        </p>
                       </div>
                     </div>
 
@@ -910,11 +906,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                         <div className="flex justify-between text-sm">
                           <span>Pay upfront:</span>
-                          <span className="font-semibold">${Math.round(calculateTotal() * 1.1 * 0.3)}</span>
+                          <span className="font-semibold">{Math.round(calculateTotal() * 1.1 * 0.3)} ₫</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Pay at pickup:</span>
-                          <span className="font-semibold">${Math.round(calculateTotal() * 1.1 * 0.7)}</span>
+                          <span className="font-semibold">{Math.round(calculateTotal() * 1.1 * 0.7)} ₫</span>
                         </div>
                       </div>
                     )}
