@@ -54,7 +54,6 @@ function normalizeCity(str) {
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCarType, setSelectedCarType] = useState('');
   const [priceRange, setPriceRange] = useState('');
   const [activePopup, setActivePopup] = useState(null);
   const [filters, setFilters] = useState({
@@ -70,6 +69,7 @@ const CarListingPage = () => {
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
   const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
   const [pickUpDate, setPickUpDate] = useState('');
@@ -140,10 +140,10 @@ const CarListingPage = () => {
     }
   }, []);
 
-  // Fetch API function với debounce và abort controller
+  // Sửa lại fetchData function với delay cho skeleton loading
   const fetchData = useCallback(async () => {
-    // Chỉ fetch khi đã initialized
     if (!isInitializedRef.current) return;
+
     // Cancel previous request
     if (fetchController.current) {
       fetchController.current.abort();
@@ -151,7 +151,12 @@ const CarListingPage = () => {
     // Create new controller
     fetchController.current = new AbortController();
 
+    // Set loading states
     setIsLoading(true);
+    if (cars.length === 0) { // Chỉ show initial loading khi chưa có data
+      setIsInitialLoading(true);
+    }
+
     const params = new URLSearchParams();
 
     if (selectedLocation) params.append('location', selectedLocation);
@@ -164,7 +169,7 @@ const CarListingPage = () => {
     params.append('priceMax', priceMax);
     if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
 
-    console.log('🔍 Fetching API with params:', params.toString());
+    console.log('Fetching API with params:', params.toString());
 
     try {
       const res = await fetch(`/api/vehicles?${params.toString()}`, {
@@ -174,17 +179,28 @@ const CarListingPage = () => {
       if (!res.ok) throw new Error('API call failed');
 
       const data = await res.json();
-      console.log('✅ API response:', data);
-      setCars(data.records || []);
+      console.log('API response:', data);
+
+      // Thêm delay cho skeleton loading effect
+      const minDelay = cars.length === 0 ? 1500 : 500; // 1.5s cho lần đầu, 0.5s cho filter
+
+      setTimeout(() => {
+        setCars(data.records || []);
+        setIsInitialLoading(false);
+        setIsLoading(false);
+      }, minDelay);
+
     } catch (error) {
       if (error.name !== 'AbortError') {
-        console.error('❌ Error fetching cars:', error);
-        setCars([]);
+        console.error('Error fetching cars:', error);
+        setTimeout(() => {
+          setCars([]);
+          setIsInitialLoading(false);
+          setIsLoading(false);
+        }, cars.length === 0 ? 1500 : 500);
       }
-    } finally {
-      setIsLoading(false);
     }
-  }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm]);
+  }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm, cars.length]);
 
   // Effect để gọi API - chỉ chạy khi dependencies thay đổi và đã initialized
   useEffect(() => {
@@ -258,9 +274,10 @@ const CarListingPage = () => {
     return typeMap[type] || type;
   };
 
+  // Sửa lại filteredCars để sử dụng cars thay vì logic riêng
   const filteredCars = React.useMemo(() => {
-    console.log('🔄 Filtering cars:', cars.length, 'cars');
-    return cars;
+    console.log('🔄 Using cars as filteredCars:', cars.length, 'cars');
+    return cars; // API đã filter rồi, không cần filter thêm
   }, [cars]);
 
   const handleFilterToggle = (category, value) => {
@@ -493,11 +510,7 @@ const CarListingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {isLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60">
-          <CarLoadingScreen />
-        </div>
-      )}
+      {/* Bỏ CarLoadingScreen đen */}
       <Header />
       <div className="h-21 bg-gray-800/95"></div>
       <div className="bg-white shadow-sm border-b">
@@ -525,54 +538,66 @@ const CarListingPage = () => {
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivePopup('vehicle_type')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal"
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.vehicle_type.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}
               >
                 Loại Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.vehicle_type.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.vehicle_type.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('brand')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.brand.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Hãng Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.brand.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.brand.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('seats')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.seats.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Số Chỗ
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.seats.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.seats.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('fuel_type')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.fuel_type.length > 0
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.fuel_type.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.fuel_type.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={handleDiscountToggle}
-                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.discount
                   ? 'border-green-600 bg-green-50 text-green-600'
-                  : 'border-gray-300 hover:bg-gray-50'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
                 Giảm Giá
                 {filters.discount && (
@@ -583,10 +608,13 @@ const CarListingPage = () => {
               </button>
               <button
                 onClick={() => setActivePopup('price')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full text-black font-normal hover:bg-gray-50"
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${(priceMin !== 0 || priceMax !== 10000000)
+                    ? 'border-green-600 bg-green-50 text-green-600'
+                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}
               >
                 <span>Giá:</span>
-                <span className="ml-2 text-gray-700">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
+                <span className="ml-2">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
               </button>
             </div>
           </div>
@@ -616,22 +644,13 @@ const CarListingPage = () => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
+          isLoading={isInitialLoading}
           noResultType={
             pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
               ? "location"
-              : filters.vehicle_type.length
+              : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
                 ? "filter"
-                : filters.brand.length
-                  ? "filter"
-                  : filters.seats.length
-                    ? "filter"
-                    : filters.fuel_type.length
-                      ? "filter"
-                      : filters.discount
-                        ? "filter"
-                        : priceRange && priceRange !== 'Tất cả giá'
-                          ? "filter"
-                          : undefined
+                : undefined
           }
           noResultFilter={
             filters.vehicle_type.length
@@ -644,9 +663,7 @@ const CarListingPage = () => {
                     ? "fuel_type"
                     : filters.discount
                       ? "discount"
-                      : priceRange && priceRange !== 'Tất cả giá'
-                        ? "price"
-                        : undefined
+                      : "price"
           }
         />
         <div ref={loaderRef} className="h-10"></div>

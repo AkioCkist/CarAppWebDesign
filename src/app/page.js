@@ -403,7 +403,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    // Fetch 4 xe đầu tiên từ API Next.js (App Router)
+    // Fetch 4 xe đầu tiên
+    setFleetLoading(true); // Đảm bảo loading state được set
     fetch("/api/vehicles?limit=4")
       .then(res => res.json())
       .then(data => {
@@ -425,10 +426,18 @@ export default function HomePage() {
           description: v.description,
           isFavorite: v.is_favorite,
         }));
-        setFleetVehicles(mapped);
-        setFleetLoading(false);
+
+        // Thêm delay 1 giây để đảm bảo skeleton loading hiển thị đủ lâu
+        setTimeout(() => {
+          setFleetVehicles(mapped);
+          setFleetLoading(false);
+        }, 1000); // Delay 1 giây
       })
-      .catch(() => setFleetLoading(false));
+      .catch(() => {
+        setTimeout(() => {
+          setFleetLoading(false);
+        }, 1000); // Delay 1 giây ngay cả khi có lỗi
+      });
   }, []);
 
   // Hàm lấy chi tiết xe khi bấm "Đặt xe ngay"
@@ -975,16 +984,63 @@ export default function HomePage() {
             <div className="overflow-x-auto scrollbar-hide">
               <ul className="flex gap-8 py-4" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 {fleetLoading ? (
-                  // Skeleton loading for 4 cars
+                  // Skeleton loading for 4 cars với animation đẹp hơn
                   Array.from({ length: 4 }).map((_, idx) => (
-                    <li key={idx} className="min-w-[340px] max-w-xs flex-shrink-0">
-                      <div className="bg-gray-100 rounded-xl h-80 animate-pulse" />
+                    <li key={idx} className="min-w-[400px] max-w-xs flex-shrink-0">
+                      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 h-[520px] w-full">
+                        {/* Image skeleton */}
+                        <div className="w-full h-80 bg-gray-200 animate-pulse relative overflow-hidden">
+                          <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-shimmer"></div>
+                        </div>
+
+                        {/* Content skeleton */}
+                        <div className="p-4 space-y-3">
+                          {/* Title skeleton */}
+                          <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
+
+                          {/* Features skeleton */}
+                          <div className="grid grid-cols-3 gap-2">
+                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                          </div>
+
+                          {/* Location skeleton */}
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
+
+                          {/* Rating skeleton */}
+                          <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
+
+                          {/* Price skeleton */}
+                          <div className="h-6 bg-gray-200 rounded animate-pulse w-2/3"></div>
+
+                          {/* Description skeleton */}
+                          <div className="space-y-2">
+                            <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-3 bg-gray-200 rounded animate-pulse w-4/5"></div>
+                          </div>
+
+                          {/* Button skeleton */}
+                          <div className="h-12 bg-gray-200 rounded animate-pulse mt-4"></div>
+                        </div>
+                      </div>
                     </li>
                   ))
                 ) : (
                   fleetVehicles.map((vehicle, idx) => (
-                    <li key={vehicle.id || idx} className="min-w-[400px] max-w-xs flex-shrink-0">
-                      {/* Copy phần VehicleCard ở VehicleList.js vào đây */}
+                    <motion.li
+                      key={vehicle.id || idx}
+                      className="min-w-[400px] max-w-xs flex-shrink-0"
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.5,
+                        delay: idx * 0.1, // Stagger animation
+                        ease: "easeOut"
+                      }}
+                    >
+                      {/* Existing vehicle card code */
+                      /* Copy phần VehicleCard ở VehicleList.js vào đây */}
                       <div
                         className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col border border-gray-200 relative h-[520px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-2"
                       >
@@ -1072,7 +1128,7 @@ export default function HomePage() {
                           </div>
                         </div>
                       </div>
-                    </li>
+                    </motion.li>
                   ))
                 )}
               </ul>
@@ -1297,7 +1353,7 @@ export default function HomePage() {
                   }}
                 />
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" style={{ display: "none" }}>
-                  <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+                  <path d="M6.62 10.79c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                 </svg>
               </div>
               <div className="flex-1">
