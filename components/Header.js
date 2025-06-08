@@ -4,12 +4,10 @@ import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useCarLoading } from './CarLoading';
-import { useSession, signOut } from 'next-auth/react';
 
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { data: session, status } = useSession(); // Add NextAuth session
   const [user, setUser] = useState(null); // Replace session with user state
   const { startLoading, CarLoadingScreen } = useCarLoading();
   const [showDropdown, setShowDropdown] = useState(false);
@@ -97,33 +95,14 @@ export default function Header() {
   };  // Check localStorage for user data on mount and set up storage listener
   useEffect(() => {
     const checkUserData = () => {
-      // Priority: NextAuth session > localStorage
-      if (session?.user) {
-        // User logged in via OAuth
-        const userData = {
-          id: session.user.id,
-          name: session.user.name,
-          email: session.user.email,
-          phone: session.user.phone || '',
-          provider: session.user.provider,
-          roles: session.user.roles || []
-        };
-        setUser(userData);
-        // Sync with localStorage for consistency
-        localStorage.setItem('user', JSON.stringify(userData));
-      } else {
-        // Check localStorage for phone/password login
-        const userData = localStorage.getItem('user');
-        if (userData) {
-          try {
-            const parsedUser = JSON.parse(userData);
-            setUser(parsedUser);
-          } catch (error) {
-            console.error('Error parsing user data:', error);
-            localStorage.removeItem('user');
-          }
-        } else {
-          setUser(null);
+      const userData = localStorage.getItem('user');
+      if (userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('user');
         }
       }
     };
@@ -151,14 +130,9 @@ export default function Header() {
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
-  }, [session]); // Add session as dependency  // Custom logout function
-  const handleLogout = async () => {
-    // Handle OAuth logout
-    if (session?.user?.provider) {
-      await signOut({ redirect: false });
-    }
-    
-    // Clear localStorage and state
+  }, []);
+  // Custom logout function
+  const handleLogout = () => {
     localStorage.removeItem('user');
     setUser(null);
     setShowDropdown(false);

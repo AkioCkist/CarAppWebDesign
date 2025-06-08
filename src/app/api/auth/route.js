@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import bcrypt from 'bcryptjs';
-import { getServerSession } from 'next-auth/next';
 
 // Initialize Supabase client
 const supabase = createClient(

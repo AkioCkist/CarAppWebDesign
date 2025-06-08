@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
-import { signIn, getSession } from 'next-auth/react';
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -229,64 +228,15 @@ export default function LoginPage() {
     } finally {
       setIsLoading(false);
     }
-  };  // OAuth login handler
+  };
+  // Placeholder for social login (not implemented yet)
   const handleSocialLogin = async (provider) => {
-    try {
-      setIsLoading(true);
-      setAuthMessage({ 
-        show: true, 
-        message: `Signing in with ${provider}...`, 
-        success: true 
-      });
-
-      const result = await signIn(provider, {
-        redirect: false,
-        callbackUrl: '/'
-      });
-
-      if (result?.error) {
-        setAuthMessage({ 
-          show: true, 
-          message: `${provider} login failed. Please try again.`, 
-          success: false 
-        });
-        setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
-      } else if (result?.ok) {
-        // Get the session to access user data
-        const session = await getSession();
-        if (session?.user) {
-          // Store user data in localStorage for consistency with existing app logic
-          const userData = {
-            id: session.user.id,
-            name: session.user.name,
-            email: session.user.email,
-            phone: session.user.phone || '',
-            provider: session.user.provider,
-            roles: session.user.roles || []
-          };
-          localStorage.setItem('user', JSON.stringify(userData));
-          
-          setAuthMessage({
-            show: true,
-            message: `${provider} login successful! Redirecting...`,
-            success: true,
-          });
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2500);
-        }
-      }
-    } catch (error) {
-      console.error(`${provider} login error:`, error);
-      setAuthMessage({ 
-        show: true, 
-        message: `${provider} login failed. Please try again.`, 
-        success: false 
-      });
-      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
-    } finally {
-      setIsLoading(false);
-    }
+    setAuthMessage({ 
+      show: true, 
+      message: `${provider} login is not yet implemented.`, 
+      success: false 
+    });
+    setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
   };
 
   const toggleMode = () => {
@@ -846,30 +796,26 @@ export default function LoginPage() {
                             90% { transform: rotate(360deg) translateY(0); opacity: 0.8; color: #9ca3af; }
                             100% { transform: rotate(0deg) translateY(0); opacity: 0.6; color: #9ca3af; }
                           }
-                        `}</style>                        {/* Social Login Buttons with Icons */}
+                        `}</style>
+
+                        {/* Social Login Buttons with Icons */}
                         <div className="grid grid-cols-2 gap-3">
-                          <motion.button
+                          <button
                             type="button"
                             onClick={() => handleSocialLogin('google')}
-                            disabled={isLoading}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-                            whileHover={{ scale: isLoading ? 1 : 1.02 }}
-                            whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                           >
-                            <Image src="/icons/google.svg" alt="Google" width={20} height={20} className="mr-2" />
-                            <span className="text-gray-700 font-medium">Google</span>
-                          </motion.button>
-                          <motion.button
+                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Google</span>
+                          </button>
+                          <button
                             type="button"
                             onClick={() => handleSocialLogin('facebook')}
-                            disabled={isLoading}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-                            whileHover={{ scale: isLoading ? 1 : 1.02 }}
-                            whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                           >
-                            <Image src="/icons/facebook.svg" alt="Facebook" width={20} height={20} className="mr-2" />
-                            <span className="text-gray-700 font-medium">Facebook</span>
-                          </motion.button>
+                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Facebook</span>
+                          </button>
                         </div>
 
                         {/* Toggle Mode */}
@@ -1060,30 +1006,26 @@ export default function LoginPage() {
                         {/* Divider */}
                         <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
                           ↓
-                        </div>                        {/* Social Login Buttons with Icons (repeated for register side for consistency) */}
+                        </div>
+
+                        {/* Social Login Buttons with Icons (repeated for register side for consistency) */}
                         <div className="grid grid-cols-2 gap-3">
-                          <motion.button
+                          <button
                             type="button"
                             onClick={() => handleSocialLogin('google')}
-                            disabled={isLoading}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-                            whileHover={{ scale: isLoading ? 1 : 1.02 }}
-                            whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                           >
-                            <Image src="/icons/google.svg" alt="Google" width={20} height={20} className="mr-2" />
-                            <span className="text-gray-700 font-medium">Google</span>
-                          </motion.button>
-                          <motion.button
+                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Google</span>
+                          </button>
+                          <button
                             type="button"
                             onClick={() => handleSocialLogin('facebook')}
-                            disabled={isLoading}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 hover:shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed bg-white"
-                            whileHover={{ scale: isLoading ? 1 : 1.02 }}
-                            whileTap={{ scale: isLoading ? 1 : 0.98 }}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                           >
-                            <Image src="/icons/facebook.svg" alt="Facebook" width={20} height={20} className="mr-2" />
-                            <span className="text-gray-700 font-medium">Facebook</span>
-                          </motion.button>
+                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Facebook</span>
+                          </button>
                         </div>
 
                         {/* Toggle Mode */}
