@@ -26,7 +26,7 @@ function LoadingPlaceholder() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
-        <p className="text-green-700 text-lg">Đang tải danh sách xe...</p>
+        <p className="text-green-700 text-lg">Loading vehicle list...</p>
       </div>
     </div>
   );
@@ -36,9 +36,7 @@ function LoadingPlaceholder() {
 function CarListingPageContent() {
 
   const searchParams = useSearchParams();
-  const router = useRouter();
-
-  function beautifyCityName(str) {
+  const router = useRouter(); function beautifyCityName(str) {
     if (!str) return "";
     if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
     const mapping = {
@@ -97,9 +95,8 @@ function CarListingPageContent() {
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [isInitialLoading, setIsInitialLoading] = useState(true);
-  const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
-  const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
+  const [isInitialLoading, setIsInitialLoading] = useState(true); const [pickUpLocation, setPickUpLocation] = useState('Pick-up Location');
+  const [dropOffLocation, setDropOffLocation] = useState('Drop-off Location');
   const [pickUpDate, setPickUpDate] = useState('');
   const [pickUpTime, setPickUpTime] = useState('');
   const [dropOffDate, setDropOffDate] = useState('');
@@ -129,13 +126,12 @@ function CarListingPageContent() {
       const pickUpParam = params.get('pickUpLocation');
       const dropOffParam = params.get('dropOffLocation');
 
-      const newSelectedLocation = normalizeCity(pickUpParam) || '';
-      const newPickUpLocation = beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe';
-      const newDropOffLocation = beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe';
+      const newSelectedLocation = normalizeCity(pickUpParam) || ''; const newPickUpLocation = beautifyCityName(normalizeCity(pickUpParam)) || 'Pick-up Location';
+      const newDropOffLocation = beautifyCityName(normalizeCity(dropOffParam)) || 'Drop-off Location';
       const newFilters = {
         vehicle_type: params.get('vehicle_type') ? params.get('vehicle_type').split(',') : [],
         brand: params.get('brand') ? params.get('brand').split(',') : [],
-        seats: params.get('seats') ? params.get('seats').split(',').map(s => `${s} chỗ`) : [],
+        seats: params.get('seats') ? params.get('seats').split(',').map(s => `${s} seats`) : [],
         fuel_type: params.get('fuel_type') ? params.get('fuel_type').split(',') : [],
         discount: params.get('discount') === '1'
       };
@@ -273,9 +269,8 @@ function CarListingPageContent() {
     brand: [
       'Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan',
       'Lamborghini', 'Ferrari', 'Porsche', 'McLaren', 'Maserati', 'Aston Martin', 'Bentley'
-    ],
-    seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
-    fuel_type: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
+    ], seats: ['2 seats', '4 seats', '5 seats', '7 seats', '8+ seats'],
+    fuel_type: ['Gasoline', 'Diesel', 'Hybrid', 'Electric']
   };
 
   const formatCarTypeDisplay = (type) => {
@@ -418,10 +413,9 @@ function CarListingPageContent() {
           `}
           onClick={e => e.stopPropagation()}
         >
-          {/* Header */}
-          <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+          {/* Header */}          <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
             <div className="flex justify-between items-center">
-              <h3 className="text-xl font-bold text-white">Chọn khoảng giá</h3>
+              <h3 className="text-xl font-bold text-white">Select Price Range</h3>
               <button
                 onClick={handleClose}
                 className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
@@ -432,31 +426,30 @@ function CarListingPageContent() {
           </div>
 
           {/* Content */}
-          <div className="p-6">
-            <div className="flex space-x-4 mb-6">
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Từ</label>
-                <input
-                  type="text"
-                  value={formatNumber(internalValues[0])}
-                  onChange={(e) => handleInputChange(0, e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+          <div className="p-6">            <div className="flex space-x-4 mb-6">
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">From</label>
+              <input
+                type="text"
+                value={formatNumber(internalValues[0])}
+                onChange={(e) => handleInputChange(0, e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
                            focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
-                  placeholder="0"
-                />
-              </div>
-              <div className="flex-1">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Đến</label>
-                <input
-                  type="text"
-                  value={formatNumber(internalValues[1])}
-                  onChange={(e) => handleInputChange(1, e.target.value)}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
-                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
-                  placeholder="10.000.000"
-                />
-              </div>
+                placeholder="0"
+              />
             </div>
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">To</label>
+              <input
+                type="text"
+                value={formatNumber(internalValues[1])}
+                onChange={(e) => handleInputChange(1, e.target.value)}
+                className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                placeholder="10,000,000"
+              />
+            </div>
+          </div>
             <div className="px-2">
               <Slider
                 range
@@ -491,15 +484,14 @@ function CarListingPageContent() {
             </div>
           </div>
 
-          {/* Footer Actions - CỐ Ý CHỈ CẬP NHẬT PRICE KHI BẤM "ÁP DỤNG" */}
-          <div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">
+          {/* Footer Actions */}<div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">
             <button
               onClick={handleApply}
               className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold
                          hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02]
                          active:scale-95 shadow-md hover:shadow-lg"
             >
-              Áp dụng
+              Apply
             </button>
             <button
               onClick={handleReset}
@@ -507,7 +499,7 @@ function CarListingPageContent() {
                          hover:bg-green-50 transition-all duration-200 transform hover:scale-[1.02]
                          active:scale-95"
             >
-              Đặt lại
+              Reset
             </button>
           </div>
         </div>
@@ -577,9 +569,8 @@ function CarListingPageContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <MapPin className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-gray-900">
-                {beautifyCityName(selectedLocation) || 'Địa điểm nhận xe'}
+              <MapPin className="h-5 w-5 text-blue-600" />              <span className="font-medium text-gray-900">
+                {beautifyCityName(selectedLocation) || 'Pick-up Location'}
               </span>
               <span className="text-gray-500">→</span>
               <span className="font-medium text-gray-900">{dropOffLocation}</span>
@@ -593,8 +584,7 @@ function CarListingPageContent() {
       </div>
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center py-3">
-            <span className="text-sm text-black font-semibold mr-4">Bộ Lọc:</span>
+          <div className="flex items-center py-3">            <span className="text-sm text-black font-semibold mr-4">Filters:</span>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivePopup('vehicle_type')}
@@ -603,7 +593,7 @@ function CarListingPageContent() {
                   : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}
               >
-                Loại Xe
+                Vehicle Type
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.vehicle_type.length > 0 && (
                   <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -617,7 +607,7 @@ function CarListingPageContent() {
                   ? 'border-green-600 bg-green-50 text-green-600'
                   : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
-                Hãng Xe
+                Brand
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.brand.length > 0 && (
                   <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -631,7 +621,7 @@ function CarListingPageContent() {
                   ? 'border-green-600 bg-green-50 text-green-600'
                   : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
-                Số Chỗ
+                Seats
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.seats.length > 0 && (
                   <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -645,7 +635,7 @@ function CarListingPageContent() {
                   ? 'border-green-600 bg-green-50 text-green-600'
                   : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
-                Nguyên Liệu
+                Fuel Type
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.fuel_type.length > 0 && (
                   <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
@@ -657,9 +647,8 @@ function CarListingPageContent() {
                 onClick={handleDiscountToggle}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.discount
                   ? 'border-green-600 bg-green-50 text-green-600'
-                  : 'border-gray-300 hover:bg-gray-50 text-black'
-                  }`}>
-                Giảm Giá
+                  : 'border-gray-300 hover:bg-gray-50 text-black'}`}>
+                Discount
                 {filters.discount && (
                   <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     1
@@ -673,7 +662,7 @@ function CarListingPageContent() {
                   : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}
               >
-                <span>Giá:</span>
+                <span>Price:</span>
                 <span className="ml-2">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
               </button>
             </div>
@@ -683,10 +672,9 @@ function CarListingPageContent() {
       <div className="bg-gray-50 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <input
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />            <input
               type="text"
-              placeholder="Tìm kiếm xe theo tên, hãng..."
+              placeholder="Search cars by name, brand..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-black"
@@ -704,9 +692,8 @@ function CarListingPageContent() {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
-          isLoading={isInitialLoading}
-          noResultType={
-            pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
+          isLoading={isInitialLoading} noResultType={
+            pickUpLocation && pickUpLocation !== 'Pick-up Location' && filteredCars.length === 0
               ? "location"
               : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
                 ? "filter"
@@ -729,10 +716,9 @@ function CarListingPageContent() {
         <div ref={loaderRef} className="h-10"></div>
       </div>
 
-      {/* Sử dụng FilterPopup component với hiệu ứng */}
-      {activePopup === 'vehicle_type' && (
+      {/* Sử dụng FilterPopup component với hiệu ứng */}      {activePopup === 'vehicle_type' && (
         <FilterPopup
-          title="Loại Xe"
+          title="Vehicle Type"
           options={filterOptions.vehicle_type}
           category="vehicle_type"
           onClose={closePopup}
@@ -744,7 +730,7 @@ function CarListingPageContent() {
       )}
       {activePopup === 'brand' && (
         <FilterPopup
-          title="Hãng Xe"
+          title="Brand"
           options={filterOptions.brand}
           category="brand"
           onClose={closePopup}
@@ -755,7 +741,7 @@ function CarListingPageContent() {
       )}
       {activePopup === 'seats' && (
         <FilterPopup
-          title="Số Chỗ"
+          title="Seats"
           options={filterOptions.seats}
           category="seats"
           onClose={closePopup}
@@ -766,7 +752,7 @@ function CarListingPageContent() {
       )}
       {activePopup === 'fuel_type' && (
         <FilterPopup
-          title="Nguyên Liệu"
+          title="Fuel Type"
           options={filterOptions.fuel_type}
           category="fuel_type"
           onClose={closePopup}

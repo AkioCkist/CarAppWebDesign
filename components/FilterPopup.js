@@ -97,15 +97,14 @@ const FilterPopup = ({ title, options, category, onClose, filters, onFilterToggl
                 </div>
 
                 {/* Footer Actions */}
-                <div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">
-                    <button
-                        onClick={handleClose}
-                        className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold
+                <div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">                    <button
+                    onClick={handleClose}
+                    className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold
                                    hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02]
                                    active:scale-95 shadow-md hover:shadow-lg"
-                    >
-                        Áp dụng ({filters[category].length})
-                    </button>
+                >
+                    Apply ({filters[category].length})
+                </button>
                     <button
                         onClick={() => {
                             onClearFilters(category);
@@ -115,7 +114,7 @@ const FilterPopup = ({ title, options, category, onClose, filters, onFilterToggl
                                    hover:bg-green-50 transition-all duration-200 transform hover:scale-[1.02]
                                    active:scale-95"
                     >
-                        Xóa bộ lọc
+                        Clear Filters
                     </button>
                 </div>
             </div>
