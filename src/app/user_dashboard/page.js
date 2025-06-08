@@ -1,22 +1,34 @@
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useSession, signOut } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import VehicleList from "../../../components/VehicleList";
 import ProfileEditPanel from "../../../components/ProfileEditPanel";
 
 export default function UserProfilePage() {
-  // Use NextAuth session for user info
-  const { data: session } = useSession();
-  const user = session?.user || {};
-
+  // MOVE ALL HOOKS TO THE TOP - BEFORE ANY CONDITIONAL LOGIC
+  const router = useRouter();
+  const [user, setUser] = useState(null);
   const [fadeIn, setFadeIn] = useState(false);
   const [showFade, setShowFade] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
   const [activePanel, setActivePanel] = useState('dashboard');
+  const [favoriteCars, setFavoriteCars] = useState([]);
 
+  // User data effect
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    } else {
+      // Redirect to signin if no user data
+      router.push('/signin_registration');
+    }
+  }, [router]);
+
+  // Fade effect
   useEffect(() => {
     setFadeIn(true);
     // Start fade out after a short delay
@@ -28,6 +40,134 @@ export default function UserProfilePage() {
       clearTimeout(removeTimer);
     };
   }, []);
+
+  // Initialize favorite cars when user data is available
+  useEffect(() => {
+    if (user) {
+      const userData = {
+        name: user.name || "Monica Lucas",
+        email: user.email || "monica@rentaly.com",
+        avatar: user.avatar || "/images/profile/1.jpg",
+        totalOrders: 3,
+        completedRides: 12,
+        totalBookings: 58,
+        totalCars: 24,
+        recentOrders: [
+          {
+            id: "RWR19",
+            car: "Jeep Renegade",
+            pickup: "New York",
+            destination: "Los Angeles",
+            rentDate: "March 8, 2023",
+            returnDate: "March 16, 2023",
+            status: "Completed"
+          },
+          {
+            id: "RWR20",
+            car: "Mini Cooper",
+            pickup: "San Francisco",
+            destination: "Chicago",
+            rentDate: "March 8, 2023",
+            returnDate: "March 16, 2023",
+            status: "Completed"
+          },
+          {
+            id: "RWR21",
+            car: "Ferrari Enzo",
+            pickup: "Philadelphia",
+            destination: "Washington",
+            rentDate: "March 8, 2023",
+            returnDate: "March 16, 2023",
+            status: "Pending"
+          },
+          {
+            id: "RWR22",
+            car: "Hyundai Santa",
+            pickup: "Kansas City",
+            destination: "Wichita",
+            rentDate: "March 13, 2023",
+            returnDate: "March 16, 2023",
+            status: "Completed"
+          },
+          {
+            id: "RWR23",
+            car: "Toyota Yaris",
+            pickup: "Baltimore",
+            destination: "Sacramento",
+            rentDate: "March 5, 2023",
+            returnDate: "March 16, 2023",
+            status: "Pending"
+          }
+        ],
+        favoriteCars: [
+          {
+            id: 1,
+            name: 'Porsche 911',
+            image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
+            transmission: 'Tự động',
+            fuel: 'Xăng',
+            seats: 2,
+            location: 'Quận Sơn Trà, Đà Nẵng',
+            rating: 5.0,
+            trips: 37,
+            priceDisplay: '865K',
+            oldPrice: 980000,
+            pricePer: 'ngày',
+            priceDiscount: 'Giảm 12%',
+            description: 'Xe thể thao sang trọng với hiệu suất vượt trội.',
+            isFavorite: false
+          },
+          {
+            id: 2,
+            name: 'Porsche 911 GT3 R rennsport',
+            image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
+            transmission: 'Tự động',
+            fuel: 'Xăng',
+            seats: 2,
+            location: 'Quận Sơn Trà, Đà Nẵng',
+            rating: 5.0,
+            trips: 170,
+            priceDisplay: '5585K',
+            oldPrice: 6412000,
+            pricePer: 'ngày',
+            priceDiscount: 'Giảm 13%',
+            description: 'Siêu xe đua với tốc độ đỉnh cao.',
+            isFavorite: false
+          },
+          {
+            id: 3,
+            name: 'SUZUKI XL7 2021',
+            image: 'https://images.unsplash.com/photo-1549399592-91b8e56a6b26?w=400&h=250&fit=crop',
+            transmission: 'Tự động',
+            fuel: 'Xăng',
+            seats: 7,
+            location: 'Quận Sơn Trà, Đà Nẵng',
+            rating: 4.8,
+            trips: 2,
+            priceDisplay: '865K',
+            oldPrice: 912000,
+            pricePer: 'ngày',
+            priceDiscount: 'Giảm 5%',
+            description: 'Xe gia đình rộng rãi, tiết kiệm nhiên liệu.',
+            isFavorite: false
+          }
+        ]
+      };
+      setFavoriteCars(userData.favoriteCars);
+    }
+  }, [user]);
+
+  // NOW HANDLE LOADING STATE AFTER ALL HOOKS ARE DECLARED
+  if (!user) {
+    return (
+      <div className="font-sans bg-gray-50 text-gray-900 min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto mb-4"></div>
+          <div className="text-gray-600">Loading...</div>
+        </div>
+      </div>
+    );
+  }
 
   // Mock user data - replace with actual data from your backend if needed
   const userData = {
@@ -201,9 +341,6 @@ export default function UserProfilePage() {
     : "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
   const name = user.name || "Unknown User";
   const phone = user.phone || "N/A";
-
-  // State for favorite cars
-  const [favoriteCars, setFavoriteCars] = useState(userData.favoriteCars);
 
   // Handle favorite/unfavorite
   const handleFavoriteToggle = (vehicleId) => {
@@ -442,12 +579,12 @@ export default function UserProfilePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     My Favorite Cars
-                  </motion.a>
-                  <motion.a
+                  </motion.a>                  <motion.a
                     href="#"
                     onClick={e => {
                       e.preventDefault();
-                      signOut({ callbackUrl: "/" }); // <-- Sign out and redirect to home
+                      localStorage.removeItem('user');
+                      router.push('/'); // Sign out and redirect to home
                     }}
                     className="flex items-center px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                     variants={buttonVariants}
@@ -483,12 +620,6 @@ export default function UserProfilePage() {
                       animate="visible"
                       className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
                     >
-                      {/*
-                        { icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", value: userData.totalOrders, label: "Total Orders" },
-                        { icon: "M13 10V3L4 14h7v7l9-11h-7z", value: userData.completedRides, label: "Completed" },
-                        { icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", value: userData.totalBookings, label: "Total Bookings" },
-                        { icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", value: userData.totalCars, label: "Total Cars" }
-                      */}
                       {Object.entries({
                         totalOrders: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
                         completedRides: "M13 10V3L4 14h7v7l9-11h-7z",
@@ -545,48 +676,28 @@ export default function UserProfilePage() {
                                 className="hover:bg-gray-50"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: 0.4 + (index * 0.1), duration: 0.4 }}
-                              >
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.pickup}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.rentDate}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.returnDate}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                    {order.status}
-                                  </span>
-                                </td>
-                              </motion.tr>
+                              transition={{ delay: index * 0.1, duration: 0.3 }}
+                            >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.id}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.pickup}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.rentDate}</td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.returnDate}</td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                                  {order.status}
+                                </span>
+                              </td>
+                            </motion.tr>
                             ))}
                           </tbody>
                         </table>
                       </div>
                     </motion.div>
-
-                    {/* Favorite Cars */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.6, duration: 0.5 }}
-                      className="bg-white rounded-lg shadow-sm"
-                    >
-                      <div className="p-6 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-800">My Favorites</h3>
-                      </div>
-                      <div className="p-4 md:p-6">
-                        <VehicleList
-                          vehicles={favoriteCars}
-                          onFavoriteToggle={handleFavoriteToggle}
-                          favorites={favoriteCars.map(car => car.id)}
-                          noResultType="favorite"
-                        />
-                      </div>
-                    </motion.div>
                   </motion.div>
                 )}
 
-                {/* Profile Panel */}
+                {/* Profile Edit Panel */}
                 {activePanel === 'profile' && (
                   <motion.div
                     key="profile"
@@ -595,7 +706,7 @@ export default function UserProfilePage() {
                     animate="visible"
                     exit="exit"
                   >
-                    <ProfileEditPanel userData={userData} />
+                    <ProfileEditPanel user={userData} />
                   </motion.div>
                 )}
 
@@ -608,9 +719,55 @@ export default function UserProfilePage() {
                     animate="visible"
                     exit="exit"
                   >
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                      <h3 className="text-lg font-semibold text-gray-800">My Orders Content</h3>
-                      <p className="mt-4 text-gray-600">This section will display your order history.</p>
+                    <div className="bg-white rounded-lg shadow-sm">
+                      <div className="p-6 border-b border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-800">All My Orders</h3>
+                      </div>
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-gray-200">
+                            {userData.recentOrders.map((order, index) => (
+                              <motion.tr
+                                key={order.id}
+                                className="hover:bg-gray-50"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1, duration: 0.3 }}
+                              >
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {order.pickup} → {order.destination}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                  {order.rentDate} - {order.returnDate}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                                    {order.status}
+                                  </span>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                  <button className="text-green-600 hover:text-green-900 mr-3">View</button>
+                                  {order.status.toLowerCase() === 'pending' && (
+                                    <button className="text-red-600 hover:text-red-900">Cancel</button>
+                                  )}
+                                </td>
+                              </motion.tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
                   </motion.div>
                 )}
@@ -624,15 +781,35 @@ export default function UserProfilePage() {
                     animate="visible"
                     exit="exit"
                   >
-                    <div className="bg-white rounded-lg shadow-sm p-6">
-                      <h3 className="text-lg font-semibold text-gray-800">My Favorite Cars Content</h3>
-                      <div className="p-4 md:p-6">
-                        <VehicleList
-                          vehicles={favoriteCars}
-                          onFavoriteToggle={handleFavoriteToggle}
-                          favorites={favoriteCars.map(car => car.id)}
-                          noResultType="favorite"
-                        />
+                    <div className="bg-white rounded-lg shadow-sm">
+                      <div className="p-6 border-b border-gray-200">
+                        <h3 className="text-lg font-semibold text-gray-800">My Favorite Cars</h3>
+                        <p className="text-sm text-gray-600 mt-1">Cars you've marked as favorites</p>
+                      </div>
+                      <div className="p-6">
+                        {favoriteCars.length > 0 ? (
+                          <VehicleList 
+                            vehicles={favoriteCars}
+                            onFavoriteToggle={handleFavoriteToggle}
+                            showFavoriteButton={true}
+                          />
+                        ) : (
+                          <div className="text-center py-12">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
+                            <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
+                            <div className="mt-6">
+                              <button
+                                onClick={() => router.push('/vehicles')}
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              >
+                                Browse Cars
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </motion.div>

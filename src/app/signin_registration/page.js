@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
-import { signIn, useSession } from "next-auth/react"; // Ensure signIn is imported
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -80,7 +79,6 @@ export default function LoginPage() {
   const [authMessage, setAuthMessage] = useState({ show: false, message: "", success: false });
 
   const { focusedInput, handleFocus, handleBlur } = useFocusState();
-  const { update } = useSession(); // Kept for potential future use or if next-auth is implicitly used
 
   useEffect(() => {
     const handleScroll = () => {
@@ -153,25 +151,22 @@ export default function LoginPage() {
     if (!validateForm()) return;
 
     setIsLoading(true);
-    setAuthMessage({ show: false, message: "", success: false });
-
-    try {
+    setAuthMessage({ show: false, message: "", success: false });    try {
       if (isLogin) {
-        // Use NextAuth.js credentials provider for login
-        const result = await signIn("credentials", {
-          redirect: false,
-          phone: formData.phone,
-          password: formData.password,
-        });
-
-        if (result?.error) {
-          setAuthMessage({
-            show: true,
-            message: "Phone number or password is incorrect.",
-            success: false,
-          });
-          setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
-        } else {
+        // Use custom auth API for login
+        const response = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'login',
+            phone: formData.phone,
+            password: formData.password
+          }),
+        });        const data = await response.json();
+        if (response.ok && data.success) {
+          // Store user data in localStorage
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
           setAuthMessage({
             show: true,
             message: "Login successful! Redirecting...",
@@ -180,6 +175,13 @@ export default function LoginPage() {
           setTimeout(() => {
             window.location.href = "/";
           }, 2500);
+        } else {
+          setAuthMessage({
+            show: true,
+            message: data.error || "Phone number or password is incorrect.",
+            success: false,
+          });
+          setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
         }
       } else {
         // Registration logic (keep your custom API call for registration)
@@ -192,9 +194,11 @@ export default function LoginPage() {
             password: formData.password,
             name: formData.name
           }),
-        });
-        const data = await response.json();
+        });        const data = await response.json();
         if (response.ok && data.success) {
+          // Store user data in localStorage after successful registration
+          localStorage.setItem('user', JSON.stringify(data.user));
+          
           setAuthMessage({
             show: true,
             message: 'Account created successfully!',
@@ -202,15 +206,8 @@ export default function LoginPage() {
           });
           setTimeout(() => {
             setAuthMessage({ show: false, message: "", success: false });
-            setIsLogin(true);
-            setFormData({
-              phone: '',
-              password: '',
-              confirmPassword: '',
-              name: '',
-              rememberMe: false
-            });
-            setErrors({});
+            // Redirect to home instead of switching to login
+            window.location.href = "/";
           }, 2500);
         } else {
           setAuthMessage({
@@ -232,25 +229,14 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
-
-  // Modified handleSocialLogin to use NextAuth.js signIn
+  // Placeholder for social login (not implemented yet)
   const handleSocialLogin = async (provider) => {
-    setAuthMessage({ show: false, message: "", success: false });
-    setIsLoading(true); // Indicate loading for social login
-
-    try {
-      await signIn(provider, { callbackUrl: '/' }); // Redirect to home on success
-    } catch (error) {
-      console.error(`Social login with ${provider} failed:`, error);
-      setAuthMessage({
-        show: true,
-        message: `Failed to sign in with ${provider}. Please try again.`,
-        success: false,
-      });
-      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500); // Updated to 2.5s
-    } finally {
-      setIsLoading(false);
-    }
+    setAuthMessage({ 
+      show: true, 
+      message: `${provider} login is not yet implemented.`, 
+      success: false 
+    });
+    setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
   };
 
   const toggleMode = () => {

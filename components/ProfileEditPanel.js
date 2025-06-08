@@ -1,14 +1,20 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { useSession } from 'next-auth/react';
 
 export default function ProfileEditPanel() {
-  const { data: session, update } = useSession();
-  const accountId = session?.user?.id;
-  const initialUsername = session?.user?.name || '';
-  const initialPhone = session?.user?.phone || '';
+  const [user, setUser] = useState(null);
+  
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
+  const accountId = user?.id;
+  const initialUsername = user?.name || '';
+  const initialPhone = user?.phone || '';
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [formData, setFormData] = useState({
@@ -19,23 +25,16 @@ export default function ProfileEditPanel() {
   });
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
-  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    if (session?.user) {
+    if (user) {
       setFormData(prev => ({
         ...prev,
-        username: session.user.name || '',
-        phone: session.user.phone || '',
+        username: user.name || '',
+        phone: user.phone || '',
       }));
     }
-
-    // Get user info from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, [session]);
+  }, [user]);
 
   // Add this inside your component, after the other useEffects
   useEffect(() => {
