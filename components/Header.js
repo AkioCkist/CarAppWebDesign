@@ -17,7 +17,6 @@ export default function Header() {
   const [fadeOut, setFadeOut] = useState(false);
   const [bgOpacity, setBgOpacity] = useState(0);
   const [showWhiteFade, setShowWhiteFade] = useState(false);
-  const [user, setUser] = useState(null);
 
   const isCarFindingPage = pathname?.includes('/finding_car');
 
@@ -25,12 +24,9 @@ export default function Header() {
     const handleScroll = () => {
       setScrollY(window.scrollY);
     };
-
-    // Chỉ thêm scroll listener nếu không phải trang finding_car
     if (!isCarFindingPage) {
       window.addEventListener("scroll", handleScroll);
     }
-
     return () => {
       if (!isCarFindingPage) {
         window.removeEventListener("scroll", handleScroll);
@@ -40,7 +36,7 @@ export default function Header() {
 
   const handleNavigation = (href) => {
     setFadeOut(true);
-    setShowMobileMenu(false); // Close mobile menu on navigation
+    setShowMobileMenu(false);
     setTimeout(() => {
       if (href.startsWith("/")) {
         router.push(href);
@@ -99,13 +95,8 @@ export default function Header() {
     exit: { opacity: 0, height: 0 },
   };
 
-  useEffect(() => {
-    // Get user info from localStorage
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
+  // Remove localStorage user logic, use session from next-auth
+  const user = session?.user;
 
   return (
     <>
@@ -168,10 +159,10 @@ export default function Header() {
                     setShowWhiteFade(true);
                     setTimeout(() => {
                       handleNavigation("/about_us");
-                    }, 200); // Reduced timeout for smoother transition
+                    }, 200);
                     setTimeout(() => {
                       setShowWhiteFade(false);
-                    }, 600); // Reset after navigation
+                    }, 600);
                   }}
                   className="hover:text-green-400 transition-colors"
                 >
@@ -182,7 +173,7 @@ export default function Header() {
 
             {/* Right side */}
             <div className="flex items-center gap-2 sm:gap-3">
-              {/* Mobile menu button - Only show when not logged in or on smaller screens */}
+              {/* Mobile menu button */}
               <button
                 onClick={() => setShowMobileMenu(!showMobileMenu)}
                 className="md:hidden p-2 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
@@ -199,7 +190,7 @@ export default function Header() {
                     onClick={() => setShowDropdown(!showDropdown)}
                     className="flex items-center gap-2 cursor-pointer p-1 rounded-lg transition-all duration-200 group"
                     whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.95 }} // Pressing down effect
+                    whileTap={{ scale: 0.95 }}
                   >
                     <div className="relative">
                       <img
@@ -237,8 +228,7 @@ export default function Header() {
                         <div className="py-1 border-t border-gray-100">
                           <button
                             onClick={() => {
-                              localStorage.removeItem('user');
-                              window.location.href = "/";
+                              signOut({ callbackUrl: "/" });
                             }}
                             className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                           >
