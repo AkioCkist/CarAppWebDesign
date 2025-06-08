@@ -131,8 +131,8 @@ const CarRentalModal = ({
 
         const params = new URLSearchParams();
         Object.entries(searchDataValues).forEach(([key, value]) => {
-            if (value) {  // Only add non-empty values
-                params.append(key, encodeURIComponent(value));
+            if (value) {
+                params.append(key, value); // Không encode 2 lần, URLSearchParams tự xử lý
             }
         });
         return `/booking_car?${params.toString()}`;

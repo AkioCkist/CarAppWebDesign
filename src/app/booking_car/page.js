@@ -14,21 +14,15 @@ function BookingContent() {
 
   const carId = searchParams.get('carId');
   
-  // ✅ Decode URL parameters properly và thêm debug log
+  // Lấy các tham số tìm kiếm từ URL
   const preFilledSearchData = {
-    pickupLocation: searchParams.get('pickupLocation') ? decodeURIComponent(searchParams.get('pickupLocation')) : '',
-    dropoffLocation: searchParams.get('dropoffLocation') ? decodeURIComponent(searchParams.get('dropoffLocation')) : '',
+    pickupLocation: searchParams.get('pickupLocation') || '',
+    dropoffLocation: searchParams.get('dropoffLocation') || '',
     pickupDate: searchParams.get('pickupDate') || '',
     pickupTime: searchParams.get('pickupTime') || '',
     dropoffDate: searchParams.get('dropoffDate') || '',
     dropoffTime: searchParams.get('dropoffTime') || ''
   };
-
-  // Debug log để kiểm tra dữ liệu
-  useEffect(() => {
-    console.log('Raw URL params:', Object.fromEntries(searchParams.entries()));
-    console.log('Processed preFilledSearchData:', preFilledSearchData);
-  }, [searchParams]);
 
   useEffect(() => {
     if (!carId) {
@@ -40,14 +34,19 @@ function BookingContent() {
     const fetchCar = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch(`http://localhost/myapi/vehicles.php?id=${carId}`);
-        
+        // Gọi API Next.js (không dùng PHP nữa)
+        const res = await fetch(`/api/vehicles?id=${encodeURIComponent(carId)}`);
         if (!res.ok) throw new Error('Không thể lấy dữ liệu xe');
-        
-        const car = await res.json();
+        let car = await res.json();
+        // Nếu trả về là object có records, lấy phần tử đầu tiên
+        if (car.records && Array.isArray(car.records)) {
+          car = car.records[0];
+        }
+        if (!car || Object.keys(car).length === 0) {
+          throw new Error('Không tìm thấy dữ liệu xe');
+        }
         setSelectedCar(car);
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin xe:', error);
         setError('Không thể tải thông tin xe. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
@@ -72,7 +71,6 @@ function BookingContent() {
       </div>
     );
   }
-
 
   return (
     <div className="min-h-screen bg-gray-50">
