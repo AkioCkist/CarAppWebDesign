@@ -155,8 +155,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   const handleBookingComplete = async () => {
     setIsSubmitting(true);
-    
-    // Simulate API call
+
     setTimeout(() => {
       const bookingData = {
         car: selectedCar,
@@ -166,17 +165,33 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         total: calculateTotal(),
         bookingId: 'BK' + Date.now()
       };
-      
-      console.log('Booking Data:', bookingData);
-      alert(`🎉 Booking successful! 
+
+      // Compose dynamic popup content
+      const carName = normalizedCar?.name || '';
+      const carType = normalizedCar?.type || '';
+      const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
+      const rentalDays = getDayCount();
+      const pricePerDay = normalizedCar?.price ? `${normalizedCar.price} ₫` : '';
+      const total = `${calculateTotal()} ₫`;
+      const vat = `${Math.round(calculateTotal() * 0.1)} ₫`;
+      const totalWithVat = `${Math.round(calculateTotal() * 1.1)} ₫`;
+
+      alert(
+        `🎉 Booking successful!
+
+🚗 Car: ${carName} (${carType}${carSeats ? ' • ' + carSeats : ''})
+📅 Rental: ${searchData.pickupDate} ${searchData.pickupTime} → ${searchData.dropoffDate} ${searchData.dropoffTime} (${rentalDays} day(s))
+💵 Price per day: ${pricePerDay}
+🧾 VAT (10%): ${vat}
+💰 Total: ${totalWithVat}
 
 📋 Booking ID: ${bookingData.bookingId}
 💳 Payment method: ${paymentMethod === 'cash' ? 'Pay on Pickup' : 'Bank Transfer'}
-💰 Total: ${formatCurrency(calculateTotal())}
 
 📧 Details have been sent to your email.
-📞 We will contact you for confirmation within 30 minutes.`);
-      
+📞 We will contact you for confirmation within 30 minutes.`
+      );
+
       setIsSubmitting(false);
       // Reset form after success
       setCurrentStep(1);
@@ -884,19 +899,19 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Rental price ({getDayCount()} day(s))</span>
-                        <span className="font-medium">{calculateTotal()} ₫</span>
+                        <span className="font-medium text-gray-900">{calculateTotal()} ₫</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium">0 ₫</span>
+                        <span className="font-medium text-gray-900">0 ₫</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">VAT (10%)</span>
-                        <span className="font-medium">{Math.round(calculateTotal() * 0.1)} ₫</span>
+                        <span className="font-medium text-gray-900">{Math.round(calculateTotal() * 0.1)} ₫</span>
                       </div>
                       <div className="border-t border-gray-200 pt-3">
                         <div className="flex justify-between text-lg font-bold">
-                          <span>Total</span>
+                          <span className="text-gray-900">Total</span>
                           <span className="text-green-600">{Math.round(calculateTotal() * 1.1)} ₫</span>
                         </div>
                       </div>
