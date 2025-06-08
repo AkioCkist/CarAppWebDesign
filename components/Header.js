@@ -247,11 +247,11 @@ export default function Header() {
                     whileTap={{ scale: 0.95 }}
                   >                    <div className="relative">
                       <img
-                        src={user.avatar || "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg"}
+                        src={user.avatar || "/avatar/default_avatar.jpg"}
                         className="w-8 h-8 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full border-2 border-green-400 object-cover flex-shrink-0"
                         alt="User avatar"
                         onError={(e) => {
-                          e.target.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
+                          e.target.src = "/avatar/default_avatar.jpg";
                         }}
                       />
                     </div>
@@ -280,14 +280,13 @@ export default function Header() {
                         animate="visible"
                         exit="exit"
                       >                        {/* User info section */}
-                        <div className="px-4 py-3 border-b border-gray-100">
-                          <div className="flex items-center gap-3">
+                        <div className="px-4 py-3 border-b border-gray-100">                          <div className="flex items-center gap-3">
                             <img
-                              src={user.avatar || "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg"}
+                              src={user.avatar || "/avatar/default_avatar.jpg"}
                               className="w-10 h-10 rounded-full border border-gray-200 object-cover"
                               alt="User avatar"
                               onError={(e) => {
-                                e.target.src = "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
+                                e.target.src = "/avatar/default_avatar.jpg";
                               }}
                             />
                             <div className="flex-1 min-w-0">

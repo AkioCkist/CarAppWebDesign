@@ -333,12 +333,11 @@ export default function UserProfilePage() {
       }
     }
   };
-
   // Use user info from session, fallback to defaults if not available
   const avatar =
   user.avatar && user.avatar.trim() !== ""
     ? user.avatar
-    : "https://img.freepik.com/free-vector/blue-circle-with-white-user_78370-4707.jpg";
+    : "/avatar/default_avatar.jpg";
   const name = user.name || "Unknown User";
   const phone = user.phone || "N/A";
 
