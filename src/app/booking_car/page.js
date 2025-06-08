@@ -16,8 +16,8 @@ function BookingContent() {
   
   // ✅ Decode URL parameters properly và thêm debug log
   const preFilledSearchData = {
-    pickupLocation: decodeURIComponent(searchParams.get('pickupLocation') || ''),
-    dropoffLocation: decodeURIComponent(searchParams.get('dropoffLocation') || ''),
+    pickupLocation: searchParams.get('pickupLocation') ? decodeURIComponent(searchParams.get('pickupLocation')) : '',
+    dropoffLocation: searchParams.get('dropoffLocation') ? decodeURIComponent(searchParams.get('dropoffLocation')) : '',
     pickupDate: searchParams.get('pickupDate') || '',
     pickupTime: searchParams.get('pickupTime') || '',
     dropoffDate: searchParams.get('dropoffDate') || '',
@@ -26,14 +26,7 @@ function BookingContent() {
 
   // Debug log để kiểm tra dữ liệu
   useEffect(() => {
-    console.log('URL params:', {
-      pickupLocation: searchParams.get('pickupLocation'),
-      dropoffLocation: searchParams.get('dropoffLocation'),
-      pickupDate: searchParams.get('pickupDate'),
-      pickupTime: searchParams.get('pickupTime'),
-      dropoffDate: searchParams.get('dropoffDate'),
-      dropoffTime: searchParams.get('dropoffTime')
-    });
+    console.log('Raw URL params:', Object.fromEntries(searchParams.entries()));
     console.log('Processed preFilledSearchData:', preFilledSearchData);
   }, [searchParams]);
 

@@ -118,7 +118,7 @@ const CarRentalModal = ({
 
     // Helper to build booking URL with params
     function buildBookingUrl() {
-        const params = new URLSearchParams({
+        const searchDataValues = {
             carId: carData.id,
             pickupLocation: searchData?.pickupLocation || "",
             dropoffLocation: searchData?.dropoffLocation || "",
@@ -126,6 +126,13 @@ const CarRentalModal = ({
             pickupTime: searchData?.pickupTime || "",
             dropoffDate: searchData?.dropoffDate || "",
             dropoffTime: searchData?.dropoffTime || ""
+        };
+
+        const params = new URLSearchParams();
+        Object.entries(searchDataValues).forEach(([key, value]) => {
+            if (value) {  // Only add non-empty values
+                params.append(key, encodeURIComponent(value));
+            }
         });
         return `/booking_car?${params.toString()}`;
     }
