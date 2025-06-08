@@ -151,7 +151,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
                 transition={{ delay: 0.5 }}
                 className="text-gray-600 text-lg"
               >
-                Đang chuyển hướng đến trang...
+                Redirecting you to the destination page...
               </motion.p>
             </motion.div>
 
@@ -238,7 +238,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
               transition={{ delay: 0.6 }}
               className="text-center">
               <div className="flex items-center justify-center space-x-2">
-                <span className="text-gray-600 text-lg font-medium">Đang tải</span>
+                <span className="text-gray-600 text-lg font-medium">Please wait while content is loading</span>
                 <div className="flex space-x-1">
                   {[0, 1, 2].map((i) => (
                     <motion.div
