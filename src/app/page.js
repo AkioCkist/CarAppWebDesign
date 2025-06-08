@@ -1071,7 +1071,7 @@ export default function HomePage() {
                               </span>
                               <span className="flex items-center gap-2">
                                 <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-4 h-4" />
-                                {vehicle.seats} chỗ
+                                {vehicle.seats} seats
                               </span>
                               <span className="flex items-center gap-2">
                                 <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-4 h-4" />
@@ -1095,7 +1095,7 @@ export default function HomePage() {
                             <span className="mx-2 text-gray-400">・</span>
                             <span className="flex items-center gap-1">
                               <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-4 h-4" />
-                              {vehicle.trips} chuyến
+                              {vehicle.trips} trips
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mb-2">
@@ -1124,7 +1124,7 @@ export default function HomePage() {
                               className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
                             >
                               <span className="flex items-center justify-center gap-2">
-                                Đặt xe ngay
+                                Rent now
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
@@ -1159,35 +1159,87 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto px-4">
           <h2 className="text-3xl font-bold text-center mb-10">Latest News</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {news.map((n) => (
+            {news.map((n, index) => (
               <motion.div
                 key={n.title}
-                whileHover={{
-                  scale: 1.03,
-                  y: -5,
-                }}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{
-                  type: "tween",
-                  ease: "easeOut",
-                  duration: 0.15,
-                  stiffness: 300,
-                  damping: 10,
-                  mass: 0.5,
+                  duration: 0.5,
+                  delay: index * 0.1,
+                  ease: "easeOut"
                 }}
-                className="bg-gray-50 rounded-xl shadow p-4 flex flex-col hover:shadow-lg transition">
-                <motion.img
-                  whileHover={{ scale: 1.02 }}
-                  src={n.image}
-                  alt={n.title}
-                  className="w-full h-48 object-cover rounded mb-4" />
-                <h3 className="font-semibold text-lg mb-2">{n.title}</h3>
-                <p className="text-gray-600 mb-3">{n.snippet}</p>
-                <motion.a
-                  whileHover={{ x: 5 }}
-                  href={n.link}
-                  className="text-blue-600 font-semibold hover:underline mt-auto">
-                  Read More
-                </motion.a>
+                whileHover={{
+                  scale: 1.05,
+                  y: -10,
+                  boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)"
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 relative group cursor-pointer transition-all duration-300 ease-in-out hover:shadow-2xl"
+                onMouseEnter={(e) => {
+                  e.currentTarget.querySelector('.news-image').style.transform = 'scale(1.1)';
+                  e.currentTarget.querySelector('.news-overlay').style.opacity = '1';
+                  e.currentTarget.querySelector('.news-title').style.color = '#22C55E';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.querySelector('.news-image').style.transform = 'scale(1)';
+                  e.currentTarget.querySelector('.news-overlay').style.opacity = '0';
+                  e.currentTarget.querySelector('.news-title').style.color = '#111827';
+                }}
+              >
+                <div className="relative w-full h-48 overflow-hidden">
+                  <img
+                    src={n.image}
+                    alt={n.title}
+                    className="news-image w-full h-full object-cover transition-all duration-500"
+                  />
+                  <div
+                    className="news-overlay absolute inset-0 bg-gradient-to-t from-black/30 to-transparent transition-opacity duration-300 opacity-0"
+                  />
+
+                  {/* Animated Read More Badge */}
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    whileHover={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                    className="absolute top-4 right-4 bg-green-500 text-white text-xs px-3 py-1 rounded-full font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                  >
+                    New Article
+                  </motion.div>
+                </div>
+
+                <div className="p-6 flex flex-col flex-1">
+                  <h3 className="news-title font-semibold text-lg mb-3 transition-colors duration-300 text-gray-900 group-hover:text-green-600 line-clamp-2">
+                    {n.title}
+                  </h3>
+
+                  <p className="text-gray-600 mb-4 flex-1 line-clamp-3 group-hover:text-gray-700 transition-colors duration-300">
+                    {n.snippet}
+                  </p>
+
+                  <motion.a
+                    href={n.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ x: 5 }}
+                    className="inline-flex items-center gap-2 text-green-600 font-semibold hover:text-green-700 transition-colors duration-300 mt-auto"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Read More
+                    <motion.svg
+                      whileHover={{ x: 3 }}
+                      className="w-4 h-4 transition-transform duration-300"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </motion.svg>
+                  </motion.a>
+                </div>
+
+                {/* Hover border effect */}
+                <div className="absolute inset-0 border-2 border-green-500 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
               </motion.div>
             ))}
           </div>
@@ -1283,6 +1335,7 @@ export default function HomePage() {
               !
             </NotificationDot>
           </motion.div>
+          </motion.div>
           <motion.div
             whileHover={{
               scale: 1.1,
@@ -1313,7 +1366,7 @@ export default function HomePage() {
               fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+              <path d="M6.62 10.79c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </motion.svg>
           </motion.div>
           <motion.div
@@ -1377,19 +1430,7 @@ export default function HomePage() {
               <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
             </div>
           </motion.div>
-        </motion.div>
-        {/* Email Bubble */}
-        <motion.div
-          initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          transition={{
-            type: "spring",
-            stiffness: 300,
-            damping: 20,
-            delay: 1.0,
-          }}
-          className="relative"
-        >
+          {/* Email Bubble */}
           <motion.div
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -1397,110 +1438,121 @@ export default function HomePage() {
               type: "spring",
               stiffness: 300,
               damping: 20,
-              delay: 1.2,
+              delay: 1.0,
             }}
-            className="absolute -top-2 -right-2 z-10"
-          >
-            <NotificationDot color="bg-orange-500" delay={0.1}>
-              @
-            </NotificationDot>
-          </motion.div>
-          <motion.div
-            whileHover={{
-              scale: 1.1,
-              boxShadow:
-                "0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)",
-              y: -5,
-            }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowEmailBubble(!showEmailBubble)}
-            className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full shadow-lg cursor-pointer flex items-center justify-center relative overflow-hidden"
+            className="relative"
           >
             <motion.div
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{
+                type: "spring",
+                stiffness: 300,
+                damping: 20,
+                delay: 1.2,
+              }}
+              className="absolute -top-2 -right-2 z-10"
+            >
+              <NotificationDot color="bg-orange-500" delay={0.1}>
+                @
+              </NotificationDot>
+            </motion.div>
+            <motion.div
+              whileHover={{
+                scale: 1.1,
+                boxShadow:
+                  "0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)",
+                y: -5,
+              }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => setShowEmailBubble(!showEmailBubble)}
+              className="w-16 h-16 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full shadow-lg cursor-pointer flex items-center justify-center relative overflow-hidden"
+            >
+              <motion.div
+                animate={{
+                  scale: [1, 1.5, 1],
+                  opacity: [0.5, 0, 0.5],
+                }}
+                transition={{
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                  delay: 0.5,
+                }}
+                className="absolute inset-0 bg-white rounded-full"
+              />
+              <motion.svg
+                whileHover={{ rotateY: 180 }}
+                transition={{ duration: 0.6 }}
+                className="w-8 h-8 text-white z-10"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+              </motion.svg>
+            </motion.div>
+            <motion.div
+              initial={{ scale: 0, x: 20, opacity: 0 }}
               animate={{
-                scale: [1, 1.5, 1],
-                opacity: [0.5, 0, 0.5],
+                scale: showEmailBubble ? 1 : 0,
+                x: showEmailBubble ? 0 : 20,
+                opacity: showEmailBubble ? 1 : 0,
               }}
               transition={{
-                duration: 2,
-                repeat: Infinity,
-                ease: "easeInOut",
-                delay: 0.5,
+                type: "spring",
+                stiffness: 300,
+                damping: 25,
               }}
-              className="absolute inset-0 bg-white rounded-full"
-            />
-            <motion.svg
-              whileHover={{ rotateY: 180 }}
-              transition={{ duration: 0.6 }}
-              className="w-8 h-8 text-white z-10"
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-            </motion.svg>
-          </motion.div>
-          <motion.div
-            initial={{ scale: 0, x: 20, opacity: 0 }}
-            animate={{
-              scale: showEmailBubble ? 1 : 0,
-              x: showEmailBubble ? 0 : 20,
-              opacity: showEmailBubble ? 1 : 0,
-            }}
-            transition={{
-              type: "spring",
-              stiffness: 300,
-              damping: 25,
-            }}
-            className="absolute bottom-0 right-20 bg-white rounded-2xl shadow-2xl p-6 w-80 border border-gray-100 z-50"
-            style={{
-              transformOrigin: "bottom right",
-              right: "80px",
-              bottom: "0px",
-            }}
-          >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setShowEmailBubble(false);
+              className="absolute bottom-0 right-20 bg-white rounded-2xl shadow-2xl p-6 w-80 border border-gray-100 z-50"
+              style={{
+                transformOrigin: "bottom right",
+                right: "80px",
+                bottom: "0px",
               }}
-              className="absolute top-3 right-3 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors z-10"
             >
-              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <div className="flex items-start gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
-                <img
-                  src="/icons/email_bubble.svg"
-                  alt="Email Support"
-                  className="w-full h-full rounded-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "block";
-                  }}
-                />
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" style={{ display: "none" }}>
-                  <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowEmailBubble(false);
+                }}
+                className="absolute top-3 right-3 w-6 h-6 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition-colors z-10"
+              >
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
                 </svg>
-              </div>
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-800 mb-1">Send Email</h4>
-                <p className="text-gray-600 text-sm mb-3">Have questions? Drop us a message and we'll get back to you!</p>
-                <a
-                  href="mailto:contact@whalexe.com"
-                  className="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
-                >
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              </button>
+              <div className="flex items-start gap-3">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <img
+                    src="/icons/email_bubble.svg"
+                    alt="Email Support"
+                    className="w-full h-full rounded-full object-cover"
+                    onError={(e) => {
+                      e.target.style.display = "none";
+                      e.target.nextSibling.style.display = "block";
+                    }}
+                  />
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24" style={{ display: "none" }}>
                     <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
                   </svg>
-                  contact@whalexe.com
-                </a>
+                </div>
+                <div className="flex-1">
+                  <h4 className="font-semibold text-gray-800 mb-1">Send Email</h4>
+                  <p className="text-gray-600 text-sm mb-3">Have questions? Drop us a message and we'll get back to you!</p>
+                  <a
+                    href="mailto:contact@whalexe.com"
+                    className="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+                    </svg>
+                    contact@whalexe.com
+                  </a>
+                </div>
+                <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
               </div>
-              <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
-            </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
       </div>
 
       {/* Google Tag Script */}
