@@ -52,7 +52,7 @@ const news = [
     link: "https://www.hertz.com/us/en/blog/automotive/how-to-pick-a-rental-car-for-your-next-trip",
   },
   {
-    image: "https://energycentral.com/sites/default/files/styles/article_body/public/ece/node_main/2024/10/energycentral-carrentalimage.png?itok=JnrJQWuu",
+    image: "https://tribe-s3-production.imgix.net/TvW2b1YQoFl67YyaWGcD7?fit=max&w=2000&auto=compress,format",
     title: "Electric Vehicles and the Future of Car Rentals",
     snippet: "EVs are changing car rentals with lower costs and eco benefits. Companies are growing EV fleets and adapting to charging needs.",
     link: "https://energycentral.com/c/cp/electric-vehicles-and-future-car-rentals",
