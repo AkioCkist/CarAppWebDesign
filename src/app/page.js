@@ -1071,7 +1071,7 @@ export default function HomePage() {
                               </span>
                               <span className="flex items-center gap-2">
                                 <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-4 h-4" />
-                                {vehicle.seats} chỗ
+                                {vehicle.seats} seats
                               </span>
                               <span className="flex items-center gap-2">
                                 <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-4 h-4" />
@@ -1095,7 +1095,7 @@ export default function HomePage() {
                             <span className="mx-2 text-gray-400">・</span>
                             <span className="flex items-center gap-1">
                               <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-4 h-4" />
-                              {vehicle.trips} chuyến
+                              {vehicle.trips} trips
                             </span>
                           </div>
                           <div className="flex items-center gap-2 mb-2">
@@ -1124,7 +1124,7 @@ export default function HomePage() {
                               className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
                             >
                               <span className="flex items-center justify-center gap-2">
-                                Đặt xe ngay
+                                Rent now
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
