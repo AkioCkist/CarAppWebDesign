@@ -16,17 +16,17 @@ function BookingContent() {
   
   // Lấy các tham số tìm kiếm từ URL
   const preFilledSearchData = {
-    pickupLocation: searchParams.get('pickupLocation') || '',
-    dropoffLocation: searchParams.get('dropoffLocation') || '',
-    pickupDate: searchParams.get('pickupDate') || '',
-    pickupTime: searchParams.get('pickupTime') || '',
-    dropoffDate: searchParams.get('dropoffDate') || '',
-    dropoffTime: searchParams.get('dropoffTime') || ''
+    pickupLocation: searchParams.get('pickupLocation') || searchParams.get('pickUpLocation') || '',
+    dropoffLocation: searchParams.get('dropoffLocation') || searchParams.get('dropOffLocation') || '',
+    pickupDate: searchParams.get('pickupDate') || searchParams.get('pickUpDate') || '',
+    pickupTime: searchParams.get('pickupTime') || searchParams.get('pickUpTime') || '',
+    dropoffDate: searchParams.get('dropoffDate') || searchParams.get('dropOffDate') || '',
+    dropoffTime: searchParams.get('dropoffTime') || searchParams.get('dropOffTime') || ''
   };
 
   useEffect(() => {
     if (!carId) {
-      setError('Không tìm thấy thông tin xe');
+      setError('Car information not found');
       setIsLoading(false);
       return;
     }
@@ -36,18 +36,18 @@ function BookingContent() {
         setIsLoading(true);
         // Gọi API Next.js (không dùng PHP nữa)
         const res = await fetch(`/api/vehicles?id=${encodeURIComponent(carId)}`);
-        if (!res.ok) throw new Error('Không thể lấy dữ liệu xe');
+        if (!res.ok) throw new Error('Unable to fetch car data');
         let car = await res.json();
         // Nếu trả về là object có records, lấy phần tử đầu tiên
         if (car.records && Array.isArray(car.records)) {
           car = car.records[0];
         }
         if (!car || Object.keys(car).length === 0) {
-          throw new Error('Không tìm thấy dữ liệu xe');
+          throw new Error('Car data not found');
         }
         setSelectedCar(car);
       } catch (error) {
-        setError('Không thể tải thông tin xe. Vui lòng thử lại sau.');
+        setError('Unable to load car information. Please try again later.');
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +59,7 @@ function BookingContent() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Đang tải...</div>
+        <div className="text-lg">Loading...</div>
       </div>
     );
   }
@@ -73,7 +73,7 @@ function BookingContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-green-200 via-white to-gray-50">
       <Header />
       <CarBookingPage 
         selectedCar={selectedCar} 
