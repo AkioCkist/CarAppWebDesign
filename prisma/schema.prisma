@@ -15,17 +15,22 @@ datasource db {
 }
 
 model accounts {
-  account_id   Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(50)
-  phone_number String?  @unique @db.VarChar(20)
-  password     String   @db.VarChar(255)
-  created_at   DateTime @default(now())
+  account_id     Int      @id @default(autoincrement())
+  username       String   @db.VarChar(50)
+  phone_number   String?  @unique @db.VarChar(20)
+  email          String?  @unique @db.VarChar(255)
+  password       String?  @db.VarChar(255)
+  oauth_provider String?  @db.VarChar(50)
+  oauth_id       String?  @db.VarChar(255)
+  avatar_url     String?  @db.VarChar(500)
+  created_at     DateTime @default(now())
 
   // Relations
   account_roles account_roles[]
   bookings      bookings[]
   vehicles      vehicles[]
 
+  @@unique([oauth_provider, oauth_id])
   @@map("accounts")
 }
 
