@@ -1,6 +1,10 @@
-import { handlers } from "./../../../../../lib/auth"; // Adjust path based on your project structure
+// app/api/auth/[...nextauth]/route.js
+import { handlers } from "./../../../../../lib/auth"; //
 
-export const GET = handlers;
-export const POST = handlers;
-// You can also export other methods like PUT, DELETE if needed for other NextAuth features,
-// but for standard authentication, GET and POST are usually sufficient.
+// This is the correct way to export the handlers for the App Router
+export const GET = handlers; //
+export const POST = handlers; //
+
+// If you need to handle other methods like PUT, DELETE, etc., you would do the same:
+export const PUT = handlers;
+export const DELETE = handlers;
