@@ -1,33 +1,33 @@
 import React from "react";
 
 export default function NoResultMessage({ type, filter }) {
-    let message = "Không có xe nào đang cho thuê.";
+    let message = "No cars available for rent.";
     if (type === "filter") {
         switch (filter) {
             case "carType":
-                message = "Không có loại xe này.";
+                message = "No cars of this type available.";
                 break;
             case "brand":
-                message = "Không có hãng xe phù hợp.";
+                message = "No cars from this brand available.";
                 break;
             case "seats":
-                message = "Không có xe với số chỗ này.";
+                message = "No cars with this number of seats.";
                 break;
             case "fuel":
-                message = "Không có xe với loại nhiên liệu này.";
+                message = "No cars with this fuel type.";
                 break;
             case "discount":
-                message = "Không có xe đang giảm giá.";
+                message = "No cars with discounts available.";
                 break;
             case "price":
-                message = "Không có xe trong khoảng giá này.";
+                message = "No cars in this price range.";
                 break;
             default:
-                message = "Không tìm thấy xe phù hợp.";
+                message = "No matching cars found.";
         }
     }
     if (type === "favorite") {
-        message = "Không có xe nào trong danh sách yêu thích.";
+        message = "No cars in your favorites list.";
     }
     return (
         <div className="flex flex-col items-center justify-center py-12">
