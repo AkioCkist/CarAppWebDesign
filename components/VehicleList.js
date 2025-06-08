@@ -178,7 +178,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
                 }`}
             >
               <img
-                src="/icons/IconDetailCarCard/transmission.svg"
+                src="/icons/IconDetailCarCard/Transmission.svg"
                 alt="transmission"
                 className="w-4 h-4"
               />
