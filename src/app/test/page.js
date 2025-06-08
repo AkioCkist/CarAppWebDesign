@@ -1,17 +1,26 @@
 'use client'
 
-import { useSession } from "next-auth/react";
+import { useState, useEffect } from "react";
 
 export default function Dashboard() {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState(null);
+  const [status, setStatus] = useState("loading");
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+    setStatus("loaded");
+  }, []);
 
   if (status === "loading") {
     return <p>Loading...</p>;
   }
 
-  if (!session) {
+  if (!user) {
     return <p>You are not logged in.</p>;
   }
 
-  return <p>Welcome, {session.user?.name}</p>;
+  return <p>Welcome, {user?.name}</p>;
 }

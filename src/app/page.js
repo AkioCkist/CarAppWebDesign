@@ -12,7 +12,6 @@ import vehicles from "../../lib/seed";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import Script from "next/script";
-import { useSession } from "next-auth/react";
 
 // Make sure this declaration is present!
 const vehicleTypes = [
@@ -194,8 +193,14 @@ const AnimatedDropdown = ({
 };
 
 export default function HomePage() {
-  const { data: session } = useSession();
-  const user = session?.user;
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
 
   const [sameLocation, setSameLocation] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
