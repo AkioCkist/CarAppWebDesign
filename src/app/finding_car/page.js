@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { Suspense, useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from 'lucide-react';
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
@@ -11,10 +11,52 @@ import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
 import { useSearchParams, useRouter } from 'next/navigation';
 
-function beautifyCityName(str) {
-  if (!str) return "";
-  if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
-  const mapping = {
+// Component chính - bọc bởi Suspense
+export default function Page() {
+  return (
+    <Suspense fallback={<LoadingPlaceholder />}>
+      <CarListingPageContent />
+    </Suspense>
+  );
+}
+
+// Component loading đơn giản
+function LoadingPlaceholder() {
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
+        <p className="text-green-700 text-lg">Đang tải danh sách xe...</p>
+      </div>
+    </div>
+  );
+}
+
+// Di chuyển toàn bộ code hiện tại vào component riêng biệt
+function CarListingPageContent() {
+
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  function beautifyCityName(str) {
+    if (!str) return "";
+    if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
+    const mapping = {
+      'hcm': 'TP.HCM',
+      'tp.hcm': 'TP.HCM',
+      'hanoi': 'Hà Nội',
+      'ha noi': 'Hà Nội',
+      'danang': 'Đà Nẵng',
+      'da nang': 'Đà Nẵng',
+      'hue': 'Huế',
+      'bacninh': 'Bắc Ninh',
+      'bac ninh': 'Bắc Ninh'
+    };
+    const normalized = str.trim().toLowerCase();
+    return mapping[normalized] || str;
+  }
+
+  const cityMapping = {
     'hcm': 'TP.HCM',
     'tp.hcm': 'TP.HCM',
     'hanoi': 'Hà Nội',
@@ -23,36 +65,21 @@ function beautifyCityName(str) {
     'da nang': 'Đà Nẵng',
     'hue': 'Huế',
     'bacninh': 'Bắc Ninh',
-    'bac ninh': 'Bắc Ninh'
+    'bac ninh': 'Bắc Ninh',
+    'TP.HCM': 'TP.HCM',
+    'Hà Nội': 'Hà Nội',
+    'Đà Nẵng': 'Đà Nẵng',
+    'Huế': 'Huế',
+    'Bắc Ninh': 'Bắc Ninh'
   };
-  const normalized = str.trim().toLowerCase();
-  return mapping[normalized] || str;
-}
 
-const cityMapping = {
-  'hcm': 'TP.HCM',
-  'tp.hcm': 'TP.HCM',
-  'hanoi': 'Hà Nội',
-  'ha noi': 'Hà Nội',
-  'danang': 'Đà Nẵng',
-  'da nang': 'Đà Nẵng',
-  'hue': 'Huế',
-  'bacninh': 'Bắc Ninh',
-  'bac ninh': 'Bắc Ninh',
-  'TP.HCM': 'TP.HCM',
-  'Hà Nội': 'Hà Nội',
-  'Đà Nẵng': 'Đà Nẵng',
-  'Huế': 'Huế',
-  'Bắc Ninh': 'Bắc Ninh'
-};
+  function normalizeCity(str) {
+    if (!str) return "";
+    const normalized = str.trim().toLowerCase();
+    return cityMapping[normalized] || cityMapping[str.trim()] || str;
+  }
 
-function normalizeCity(str) {
-  if (!str) return "";
-  const normalized = str.trim().toLowerCase();
-  return cityMapping[normalized] || cityMapping[str.trim()] || str;
-}
-
-const CarListingPage = () => {
+  // Phần còn lại của component CarListingPage - GIỮ NGUYÊN TẤT CẢ
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
   const [priceRange, setPriceRange] = useState('');
@@ -80,8 +107,6 @@ const CarListingPage = () => {
   const [selectedCar, setSelectedCar] = useState(null);
   const [showRentalModal, setShowRentalModal] = useState(false);
   const [favorites, setFavorites] = useState([]);
-  const searchParams = useSearchParams();
-  const router = useRouter();
 
   const didInitRef = useRef(false);
   const isInitializedRef = useRef(false);
@@ -768,6 +793,4 @@ const CarListingPage = () => {
       <Footer />
     </div>
   );
-};
-
-export default CarListingPage;
+}
