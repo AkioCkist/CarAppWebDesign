@@ -315,12 +315,12 @@ function formatVehicleData(vehicle) {
         icon: mapping.amenity.amenity_icon,
         description: mapping.amenity.description
     }))
-    const priceDisplay = Math.floor(Number(vehicle.base_price) / 1000) + 'K/ngày'
+    const priceDisplay = Math.floor(Number(vehicle.base_price) / 1000) + 'K/Day'
     let oldPrice = null
     let priceDiscount = null
     if (Number(vehicle.rating) >= 4.8) {
         oldPrice = Number(vehicle.base_price) * 1.2
-        priceDiscount = 'Giảm 20%'
+        priceDiscount = 'Discount 20%'
     }
     return {
         id: vehicle.vehicle_id,

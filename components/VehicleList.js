@@ -69,13 +69,12 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               </svg>
               {vehicle.rating}
             </span>
-            <span className="mx-2 text-gray-400">・</span>
-            <span className="flex items-center gap-1">
+            <span className="mx-2 text-gray-400">・</span>          <span className="flex items-center gap-1">
               <img
                 src="/icons/IconDetailCarCard/trips.svg"
                 alt="trips"
                 className="w-4 h-4" />
-              {vehicle.trips} chuyến
+              {vehicle.trips} trips
             </span>
           </div>
           <div className="flex items-center gap-2 mb-2">
@@ -98,18 +97,17 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
           <div className="text-xs text-gray-700 mb-3 line-clamp-2 h-8 overflow-hidden">
             {vehicle.description}
           </div>
-          <div className="mt-auto">
-            <button
-              onClick={handleBookClick}
-              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
-            >
-              <span className="flex items-center justify-center gap-2">
-                Đặt xe ngay
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </button>
+          <div className="mt-auto">            <button
+            onClick={handleBookClick}
+            className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+          >
+            <span className="flex items-center justify-center gap-2">
+              Book Now
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
+          </button>
           </div>
         </div>
       </div>
@@ -194,7 +192,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
                 alt="seats"
                 className="w-4 h-4"
               />
-              {vehicle.seats} chỗ
+              {vehicle.seats} seats
             </span>
 
             <span
@@ -242,7 +240,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               alt="trips"
               className="w-4 h-4"
             />
-            {vehicle.trips} chuyến
+            {vehicle.trips} trips 
           </span>
         </div>
 
@@ -282,9 +280,8 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               ? 'shadow-lg scale-105 from-green-600 to-green-700'
               : 'hover:from-green-600 hover:to-green-700 hover:shadow-md'
               } active:scale-95 active:shadow-inner`}
-          >
-            <span className="flex items-center justify-center gap-2">
-              Đặt xe ngay
+          >            <span className="flex items-center justify-center gap-2">
+              Book Now
               <svg
                 className={`w-4 h-4 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''
                   }`}
