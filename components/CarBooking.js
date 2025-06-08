@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect,  } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Calendar, MapPin, Clock, User, Mail, Phone,
@@ -8,8 +8,34 @@ import {
   ArrowRight, Star, Shield, Award, Users
 } from 'lucide-react';
 
+// carbooking.js - Sửa lại useEffect
 const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
-  const searchParams = useSearchParams();
+  // Chuẩn hóa dữ liệu xe đã chọn
+  const normalizedCar = selectedCar
+    ? {
+        id: selectedCar.vehicle_id || selectedCar.id,
+        name: selectedCar.name || '',
+        type: selectedCar.vehicle_type || selectedCar.type || '',
+        seats: selectedCar.seats || '',
+        transmission: selectedCar.transmission || '',
+        fuel: selectedCar.fuel_type || selectedCar.fuel || '',
+        price: selectedCar.base_price || selectedCar.price || 0,
+        base_price: selectedCar.base_price || selectedCar.price || 0,
+        image:
+          selectedCar.image
+            ? (typeof selectedCar.image === 'string'
+                ? <img src={selectedCar.image} alt={selectedCar.name} className="w-16 h-16 object-cover rounded-xl" />
+                : selectedCar.image)
+            : (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0
+                ? <img src={selectedCar.vehicle_images[0].image_url} alt={selectedCar.name} className="w-16 h-16 object-cover rounded-xl" />
+                : null),
+        features: (selectedCar.features || selectedCar.amenities?.map(a => a.name) || []).slice(0, 5),
+        rating: selectedCar.rating || 5,
+        trips: selectedCar.total_trips || selectedCar.trips || 0,
+        location: selectedCar.location || '',
+        description: selectedCar.description || '',
+      }
+    : null;
 
   const [searchData, setSearchData] = useState({
     pickupLocation: '',
@@ -33,39 +59,28 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // ✅ Fetch searchData from URL
+  // Tự động fill thông tin tìm kiếm nếu đã có preFilledSearchData
   useEffect(() => {
     if (preFilledSearchData) {
-      setSearchData(preFilledSearchData);
-    } else if (searchParams) {
-      const pickupLocation = searchParams.get('pickupLocation');
-      const dropoffLocation = searchParams.get('dropoffLocation');
-      const pickupDate = searchParams.get('pickupDate');
-      const pickupTime = searchParams.get('pickupTime');
-      const dropoffDate = searchParams.get('dropoffDate');
-      const dropoffTime = searchParams.get('dropoffTime');
-
-      if (pickupLocation && dropoffLocation && pickupDate && pickupTime && dropoffDate && dropoffTime) {
-        setSearchData({
-          pickupLocation,
-          dropoffLocation,
-          pickupDate,
-          pickupTime,
-          dropoffDate,
-          dropoffTime
-        });
-      }
+      setSearchData(prevData => ({
+        ...prevData,
+        ...preFilledSearchData
+      }));
     }
-  }, [preFilledSearchData, searchParams]);
+  }, [preFilledSearchData]);
 
+  // Debug: Log searchData khi nó thay đổi
+  useEffect(() => {
+    console.log('Current searchData:', searchData);
+  }, [searchData]);
 
   const validateStep1 = () => {
     const newErrors = {};
     
-    if (!searchData.pickupLocation.trim()) {
+    if (!searchData.pickupLocation?.trim()) {
       newErrors.pickupLocation = 'Vui lòng nhập điểm đón';
     }
-    if (!searchData.dropoffLocation.trim()) {
+    if (!searchData.dropoffLocation?.trim()) {
       newErrors.dropoffLocation = 'Vui lòng nhập điểm trả xe';
     }
     if (!searchData.pickupDate) {
@@ -90,7 +105,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         newErrors.dropoffDate = 'Ngày trả xe phải sau ngày đón xe';
       }
     }
-
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -209,7 +224,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
       <pre className="text-sm p-4 bg-gray-100 border rounded-md mb-4">
-        <strong>Xe chọn:</strong> {selectedCar.name} ({selectedCar.type}) - {selectedCar.price} đ/ngày
+        <strong>Xe chọn:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {normalizedCar?.price} đ/ngày
       </pre>
       <pre className="text-sm p-4 bg-yellow-50 border rounded-md mb-6">
         <strong>Thông tin tìm kiếm:</strong><br />
@@ -271,15 +286,15 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                   <div className="text-5xl bg-green-50 p-4 rounded-2xl">
-                    {selectedCar.image}
+                    {normalizedCar?.image}
                   </div>
                   <div>
-                    <h3 className="text-2xl font-bold text-green-800 mb-1">{selectedCar.name}</h3>
+                    <h3 className="text-2xl font-bold text-green-800 mb-1">{normalizedCar?.name}</h3>
                     <p className="text-green-600 text-lg mb-2">
-                      {selectedCar.type} • {selectedCar.seats} chỗ • {selectedCar.transmission}
+                      {normalizedCar?.type} • {normalizedCar?.seats} chỗ • {normalizedCar?.transmission}
                     </p>
                     <div className="flex space-x-2">
-                      {selectedCar.features?.map((feature, index) => (
+                      {normalizedCar?.features?.map((feature, index) => (
                         <span key={index} className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">
                           {feature}
                         </span>
@@ -289,12 +304,12 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 </div>
                 <div className="text-right">
                   <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl mb-2">
-                    <p className="text-2xl font-bold">${selectedCar.price}</p>
+                    <p className="text-2xl font-bold">${normalizedCar?.price}</p>
                     <p className="text-sm opacity-90">/ngày</p>
                   </div>
                   <p className="text-green-600 font-medium flex items-center justify-end">
                     <Star className="w-4 h-4 mr-1 fill-yellow-400 text-yellow-400" />
-                    {selectedCar.rating}/5
+                    {normalizedCar?.rating}/5
                   </p>
                 </div>
               </div>
@@ -467,7 +482,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="text-green-700 font-medium">Số ngày thuê: {getDayCount()} ngày</p>
-                        <p className="text-green-600">Giá: ${selectedCar.price} x {getDayCount()} ngày</p>
+                        <p className="text-green-600">Giá: ${normalizedCar.price} x {getDayCount()} ngày</p>
                       </div>
                       <div className="text-right">
                         <p className="text-2xl font-bold text-green-600">${calculateTotal()}</p>
@@ -804,10 +819,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6">
                     {/* Car Info Summary */}
                     <div className="flex items-center mb-4">
-                      <div className="text-3xl mr-4">{selectedCar.image}</div>
+                      <div className="text-3xl mr-4">{normalizedCar.image}</div>
                       <div>
-                        <h4 className="font-semibold text-green-800">{selectedCar.name}</h4>
-                        <p className="text-green-600 text-sm">{selectedCar.type} • {selectedCar.seats} chỗ</p>
+                        <h4 className="font-semibold text-green-800">{normalizedCar.name}</h4>
+                        <p className="text-green-600 text-sm">{normalizedCar.type} • {normalizedCar.seats} chỗ</p>
                       </div>
                     </div>
 

@@ -1,5 +1,5 @@
-'use client';
-
+'use client'
+// booking_car/page.js - Sửa lại cách lấy dữ liệu từ URL
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import CarBookingPage from '../../../components/CarBooking';
@@ -13,9 +13,8 @@ function BookingContent() {
   const [error, setError] = useState(null);
 
   const carId = searchParams.get('carId');
-  const carName = searchParams.get('carName');
   
-  // Dữ liệu lọc chuyến đi
+  // Lấy các tham số tìm kiếm từ URL
   const preFilledSearchData = {
     pickupLocation: searchParams.get('pickupLocation') || '',
     dropoffLocation: searchParams.get('dropoffLocation') || '',
@@ -35,14 +34,19 @@ function BookingContent() {
     const fetchCar = async () => {
       try {
         setIsLoading(true);
-        const res = await fetch(`http://localhost/myapi/vehicles.php?id=${carId}`);
-        
+        // Gọi API Next.js (không dùng PHP nữa)
+        const res = await fetch(`/api/vehicles?id=${encodeURIComponent(carId)}`);
         if (!res.ok) throw new Error('Không thể lấy dữ liệu xe');
-        
-        const car = await res.json();
+        let car = await res.json();
+        // Nếu trả về là object có records, lấy phần tử đầu tiên
+        if (car.records && Array.isArray(car.records)) {
+          car = car.records[0];
+        }
+        if (!car || Object.keys(car).length === 0) {
+          throw new Error('Không tìm thấy dữ liệu xe');
+        }
         setSelectedCar(car);
       } catch (error) {
-        console.error('Lỗi khi lấy thông tin xe:', error);
         setError('Không thể tải thông tin xe. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);
@@ -54,46 +58,35 @@ function BookingContent() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-green-700 text-lg">Đang tải thông tin xe...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Đang tải...</div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-500 text-lg">{error}</p>
-          <p className="text-gray-700 mt-2">Vui lòng quay lại trang chọn xe</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-red-500 text-lg">{error}</div>
       </div>
     );
   }
 
-
   return (
-    <>
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <CarBookingPage selectedCar={selectedCar} preFilledSearchData={preFilledSearchData} />
+      <CarBookingPage 
+        selectedCar={selectedCar} 
+        preFilledSearchData={preFilledSearchData}
+      />
       <Footer />
-    </>
+    </div>
   );
 }
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500 mx-auto mb-4"></div>
-          <p className="text-green-700 text-lg">Đang tải thông tin đặt xe...</p>
-        </div>
-      </div>
-    }>
+    <Suspense fallback={<div>Loading...</div>}>
       <BookingContent />
     </Suspense>
   );
