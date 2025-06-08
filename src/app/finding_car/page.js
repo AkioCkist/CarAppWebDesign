@@ -244,8 +244,11 @@ const CarListingPage = () => {
   };
 
   const filterOptions = {
-    vehicle_type: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
-    brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan'],
+    vehicle_type: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup', 'supercar'],
+    brand: [
+      'Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan',
+      'Lamborghini', 'Ferrari', 'Porsche', 'McLaren', 'Maserati', 'Aston Martin', 'Bentley'
+    ],
     seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
     fuel_type: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
   };
@@ -256,7 +259,8 @@ const CarListingPage = () => {
       'suv': 'SUV',
       'hatchback': 'Hatchback',
       'crossover': 'Crossover',
-      'pickup': 'Pickup'
+      'pickup': 'Pickup',
+      'supercar': 'Super Car'
     };
     return typeMap[type] || type;
   };

@@ -18,7 +18,7 @@ const AMENITY_ICONS = {
     circle: { icon: <img src="/icons/IconDetailCarCard/Detail/tirepressure.svg" alt="Cảm biến lốp" className="w-5 h-5" />, label: "Cảm biến lốp" },
     package: { icon: <img src="/icons/IconDetailCarCard/Detail/cartrunk.svg" alt="Cốp xe rộng" className="w-5 h-5" />, label: "Cốp xe rộng" },
     shield: { icon: <img src="/icons/IconDetailCarCard/Detail/collisionsensor.svg" alt="Cảm biến va chạm" className="w-5 h-5" />, label: "Cảm biến va chạm" },
-    radar: { icon: <img src="/icons/IconDetailCarCard/Detail/reversesensor.svg" alt="Cảm biến lùi xe" className="w-5 h-5" />, label: "Cảm biến lùi xe" },
+    radar: { icon: <img src="/icons/IconDetailCarCard/Detail/reversesenser.svg" alt="Cảm biến lùi xe" className="w-5 h-5" />, label: "Cảm biến lùi xe" },
     ChildSeat: { icon: <img src="/icons/IconDetailCarCard/Detail/childseat.svg" alt="Ghế trẻ cho trẻ em" className="w-5 h-5" />, label: "Ghế cho trẻ em" },
 };
 const TERMS = [
