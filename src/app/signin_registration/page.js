@@ -151,39 +151,55 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
-    
+
     setIsLoading(true);
     setAuthMessage({ show: false, message: "", success: false });
 
     try {
-      const response = await fetch('/api/auth', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: isLogin ? 'login' : 'register',
+      if (isLogin) {
+        // Use NextAuth.js credentials provider for login
+        const result = await signIn("credentials", {
+          redirect: false,
           phone: formData.phone,
           password: formData.password,
-          name: formData.name
-        }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok && data.success) {
-        setAuthMessage({
-          show: true,
-          message: isLogin ? 'Login successful! Redirecting...' : 'Account created successfully!',
-          success: true,
         });
 
-        if (isLogin) {
-          localStorage.setItem('user', JSON.stringify(data.user));
+        if (result?.error) {
+          setAuthMessage({
+            show: true,
+            message: "Phone number or password is incorrect.",
+            success: false,
+          });
+          setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
+        } else {
+          setAuthMessage({
+            show: true,
+            message: "Login successful! Redirecting...",
+            success: true,
+          });
           setTimeout(() => {
             window.location.href = "/";
-          }, 2500); // Updated to 2.5s to allow for 2s display + 0.5s fade
-        } else {
+          }, 2500);
+        }
+      } else {
+        // Registration logic (keep your custom API call for registration)
+        const response = await fetch('/api/auth', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'register',
+            phone: formData.phone,
+            password: formData.password,
+            name: formData.name
+          }),
+        });
+        const data = await response.json();
+        if (response.ok && data.success) {
+          setAuthMessage({
+            show: true,
+            message: 'Account created successfully!',
+            success: true,
+          });
           setTimeout(() => {
             setAuthMessage({ show: false, message: "", success: false });
             setIsLogin(true);
@@ -195,45 +211,23 @@ export default function LoginPage() {
               rememberMe: false
             });
             setErrors({});
-          }, 2500); // Updated timing for registration success
-        }
-      } else {
-        // Display specific error message for incorrect credentials
-        let errorMessage = 'An error occurred. Please try again.';
-        
-        if (isLogin) {
-          if (data.error?.includes('phone') || data.error?.includes('user') || data.error?.includes('found')) {
-            errorMessage = 'Phone number or password is incorrect.';
-          } else if (data.error?.includes('password')) {
-            errorMessage = 'Phone number or password is incorrect.';
-          } else {
-            errorMessage = data.error || 'Phone number or password is incorrect.';
-          }
+          }, 2500);
         } else {
-          errorMessage = data.error || 'Registration failed. Please try again.';
+          setAuthMessage({
+            show: true,
+            message: data.error || 'Registration failed. Please try again.',
+            success: false,
+          });
+          setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
         }
-
-        setAuthMessage({
-          show: true,
-          message: errorMessage,
-          success: false,
-        });
-        
-        setTimeout(() => {
-          setAuthMessage({ show: false, message: "", success: false });
-        }, 2500); // Updated to 2.5s total (2s display + 0.5s fade)
       }
     } catch (error) {
-      console.error('Auth error:', error);
       setAuthMessage({
         show: true,
         message: 'Network error. Please check your connection and try again.',
         success: false,
       });
-      
-      setTimeout(() => {
-        setAuthMessage({ show: false, message: "", success: false });
-      }, 2500); // Updated to 2.5s total (2s display + 0.5s fade)
+      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
     } finally {
       setIsLoading(false);
     }
