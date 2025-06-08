@@ -5,6 +5,7 @@ import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import CarRentalModal from "../../../components/CarRentalModal";
+import FilterPopup from "../../../components/FilterPopup";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
@@ -82,12 +83,10 @@ const CarListingPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  // Control refs để tránh multiple calls
   const didInitRef = useRef(false);
   const isInitializedRef = useRef(false);
   const fetchController = useRef(null);
 
-  // Debounce search term
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -96,7 +95,6 @@ const CarListingPage = () => {
     return () => clearTimeout(timer);
   }, [searchTerm]);
 
-  // Initialize từ URL - chỉ chạy 1 lần
   useEffect(() => {
     if (didInitRef.current) return;
     didInitRef.current = true;
@@ -106,7 +104,6 @@ const CarListingPage = () => {
       const pickUpParam = params.get('pickUpLocation');
       const dropOffParam = params.get('dropOffLocation');
 
-      // Set all states at once để tránh multiple renders
       const newSelectedLocation = normalizeCity(pickUpParam) || '';
       const newPickUpLocation = beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe';
       const newDropOffLocation = beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe';
@@ -121,7 +118,6 @@ const CarListingPage = () => {
       const newPriceMax = Number(params.get('priceMax')) || 10000000;
       const newSearchTerm = params.get('search') || '';
 
-      // Batch update tất cả states
       setSelectedLocation(newSelectedLocation);
       setPickUpLocation(newPickUpLocation);
       setDropOffLocation(newDropOffLocation);
@@ -135,25 +131,20 @@ const CarListingPage = () => {
       setSearchTerm(newSearchTerm);
       setDebouncedSearchTerm(newSearchTerm);
 
-      // Mark as initialized
       isInitializedRef.current = true;
     }
   }, []);
 
-  // Sửa lại fetchData function với delay cho skeleton loading
   const fetchData = useCallback(async () => {
     if (!isInitializedRef.current) return;
 
-    // Cancel previous request
     if (fetchController.current) {
       fetchController.current.abort();
     }
-    // Create new controller
     fetchController.current = new AbortController();
 
-    // Set loading states
     setIsLoading(true);
-    if (cars.length === 0) { // Chỉ show initial loading khi chưa có data
+    if (cars.length === 0) {
       setIsInitialLoading(true);
     }
 
@@ -181,8 +172,7 @@ const CarListingPage = () => {
       const data = await res.json();
       console.log('API response:', data);
 
-      // Thêm delay cho skeleton loading effect
-      const minDelay = cars.length === 0 ? 1500 : 500; // 1.5s cho lần đầu, 0.5s cho filter
+      const minDelay = cars.length === 0 ? 1500 : 500;
 
       setTimeout(() => {
         setCars(data.records || []);
@@ -202,14 +192,12 @@ const CarListingPage = () => {
     }
   }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm, cars.length]);
 
-  // Effect để gọi API - chỉ chạy khi dependencies thay đổi và đã initialized
   useEffect(() => {
     if (isInitializedRef.current) {
       fetchData();
     }
   }, [fetchData]);
 
-  // Cleanup function
   useEffect(() => {
     return () => {
       if (fetchController.current) {
@@ -255,10 +243,12 @@ const CarListingPage = () => {
     }
   };
 
-  const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
   const filterOptions = {
-    vehicle_type: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
-    brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan'],
+    vehicle_type: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup', 'supercar'],
+    brand: [
+      'Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan',
+      'Lamborghini', 'Ferrari', 'Porsche', 'McLaren', 'Maserati', 'Aston Martin', 'Bentley'
+    ],
     seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
     fuel_type: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
   };
@@ -269,15 +259,15 @@ const CarListingPage = () => {
       'suv': 'SUV',
       'hatchback': 'Hatchback',
       'crossover': 'Crossover',
-      'pickup': 'Pickup'
+      'pickup': 'Pickup',
+      'supercar': 'Super Car'
     };
     return typeMap[type] || type;
   };
 
-  // Sửa lại filteredCars để sử dụng cars thay vì logic riêng
   const filteredCars = React.useMemo(() => {
     console.log('🔄 Using cars as filteredCars:', cars.length, 'cars');
-    return cars; // API đã filter rồi, không cần filter thêm
+    return cars;
   }, [cars]);
 
   const handleFilterToggle = (category, value) => {
@@ -322,134 +312,181 @@ const CarListingPage = () => {
     </div>
   );
 
-  const FilterPopup = ({ title, options, category, onClose }) => (
-    <PopupOverlay onClose={onClose}>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-black">{title}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="space-y-3">
-          {options.map((option) => (
-            <label key={option} className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={filters[category].includes(option)}
-                onChange={() => handleFilterToggle(category, option)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
-              <span className="text-black">
-                {category === 'vehicle_type' ? formatCarTypeDisplay(option) : option}
-              </span>
-            </label>
-          ))}
-        </div>
-        <div className="flex space-x-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-            Áp dụng
-          </button>
-          <button
-            onClick={() => {
-              setFilters(prev => ({ ...prev, [category]: [] }));
-              onClose();
-            }}
-            className="flex-1 px-4 py-2 border border-green-500 text-green-600 rounded-md hover:bg-green-50 transition-colors">
-            Xóa bộ lọc
-          </button>
-        </div>
-      </div>
-    </PopupOverlay>
-  );
-
   const PricePopup = ({ onClose }) => {
+    const [isVisible, setIsVisible] = useState(false);
     const minLimit = 0;
     const maxLimit = 10000000;
     const step = 100000;
-    const [values, setValues] = useState([priceMin, priceMax]);
-    const formatNumber = (num) => num.toLocaleString();
-    const handleChange = (newValues) => {
-      setValues(newValues);
+    // Chỉ sử dụng internal state trong component này
+    const [internalValues, setInternalValues] = useState([priceMin, priceMax]);
+
+    useEffect(() => {
+      // Trigger animation sau khi component mount
+      const timer = setTimeout(() => setIsVisible(true), 50);
+      return () => clearTimeout(timer);
+    }, []);
+
+    const handleClose = () => {
+      setIsVisible(false);
+      setTimeout(onClose, 300); // Đợi animation xong mới close
     };
 
+    const formatNumber = (num) => num.toLocaleString();
+
+    // Cập nhật internal state khi kéo slider
+    const handleChange = (newValues) => {
+      setInternalValues(newValues);
+    };
+
+    // Cũng chỉ cập nhật internal state khi thả tay
     const handleAfterChange = (newValues) => {
-      setPriceMin(newValues[0]);
-      setPriceMax(newValues[1]);
+      setInternalValues(newValues);
+    };
+
+    // Xử lý khi thay đổi input
+    const handleInputChange = (index, value) => {
+      const numValue = parseInt(value.replace(/,/g, '')) || 0;
+      const newValues = [...internalValues];
+
+      if (index === 0 && numValue <= internalValues[1]) {
+        newValues[0] = numValue;
+      } else if (index === 1 && numValue >= internalValues[0]) {
+        newValues[1] = numValue;
+      }
+
+      setInternalValues(newValues);
+    };
+
+    // Áp dụng thay đổi - cập nhật priceMin/priceMax ở component cha
+    const handleApply = () => {
+      setPriceMin(internalValues[0]);
+      setPriceMax(internalValues[1]);
+      handleClose();
+    };
+
+    // Reset về giá trị mặc định
+    const handleReset = () => {
+      const resetValues = [0, 10000000];
+      setInternalValues(resetValues);
+      setPriceMin(0);
+      setPriceMax(10000000);
+      setTimeout(handleClose, 100);
     };
 
     return (
-      <PopupOverlay onClose={onClose}>
-        <div className="p-6">
-          <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-          <div className="flex space-x-4 mt-4">
-            <div className="flex-1">
-              <label className="block text-sm text-black">Từ</label>
-              <input
-                type="text"
-                value={formatNumber(values[0])}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                  if (v <= values[1]) setValues([v, values[1]]);
-                }}
-                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
-                placeholder="0"
-              />
+      <div
+        className={`
+          fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4
+          transition-opacity duration-300 ease-out
+          ${isVisible ? 'opacity-100' : 'opacity-0'}
+        `}
+        onClick={handleClose}
+      >
+        <div
+          className={`
+            bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden
+            transition-all duration-300 ease-out
+            ${isVisible
+              ? 'opacity-100 scale-100'
+              : 'opacity-0 scale-95'
+            }
+          `}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Chọn khoảng giá</h3>
+              <button
+                onClick={handleClose}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+              >
+                <X className="h-5 w-5 text-white" />
+              </button>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm text-black">Đến</label>
-              <input
-                type="text"
-                value={formatNumber(values[1])}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                  if (v >= values[0]) setValues([values[0], v]);
-                }}
-                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
-                placeholder="10.000.000"
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            <div className="flex space-x-4 mb-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Từ</label>
+                <input
+                  type="text"
+                  value={formatNumber(internalValues[0])}
+                  onChange={(e) => handleInputChange(0, e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                  placeholder="0"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Đến</label>
+                <input
+                  type="text"
+                  value={formatNumber(internalValues[1])}
+                  onChange={(e) => handleInputChange(1, e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                  placeholder="10.000.000"
+                />
+              </div>
+            </div>
+            <div className="px-2">
+              <Slider
+                range
+                min={minLimit}
+                max={maxLimit}
+                step={step}
+                defaultValue={[priceMin, priceMax]}
+                value={internalValues}
+                onChange={handleChange}
+                onChangeComplete={handleAfterChange}
+                trackStyle={[{ background: '#22c55e', height: 6 }]}
+                handleStyle={[
+                  {
+                    backgroundColor: '#fff',
+                    border: '2px solid #22c55e',
+                    width: 22,
+                    height: 22,
+                    marginTop: -8,
+                    boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                  },
+                  {
+                    backgroundColor: '#fff',
+                    border: '2px solid #22c55e',
+                    width: 22,
+                    height: 22,
+                    marginTop: -8,
+                    boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                  }
+                ]}
+                railStyle={{ background: '#e5e7eb', height: 6 }}
               />
             </div>
           </div>
-          <div className="mt-6 px-2">
-            <Slider
-              range
-              min={minLimit}
-              max={maxLimit}
-              step={step}
-              defaultValue={[priceMin, priceMax]}
-              value={values}
-              onChange={handleChange}
-              onChangeComplete={handleAfterChange}
-              trackStyle={[{ background: '#22c55e', height: 6 }]}
-              handleStyle={[
-                {
-                  backgroundColor: '#fff',
-                  border: '2px solid #22c55e',
-                  width: 22,
-                  height: 22,
-                  marginTop: -8,
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-                },
-                {
-                  backgroundColor: '#fff',
-                  border: '2px solid #22c55e',
-                  width: 22,
-                  height: 22,
-                  marginTop: -8,
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-                }
-              ]}
-              railStyle={{ background: '#e5e7eb', height: 6 }}
-            />
+
+          {/* Footer Actions - CỐ Ý CHỈ CẬP NHẬT PRICE KHI BẤM "ÁP DỤNG" */}
+          <div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">
+            <button
+              onClick={handleApply}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold
+                         hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95 shadow-md hover:shadow-lg"
+            >
+              Áp dụng
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex-1 px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg font-semibold
+                         hover:bg-green-50 transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95"
+            >
+              Đặt lại
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="mt-6 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-            Áp dụng
-          </button>
         </div>
-      </PopupOverlay>
+      </div>
     );
   };
 
@@ -474,7 +511,6 @@ const CarListingPage = () => {
     };
   }, [filteredCars.length]);
 
-  // Đồng bộ filter vào URL khi filter thay đổi - với debounce
   useEffect(() => {
     if (!isInitializedRef.current) return;
 
@@ -510,7 +546,6 @@ const CarListingPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {/* Bỏ CarLoadingScreen đen */}
       <Header />
       <div className="h-21 bg-gray-800/95"></div>
       <div className="bg-white shadow-sm border-b">
@@ -539,8 +574,8 @@ const CarListingPage = () => {
               <button
                 onClick={() => setActivePopup('vehicle_type')}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.vehicle_type.length > 0
-                    ? 'border-green-600 bg-green-50 text-green-600'
-                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}
               >
                 Loại Xe
@@ -554,8 +589,8 @@ const CarListingPage = () => {
               <button
                 onClick={() => setActivePopup('brand')}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.brand.length > 0
-                    ? 'border-green-600 bg-green-50 text-green-600'
-                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
                 Hãng Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
@@ -568,8 +603,8 @@ const CarListingPage = () => {
               <button
                 onClick={() => setActivePopup('seats')}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.seats.length > 0
-                    ? 'border-green-600 bg-green-50 text-green-600'
-                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
                 Số Chỗ
                 <ChevronDown className="ml-1 h-3 w-3" />
@@ -582,8 +617,8 @@ const CarListingPage = () => {
               <button
                 onClick={() => setActivePopup('fuel_type')}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.fuel_type.length > 0
-                    ? 'border-green-600 bg-green-50 text-green-600'
-                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
@@ -609,8 +644,8 @@ const CarListingPage = () => {
               <button
                 onClick={() => setActivePopup('price')}
                 className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${(priceMin !== 0 || priceMax !== 10000000)
-                    ? 'border-green-600 bg-green-50 text-green-600'
-                    : 'border-gray-300 hover:bg-gray-50 text-black'
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}
               >
                 <span>Giá:</span>
@@ -668,12 +703,18 @@ const CarListingPage = () => {
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>
+
+      {/* Sử dụng FilterPopup component với hiệu ứng */}
       {activePopup === 'vehicle_type' && (
         <FilterPopup
           title="Loại Xe"
           options={filterOptions.vehicle_type}
           category="vehicle_type"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
+          formatDisplay={formatCarTypeDisplay}
         />
       )}
       {activePopup === 'brand' && (
@@ -682,6 +723,9 @@ const CarListingPage = () => {
           options={filterOptions.brand}
           category="brand"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
         />
       )}
       {activePopup === 'seats' && (
@@ -690,6 +734,9 @@ const CarListingPage = () => {
           options={filterOptions.seats}
           category="seats"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
         />
       )}
       {activePopup === 'fuel_type' && (
@@ -698,6 +745,9 @@ const CarListingPage = () => {
           options={filterOptions.fuel_type}
           category="fuel_type"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
         />
       )}
       {activePopup === 'price' && (

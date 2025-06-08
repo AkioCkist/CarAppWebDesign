@@ -113,7 +113,7 @@ async function getVehicles(searchParams) {
                 in: carType.split(',')
             };
         }
-        
+
         // Location
         const location = searchParams.get('location');
         if (location) {
@@ -121,6 +121,22 @@ async function getVehicles(searchParams) {
                 contains: location,
                 mode: 'insensitive'
             };
+        }
+
+        // Brand filter
+        const brand = searchParams.get('brand');
+        if (brand) {
+            const brands = brand.split(',');
+            // Tìm kiếm các xe có tên chứa brand được chọn
+            whereClause.OR = whereClause.OR || [];
+            whereClause.OR.push(
+                ...brands.map(brandName => ({
+                    name: {
+                        contains: brandName,
+                        mode: 'insensitive'
+                    }
+                }))
+            );
         }
         console.log('Điều kiện whereClause:', whereClause);
 
