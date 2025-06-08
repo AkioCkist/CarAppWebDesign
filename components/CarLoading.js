@@ -126,7 +126,7 @@ const CarLoadingScreen = ({ isVisible, onComplete }) => {
             >
               <div className="flex items-center justify-center mb-4">
                 <img
-                  src="/logo/logo.png"
+                  src="/logo/logo.webp"
                   alt="Whale Xe"
                   className="h-12 w-12 object-contain"
                   onError={(e) => {

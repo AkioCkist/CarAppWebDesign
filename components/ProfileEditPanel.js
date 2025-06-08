@@ -19,6 +19,7 @@ export default function ProfileEditPanel() {
   });
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState('');
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     if (session?.user) {
@@ -28,7 +29,24 @@ export default function ProfileEditPanel() {
         phone: session.user.phone || '',
       }));
     }
+
+    // Get user info from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
   }, [session]);
+
+  // Add this inside your component, after the other useEffects
+  useEffect(() => {
+    if (activeTab === 'profile' && user) {
+      setFormData(prev => ({
+        ...prev,
+        username: user.name || '',
+        phone: user.phone || ''
+      }));
+    }
+  }, [activeTab, user]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -85,6 +103,15 @@ export default function ProfileEditPanel() {
           newPassword: '',
           reEnterPassword: ''
         }));
+
+        // Update localStorage with new info
+        const updatedUser = {
+          ...user,
+          name: formData.username,
+          phone: formData.phone
+        };
+        localStorage.setItem('user', JSON.stringify(updatedUser));
+        setUser(updatedUser);
 
         await update({
           user: {
@@ -306,5 +333,32 @@ export default function ProfileEditPanel() {
         )}
       </div>
     </motion.div>
+  );
+}
+
+// Example for a React header component
+export function Header() {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    // Get user info from localStorage
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      setUser(JSON.parse(userData));
+    }
+  }, []);
+
+  return (
+    <header>
+      {/* ...existing header code... */}
+      {user ? (
+        <div className="flex items-center gap-2">
+          <span className="font-bold text-white">{user.name}</span>
+          <span className="text-gray-300">{user.phone}</span>
+        </div>
+      ) : (
+        <a href="/signin_registration" className="text-white">Sign In</a>
+      )}
+    </header>
   );
 }

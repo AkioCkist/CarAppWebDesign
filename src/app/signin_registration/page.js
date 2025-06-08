@@ -3,8 +3,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from 'next/image';
 import { motion } from "framer-motion";
-import { TypeAnimation } from 'react-type-animation';
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react"; // Ensure signIn is imported
 
 // Animation variant for pull-up
 const pullUpVariant = {
@@ -23,6 +22,30 @@ const glassStyle = {
   borderRadius: "1rem",
   border: "1px solid rgba(255,255,255,0.3)"
   // No backdrop-filter here
+};
+
+// New variants for the popup animation
+const popupVariants = {
+  hidden: { opacity: 0, scale: 0.8, y: -50 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring",
+      stiffness: 260,
+      damping: 20,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.8,
+    y: -50,
+    transition: {
+      ease: "easeOut",
+      duration: 0.3,
+    },
+  },
 };
 
 function useFocusState() {
@@ -54,11 +77,10 @@ export default function LoginPage() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [flipDirection, setFlipDirection] = useState('horizontal');
-  const [loginError, setLoginError] = useState("");
-  const [signupPopup, setSignupPopup] = useState({ show: false, message: "", success: false });
+  const [authMessage, setAuthMessage] = useState({ show: false, message: "", success: false });
 
   const { focusedInput, handleFocus, handleBlur } = useFocusState();
-  const { update } = useSession(); // You have useSession, but 'update' might not be directly used here for initial sign-in.
+  const { update } = useSession(); // Kept for potential future use or if next-auth is implicitly used
 
   useEffect(() => {
     const handleScroll = () => {
@@ -99,7 +121,7 @@ export default function LoginPage() {
   const validateForm = () => {
     const newErrors = {};
 
-    // Phone validation for login
+    // Phone validation
     if (!formData.phone) {
       newErrors.phone = 'Phone number is required';
     } else if (!/^\+?\d{10,15}$/.test(formData.phone)) {
@@ -126,104 +148,114 @@ export default function LoginPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Add this debug function above your handleSubmit (for debugging API calls)
-  const debugApiRequest = async (url, options) => {
-    console.log("API Request URL:", url);
-    console.log("API Request Options:", options);
-
-    try {
-      const response = await fetch(url, options);
-      console.log("API Response Status:", response.status);
-
-      const text = await response.text();
-      console.log("API Raw Response Text:", text);
-
-      let json;
-      try {
-        json = JSON.parse(text);
-        console.log("API Parsed JSON:", json);
-      } catch (e) {
-        console.warn("API Response is not valid JSON.");
-        json = null;
-      }
-      return { response, json, text };
-    } catch (err) {
-      console.error("API Fetch Error:", err);
-      throw err;
-    }
-  };
-
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    
     setIsLoading(true);
-    setLoginError("");
-
-    const res = await signIn("credentials", {
-      redirect: false,
-      phone: formData.phone,
-      password: formData.password,
-      name: formData.name,
-      action: isLogin ? "login" : "register",
-    });
-
-    if (!isLogin) { // Only show popup for registration
-      if (res.ok && !res.error) {
-        setSignupPopup({
-          show: true,
-          message: "Account created successfully!",
-          success: true,
-        });
-        setTimeout(() => {
-          setSignupPopup({ show: false, message: "", success: false });
-          window.location.reload(); // Reload to clear form and potentially redirect on next login
-        }, 1500);
-      } else {
-        setSignupPopup({
-          show: true,
-          message: res.error || "Registration failed. Please try again.",
-          success: false,
-        });
-        setTimeout(() => {
-          setSignupPopup({ show: false, message: "", success: false });
-        }, 2000);
-      }
-      setIsLoading(false);
-      return;
-    }
-
-    // Login logic
-    if (res.ok && !res.error) {
-      window.location.href = "/"; // Redirect to home page on successful login
-    } else {
-      setLoginError(res.error || "Phone number or password is incorrect.");
-    }
-    setIsLoading(false);
-  };
-
-  // This is the updated handleSocialLogin function
-  const handleSocialLogin = async (provider) => {
-    console.log(`Attempting social login with: ${provider}`);
-    setLoginError(""); // Clear any previous errors
+    setAuthMessage({ show: false, message: "", success: false });
 
     try {
-      const result = await signIn(provider.toLowerCase(), {
-        redirect: false,
-        callbackUrl: "/", // Ensure redirect to homepage
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: isLogin ? 'login' : 'register',
+          phone: formData.phone,
+          password: formData.password,
+          name: formData.name
+        }),
       });
 
-      console.log("NextAuth signIn result:", result);
+      const data = await response.json();
 
-      if (result?.error) {
-        setLoginError(`Social login failed with ${provider}. Please try again or check your account permissions.`);
-      } else if (result?.ok || result?.url) {
-        // Redirect to the callbackUrl (homepage)
-        window.location.href = result.url || "/";
+      if (response.ok && data.success) {
+        setAuthMessage({
+          show: true,
+          message: isLogin ? 'Login successful! Redirecting...' : 'Account created successfully!',
+          success: true,
+        });
+
+        if (isLogin) {
+          localStorage.setItem('user', JSON.stringify(data.user));
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 2500); // Updated to 2.5s to allow for 2s display + 0.5s fade
+        } else {
+          setTimeout(() => {
+            setAuthMessage({ show: false, message: "", success: false });
+            setIsLogin(true);
+            setFormData({
+              phone: '',
+              password: '',
+              confirmPassword: '',
+              name: '',
+              rememberMe: false
+            });
+            setErrors({});
+          }, 2500); // Updated timing for registration success
+        }
+      } else {
+        // Display specific error message for incorrect credentials
+        let errorMessage = 'An error occurred. Please try again.';
+        
+        if (isLogin) {
+          if (data.error?.includes('phone') || data.error?.includes('user') || data.error?.includes('found')) {
+            errorMessage = 'Phone number or password is incorrect.';
+          } else if (data.error?.includes('password')) {
+            errorMessage = 'Phone number or password is incorrect.';
+          } else {
+            errorMessage = data.error || 'Phone number or password is incorrect.';
+          }
+        } else {
+          errorMessage = data.error || 'Registration failed. Please try again.';
+        }
+
+        setAuthMessage({
+          show: true,
+          message: errorMessage,
+          success: false,
+        });
+        
+        setTimeout(() => {
+          setAuthMessage({ show: false, message: "", success: false });
+        }, 2500); // Updated to 2.5s total (2s display + 0.5s fade)
       }
     } catch (error) {
-      console.error(`An unexpected error occurred during ${provider} login:`, error);
-      setLoginError("An unexpected error occurred during social login.");
+      console.error('Auth error:', error);
+      setAuthMessage({
+        show: true,
+        message: 'Network error. Please check your connection and try again.',
+        success: false,
+      });
+      
+      setTimeout(() => {
+        setAuthMessage({ show: false, message: "", success: false });
+      }, 2500); // Updated to 2.5s total (2s display + 0.5s fade)
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Modified handleSocialLogin to use NextAuth.js signIn
+  const handleSocialLogin = async (provider) => {
+    setAuthMessage({ show: false, message: "", success: false });
+    setIsLoading(true); // Indicate loading for social login
+
+    try {
+      await signIn(provider, { callbackUrl: '/' }); // Redirect to home on success
+    } catch (error) {
+      console.error(`Social login with ${provider} failed:`, error);
+      setAuthMessage({
+        show: true,
+        message: `Failed to sign in with ${provider}. Please try again.`,
+        success: false,
+      });
+      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500); // Updated to 2.5s
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -239,7 +271,7 @@ export default function LoginPage() {
       rememberMe: false
     });
     setErrors({});
-    setLoginError(""); // Clear login error when toggling mode
+    setAuthMessage({ show: false, message: "", success: false });
   };
 
   // Zoom out transition for header and login panel
@@ -345,6 +377,124 @@ export default function LoginPage() {
 
   return (
     <div className="font-sans bg-black text-gray-900 min-h-screen">
+      {/* Notification Component */}
+      {authMessage.show && (
+        <motion.div
+          initial={{ opacity: 0, y: -100, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -100, scale: 0.9 }}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 25,
+            duration: 0.5
+          }}
+          className="fixed top-6 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4"
+        >
+          <motion.div
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 2, duration: 0.8 }} // Start fade after 2 seconds, fade for 0.8 seconds
+            className={`relative overflow-hidden rounded-2xl shadow-2xl border backdrop-blur-md ${
+              authMessage.success
+                ? 'bg-gradient-to-r from-green-500/90 to-emerald-600/90 border-green-400/50'
+                : 'bg-gradient-to-r from-red-500/90 to-rose-600/90 border-red-400/50'
+            }`}
+            style={{
+              backdropFilter: "blur(20px)",
+              WebkitBackdropFilter: "blur(20px)",
+            }}
+          >
+            {/* Animated background glow */}
+            <div
+              className={`absolute inset-0 opacity-30 ${
+                authMessage.success ? 'bg-green-400' : 'bg-red-400'
+              }`}
+              style={{
+                background: authMessage.success
+                  ? 'radial-gradient(circle at 30% 50%, rgba(34, 197, 94, 0.4) 0%, transparent 50%)'
+                  : 'radial-gradient(circle at 30% 50%, rgba(239, 68, 68, 0.4) 0%, transparent 50%)'
+              }}
+            />
+            
+            <div className="relative p-4">
+              <div className="flex items-start space-x-3">
+                {/* Icon */}
+                <div className={`flex-shrink-0 ${authMessage.success ? 'text-green-100' : 'text-red-100'}`}>
+                  {authMessage.success ? (
+                    <motion.div
+                      initial={{ scale: 0, rotate: -180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      initial={{ scale: 0, rotate: 180 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    >
+                      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Message */}
+                <div className="flex-1 min-w-0">
+                  <motion.p
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className={`text-sm font-medium ${
+                      authMessage.success ? 'text-green-50' : 'text-red-50'
+                    }`}
+                  >
+                    {authMessage.message}
+                  </motion.p>
+                </div>
+
+                {/* Close button */}
+                <button
+                  onClick={() => setAuthMessage({ show: false, message: "", success: false })}
+                  className={`flex-shrink-0 rounded-full p-1 hover:bg-white/20 transition-colors ${
+                    authMessage.success ? 'text-green-100 hover:text-green-50' : 'text-red-100 hover:text-red-50'
+                  }`}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Progress bar for auto-dismiss - Updated timing to match 2-second display */}
+              <motion.div
+                className="mt-3 h-1 bg-white/20 rounded-full overflow-hidden"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                <motion.div
+                  className={`h-full ${authMessage.success ? 'bg-green-200' : 'bg-red-200'}`}
+                  initial={{ width: "100%" }}
+                  animate={{ width: "0%" }}
+                  transition={{
+                    duration: 2, // Changed to 2 seconds to match display time
+                    ease: "linear",
+                    delay: 0.5
+                  }}
+                />
+              </motion.div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+
       {/* Header - Apply zoom out transition */}
       <motion.header
         variants={zoomOutVariant}
@@ -375,7 +525,7 @@ export default function LoginPage() {
             <div className="flex items-center gap-2">
               {/* Logo */}
               <a href="../" className="flex items-center">
-                <img src="/logo/logo.png" alt="Logo" className="h-12" />
+                <img src="/logo/logo.webp" alt="Logo" className="h-12" />
                 <span className="text-2xl font-bold text-white ml-2">Whale Xe</span>
               </a>
             </div>
@@ -648,22 +798,6 @@ export default function LoginPage() {
                           )}
                         </motion.button>
 
-                        {/* Error message for login failure */}
-                        {loginError && (
-                          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-4 text-center transition-all duration-300">
-                            {loginError}
-                          </div>
-                        )}
-
-                        {/* Signup Success/Failure Popup */}
-                        {signupPopup.show && (
-                            <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50`}>
-                                <div className={`p-6 rounded-lg shadow-lg text-center ${signupPopup.success ? 'bg-green-500' : 'bg-red-500'} text-white`}>
-                                    <p className="text-xl font-semibold">{signupPopup.message}</p>
-                                </div>
-                            </div>
-                        )}
-
                         {/* Divider */}
                         <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
                           ↓
@@ -674,67 +808,37 @@ export default function LoginPage() {
                             animation: arrowSpinBounce 2.5s infinite ease-in-out;
                             color: #9ca3af; /* Tailwind gray-400 */
                           }
-
                           @keyframes arrowSpinBounce {
-                            0% {
-                              transform: rotate(0deg) translateY(0);
-                              opacity: 0.6;
-                              color: #9ca3af; /* gray-400 */
-                            }
-                            10% {
-                              transform: rotate(360deg) translateY(0);
-                              color: #9ca3af;
-                            }
-                            30% {
-                              transform: rotate(0deg) translateY(12px);
-                              opacity: 1;
-                              color: #fff; /* white */
-                            }
-                            60% {
-                              transform: translateY(-6px);
-                              color: #fff;
-                            }
-                            90% {
-                              transform: rotate(360deg) translateY(0);
-                              opacity: 0.8;
-                              color: #9ca3af;
-                            }
-                            100% {
-                              transform: rotate(0deg) translateY(0);
-                              opacity: 0.6;
-                              color: #9ca3af;
-                            }
+                            0% { transform: rotate(0deg) translateY(0); opacity: 0.6; color: #9ca3af; /* gray-400 */ }
+                            10% { transform: rotate(360deg) translateY(0); color: #9ca3af; }
+                            30% { transform: rotate(0deg) translateY(12px); opacity: 1; color: #fff; /* white */ }
+                            60% { transform: translateY(-6px); color: #fff; }
+                            90% { transform: rotate(360deg) translateY(0); opacity: 0.8; color: #9ca3af; }
+                            100% { transform: rotate(0deg) translateY(0); opacity: 0.6; color: #9ca3af; }
                           }
                         `}</style>
-                        {/* Social Login */}
+
+                        {/* Social Login Buttons with Icons */}
                         <div className="grid grid-cols-2 gap-3">
                           <button
                             type="button"
                             onClick={() => handleSocialLogin('google')}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                           >
-                            <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
-                              <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                              <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                              <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                              <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                            </svg>
-                            <span className="text-sm font-medium text-white">Google</span>
+                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Google</span>
                           </button>
-
                           <button
                             type="button"
                             onClick={() => handleSocialLogin('facebook')}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
                           >
-                            <svg className="w-5 h-5 mr-2" fill="#1877F2" viewBox="0 0 24 24">
-                              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                            <span className="text-sm font-medium text-white">Facebook</span>
+                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Facebook</span>
                           </button>
                         </div>
 
-                        {/* Toggle Mode - kept at bottom */}
+                        {/* Toggle Mode */}
                         <div className="mt-6 text-center">
                           <p className="text-sm text-white">
                             {isLogin ? "Don't have an account?" : "Already have an account?"}
@@ -743,7 +847,7 @@ export default function LoginPage() {
                               onClick={toggleMode}
                               className="ml-1 text-green-200 hover:text-green-100 font-medium"
                             >
-                              {isLogin ? "Sign up" : "Sign in"}
+                              {isLogin ? 'Sign up' : 'Sign in'}
                             </button>
                           </p>
                         </div>
@@ -751,38 +855,51 @@ export default function LoginPage() {
                     </motion.div>
                   </motion.div>
 
-                  {/* Back side (Register) */}
+                  {/* Back side (Register) - Adjusted the text for the "Back" side for consistency */}
                   <motion.div
                     className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 border border-white/30"
                     style={{
                       ...glassStyle,
-                      backfaceVisibility: "hidden",
-                      transform: flipDirection === 'horizontal' ? 'rotateY(180deg)' : 'rotateX(180deg)',
+                      transform: flipDirection === 'horizontal' ? "rotateY(180deg)" : "rotateX(180deg)",
                       display: "flex",
-                      flexDirection: "column"
+                      flexDirection: "column",
+                      visibility: isLogin ? "hidden" : "visible" // Ensure it's only visible when isLogin is false
                     }}
                   >
-                    {/* Content wrapper with animation */}
                     <motion.div
                       className="flex-1 flex flex-col"
                       initial="hidden"
                       animate={isLogin ? "hidden" : "visible"}
                       variants={contentVariants}
                     >
-                      {/* Header */}
                       <div className="text-center mb-8">
-                        <div className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <motion.div
+                          className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 260,
+                            damping: 20,
+                            delay: 0.2
+                          }}
+                        >
                           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                           </svg>
-                        </div>
-                        <h2 className="text-3xl font-bold text-white mb-2">
+                        </motion.div>
+                        <motion.h2
+                          className="text-3xl font-bold text-white mb-2"
+                          variants={textVariants}
+                          initial="hidden"
+                          animate="visible"
+                        >
                           Create Account
-                        </h2>
+                        </motion.h2>
                       </div>
 
-                      {/* Form with consistent height */}
                       <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
+                        {/* Name input for registration */}
                         <div>
                           <label className="block text-sm font-medium text-white mb-2">Full Name</label>
                           <input
@@ -798,70 +915,100 @@ export default function LoginPage() {
                           {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
-                          <input
-                            type="tel"
-                            name="phone"
-                            value={formData.phone}
-                            onChange={handlePhoneInput}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
-                              errors.phone ? 'border-red-500' : 'border-gray-300'
-                            } bg-white bg-opacity-80 text-gray-900`}
-                            placeholder="Enter your phone number"
-                            pattern="^\+?\d{10,15}$"
-                            inputMode="tel"
-                          />
-                          {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Password</label>
-                          <div className="relative">
+                        <motion.div
+                          variants={inputVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={1}
+                        >
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
                             <input
-                              type={showPassword ? "text" : "password"}
-                              name="password"
-                              value={formData.password}
-                              onChange={handleInputChange}
-                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
-                                errors.password ? 'border-red-500' : 'border-gray-300'
+                              type="tel"
+                              name="phone"
+                              value={formData.phone}
+                              onChange={handlePhoneInput}
+                              onFocus={() => handleFocus("phone")}
+                              onBlur={handleBlur}
+                              className={`w-full px-4 py-3 border rounded-lg transition-all duration-300 ${
+                                errors.phone ? 'border-red-500' :
+                                focusedInput === "phone" ? 'border-green-500 ring-2 ring-green-500 ring-opacity-50' : 'border-gray-300'
                               } bg-white bg-opacity-80 text-gray-900`}
-                              placeholder="Enter your password"
+                              placeholder="Enter your phone number"
+                              pattern="^\+?\d{10,15}$"
+                              inputMode="tel"
                             />
-                            <button
-                              type="button"
-                              onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
-                            >
-                              {showPassword ? '👁️' : '👁️‍🗨️'}
-                            </button>
+                            <motion.div
+                              className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-green-500 to-blue-500"
+                              initial={{ width: "0%" }}
+                              animate={{ width: focusedInput === "phone" ? "100%" : "0%" }}
+                              transition={{ duration: 0.3 }}
+                            />
+                            {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                           </div>
-                          {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
-                        </div>
+                        </motion.div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
-                          <div className="relative">
-                            <input
-                              type={showConfirmPassword ? "text" : "password"}
-                              name="confirmPassword"
-                              value={formData.confirmPassword}
-                              onChange={handleInputChange}
-                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
-                                errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
-                              } bg-white bg-opacity-80 text-gray-900`}
-                              placeholder="Confirm your password"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
-                            >
-                              {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
-                            </button>
+                        <motion.div
+                          variants={inputVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={2}
+                        >
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Password</label>
+                            <div className="relative">
+                              <input
+                                type={showPassword ? "text" : "password"}
+                                name="password"
+                                value={formData.password}
+                                onChange={handleInputChange}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                  errors.password ? 'border-red-500' : 'border-gray-300'
+                                } bg-white bg-opacity-80 text-gray-900`}
+                                placeholder="Enter your password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                              >
+                                {showPassword ? '👁️' : '👁️‍🗨️'}
+                              </button>
+                            </div>
+                            {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                           </div>
-                          {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
-                        </div>
+                        </motion.div>
+
+                        <motion.div
+                          variants={inputVariants}
+                          initial="hidden"
+                          animate="visible"
+                          custom={3}
+                        >
+                          <div>
+                            <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
+                            <div className="relative">
+                              <input
+                                type={showConfirmPassword ? "text" : "password"}
+                                name="confirmPassword"
+                                value={formData.confirmPassword}
+                                onChange={handleInputChange}
+                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                  errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
+                                } bg-white bg-opacity-80 text-gray-900`}
+                                placeholder="Confirm your password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-300 hover:text-white"
+                              >
+                                {showConfirmPassword ? '👁️' : '👁️‍🗨️'}
+                              </button>
+                            </div>
+                            {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
+                          </div>
+                        </motion.div>
 
                         <button
                           type="submit"
@@ -876,7 +1023,32 @@ export default function LoginPage() {
                           ) : 'Create Account'}
                         </button>
 
-                        {/* Toggle Mode - kept at bottom */}
+                        {/* Divider */}
+                        <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
+                          ↓
+                        </div>
+
+                        {/* Social Login Buttons with Icons (repeated for register side for consistency) */}
+                        <div className="grid grid-cols-2 gap-3">
+                          <button
+                            type="button"
+                            onClick={() => handleSocialLogin('google')}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Google</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleSocialLogin('facebook')}
+                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
+                          >
+                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
+                            <span className="text-white">Facebook</span>
+                          </button>
+                        </div>
+
+                        {/* Toggle Mode */}
                         <div className="mt-6 text-center">
                           <p className="text-sm text-white">
                             Already have an account?

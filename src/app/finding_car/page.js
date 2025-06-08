@@ -1,164 +1,285 @@
 "use client";
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Search, MapPin, Car, Star, Users, Fuel, Calendar, ChevronDown, X } from 'lucide-react';
 import VehicleList from "../../../components/VehicleList";
 import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import CarRentalModal from "../../../components/CarRentalModal";
+import FilterPopup from "../../../components/FilterPopup";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
-import { useSearchParams } from 'next/navigation'; // Thêm dòng này
+import { useSearchParams, useRouter } from 'next/navigation';
 
-const cityNameMap = {
-  hcm: "Hồ Chí Minh",
-  hanoi: "Hà Nội",
-  danang: "Đà Nẵng",
-  hue: "Huế",
-  bacninh: "Bắc Ninh",
-  "TP. Hồ Chí Minh": "Hồ Chí Minh",
-  "Hà Nội": "Hà Nội",
-  "Đà Nẵng": "Đà Nẵng",
-  "Huế": "Huế",
-  "Bắc Ninh": "Bắc Ninh"
-};
-
-function beautifyCityName(val) {
-  if (!val) return "";
-  // Nếu là mã thì chuyển, nếu là tên thì giữ nguyên
-  return cityNameMap[val] || val;
+function beautifyCityName(str) {
+  if (!str) return "";
+  if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
+  const mapping = {
+    'hcm': 'TP.HCM',
+    'tp.hcm': 'TP.HCM',
+    'hanoi': 'Hà Nội',
+    'ha noi': 'Hà Nội',
+    'danang': 'Đà Nẵng',
+    'da nang': 'Đà Nẵng',
+    'hue': 'Huế',
+    'bacninh': 'Bắc Ninh',
+    'bac ninh': 'Bắc Ninh'
+  };
+  const normalized = str.trim().toLowerCase();
+  return mapping[normalized] || str;
 }
 
-// Chuẩn hóa tên thành phố để so sánh
+const cityMapping = {
+  'hcm': 'TP.HCM',
+  'tp.hcm': 'TP.HCM',
+  'hanoi': 'Hà Nội',
+  'ha noi': 'Hà Nội',
+  'danang': 'Đà Nẵng',
+  'da nang': 'Đà Nẵng',
+  'hue': 'Huế',
+  'bacninh': 'Bắc Ninh',
+  'bac ninh': 'Bắc Ninh',
+  'TP.HCM': 'TP.HCM',
+  'Hà Nội': 'Hà Nội',
+  'Đà Nẵng': 'Đà Nẵng',
+  'Huế': 'Huế',
+  'Bắc Ninh': 'Bắc Ninh'
+};
+
 function normalizeCity(str) {
   if (!str) return "";
-  str = str.toLowerCase().trim();
-  // Quy về dạng không dấu, viết thường, bỏ ký tự đặc biệt
-  str = str.replace(/tp\.?\s*hcm|thành phố hồ chí minh|hồ chí minh/g, "hcm");
-  str = str.replace(/hà nội/g, "hanoi");
-  str = str.replace(/đà nẵng/g, "danang");
-  str = str.replace(/huế/g, "hue");
-  str = str.replace(/bắc ninh/g, "bacninh");
-  return str;
+  const normalized = str.trim().toLowerCase();
+  return cityMapping[normalized] || cityMapping[str.trim()] || str;
 }
 
 const CarListingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
-  const [selectedCarType, setSelectedCarType] = useState('');
   const [priceRange, setPriceRange] = useState('');
   const [activePopup, setActivePopup] = useState(null);
   const [filters, setFilters] = useState({
-    carType: [],
+    vehicle_type: [],
     brand: [],
     seats: [],
-    fuel: [],
+    fuel_type: [],
     discount: false
   });
-  const [displayedCount, setDisplayedCount] = useState(8); // Initial number of vehicles to display
+  const [displayedCount, setDisplayedCount] = useState(8);
   const loaderRef = useRef(null);
   const [priceMin, setPriceMin] = useState(0);
   const [priceMax, setPriceMax] = useState(10000000);
   const [cars, setCars] = useState([]);
-  const [isLoading, setIsLoading] = useState(false); // đã có
-
-  useEffect(() => {
-    setIsLoading(true);
-    fetch('http://localhost/myapi/vehicles.php')
-      .then(res => res.json())
-      .then(data => {
-        setCars(data.records || []);
-        setIsLoading(false);
-      })
-      .catch(() => setIsLoading(false));
-  }, []);
-  const priceRanges = ['Tất cả giá', 'Dưới 1 triệu', '1-2 triệu', '2-5 triệu', 'Trên 5 triệu'];
-
-  // Filter options
-  const filterOptions = {
-    carType: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup'],
-    brand: ['Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Porsche', 'Lamborghini', 'Suzuki'],
-    seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
-    fuel: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
-  };
-  const formatCarTypeDisplay = (type) => {
-    const typeMap = {
-      'sedan': 'Sedan',
-      'suv': 'SUV',
-      'hatchback': 'Hatchback',
-      'crossover': 'Crossover',
-      'pickup': 'Pickup'
-    };
-    return typeMap[type] || type;
-  };
-
+  const [isLoading, setIsLoading] = useState(false);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [pickUpLocation, setPickUpLocation] = useState('Địa điểm nhận xe');
   const [dropOffLocation, setDropOffLocation] = useState('Địa điểm trả xe');
   const [pickUpDate, setPickUpDate] = useState('');
   const [pickUpTime, setPickUpTime] = useState('');
   const [dropOffDate, setDropOffDate] = useState('');
   const [dropOffTime, setDropOffTime] = useState('');
+  const [selectedCar, setSelectedCar] = useState(null);
+  const [showRentalModal, setShowRentalModal] = useState(false);
+  const [favorites, setFavorites] = useState([]);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-  // Lấy search params sau khi mounted
+  const didInitRef = useRef(false);
+  const isInitializedRef = useRef(false);
+  const fetchController = useRef(null);
+
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchTerm]);
+
+  useEffect(() => {
+    if (didInitRef.current) return;
+    didInitRef.current = true;
+
     if (typeof window !== "undefined") {
-      const searchParams = new URLSearchParams(window.location.search);
-      setPickUpLocation(beautifyCityName(searchParams.get('pickUpLocation')) || 'Địa điểm nhận xe');
-      setDropOffLocation(beautifyCityName(searchParams.get('dropOffLocation')) || 'Địa điểm trả xe');
-      setPickUpDate(searchParams.get('pickUpDate') || '');
-      setPickUpTime(searchParams.get('pickUpTime') || '');
-      setDropOffDate(searchParams.get('dropOffDate') || '');
-      setDropOffTime(searchParams.get('dropOffTime') || '');
+      const params = new URLSearchParams(window.location.search);
+      const pickUpParam = params.get('pickUpLocation');
+      const dropOffParam = params.get('dropOffLocation');
+
+      const newSelectedLocation = normalizeCity(pickUpParam) || '';
+      const newPickUpLocation = beautifyCityName(normalizeCity(pickUpParam)) || 'Địa điểm nhận xe';
+      const newDropOffLocation = beautifyCityName(normalizeCity(dropOffParam)) || 'Địa điểm trả xe';
+      const newFilters = {
+        vehicle_type: params.get('vehicle_type') ? params.get('vehicle_type').split(',') : [],
+        brand: params.get('brand') ? params.get('brand').split(',') : [],
+        seats: params.get('seats') ? params.get('seats').split(',').map(s => `${s} chỗ`) : [],
+        fuel_type: params.get('fuel_type') ? params.get('fuel_type').split(',') : [],
+        discount: params.get('discount') === '1'
+      };
+      const newPriceMin = Number(params.get('priceMin')) || 0;
+      const newPriceMax = Number(params.get('priceMax')) || 10000000;
+      const newSearchTerm = params.get('search') || '';
+
+      setSelectedLocation(newSelectedLocation);
+      setPickUpLocation(newPickUpLocation);
+      setDropOffLocation(newDropOffLocation);
+      setPickUpDate(params.get('pickUpDate') || '');
+      setPickUpTime(params.get('pickUpTime') || '');
+      setDropOffDate(params.get('dropOffDate') || '');
+      setDropOffTime(params.get('dropOffTime') || '');
+      setFilters(newFilters);
+      setPriceMin(newPriceMin);
+      setPriceMax(newPriceMax);
+      setSearchTerm(newSearchTerm);
+      setDebouncedSearchTerm(newSearchTerm);
+
+      isInitializedRef.current = true;
     }
   }, []);
 
-  // Filter cars based on search term and filters
-  const filteredCars = cars.filter(car => {
-    const matchesSearch = car.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      car.brand?.toLowerCase().includes(searchTerm.toLowerCase());
+  const fetchData = useCallback(async () => {
+    if (!isInitializedRef.current) return;
 
-    // Lọc theo thành phố lấy từ pickUpLocation
-    let matchesLocation = true;
-    if (pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe') {
-      // Lấy phần tên thành phố đầu tiên trong location của xe
-      const carCityRaw = car.location?.split('-')[0]?.trim();
-      const carCity = normalizeCity(carCityRaw);
-      const pickUpCity = normalizeCity(pickUpLocation);
-      matchesLocation = carCity === pickUpCity;
+    if (fetchController.current) {
+      fetchController.current.abort();
+    }
+    fetchController.current = new AbortController();
+
+    setIsLoading(true);
+    if (cars.length === 0) {
+      setIsInitialLoading(true);
     }
 
-    //filter loại xe: dùng vehicle_type
-    const matchesCarType = selectedCarType === 'Tất cả loại xe' || !selectedCarType ||
-      (selectedCarType.includes('chỗ') ? `${car.seats} chỗ` === selectedCarType :
-        car.vehicle_type?.toLowerCase() === selectedCarType?.toLowerCase());
+    const params = new URLSearchParams();
 
-    // Sửa filter giá: dùng base_price (giả sử đơn vị là VND)
-    const priceValue = car.base_price ? Number(car.base_price) : 0;
-    const matchesPrice = priceRange === 'Tất cả giá' || !priceRange ||
-      (priceRange === 'Dưới 1 triệu' && priceValue < 1000000) ||
-      (priceRange === '1-2 triệu' && priceValue >= 1000000 && priceValue <= 2000000) ||
-      (priceRange === '2-5 triệu' && priceValue > 2000000 && priceValue <= 5000000) ||
-      (priceRange === 'Trên 5 triệu' && priceValue > 5000000);
+    if (selectedLocation) params.append('location', selectedLocation);
+    if (filters.vehicle_type.length) params.append('vehicle_type', filters.vehicle_type.join(','));
+    if (filters.brand.length) params.append('brand', filters.brand.join(','));
+    if (filters.seats.length) params.append('seats', filters.seats.map(s => s.split(' ')[0]).join(','));
+    if (filters.fuel_type.length) params.append('fuel_type', filters.fuel_type.join(','));
+    if (filters.discount) params.append('discount', '1');
+    params.append('priceMin', priceMin);
+    params.append('priceMax', priceMax);
+    if (debouncedSearchTerm) params.append('search', debouncedSearchTerm);
 
-    // Sửa filter nâng cao: dùng vehicle_type thay vì carType
-    const matchesFilters =
-      (!filters.carType.length || filters.carType.some(type =>
-        car.vehicle_type?.toLowerCase() === type?.toLowerCase())) &&
-      (!filters.brand.length || filters.brand.includes(car.name?.split(' ')[0])) &&
-      (!filters.seats.length || filters.seats.includes(`${car.seats} chỗ`)) &&
-      (!filters.fuel.length || filters.fuel.includes(car.fuel_type || car.fuel)) &&
-      (!filters.discount || car.priceDiscount);
-    return matchesSearch && matchesLocation && matchesCarType && matchesPrice && matchesFilters;
-  });
+    console.log('Fetching API with params:', params.toString());
 
-  // Handle filter toggle
+    try {
+      const res = await fetch(`/api/vehicles?${params.toString()}`, {
+        signal: fetchController.current.signal
+      });
+
+      if (!res.ok) throw new Error('API call failed');
+
+      const data = await res.json();
+      console.log('API response:', data);
+
+      const minDelay = cars.length === 0 ? 1500 : 500;
+
+      setTimeout(() => {
+        setCars(data.records || []);
+        setIsInitialLoading(false);
+        setIsLoading(false);
+      }, minDelay);
+
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Error fetching cars:', error);
+        setTimeout(() => {
+          setCars([]);
+          setIsInitialLoading(false);
+          setIsLoading(false);
+        }, cars.length === 0 ? 1500 : 500);
+      }
+    }
+  }, [selectedLocation, filters, priceMin, priceMax, debouncedSearchTerm, cars.length]);
+
+  useEffect(() => {
+    if (isInitializedRef.current) {
+      fetchData();
+    }
+  }, [fetchData]);
+
+  useEffect(() => {
+    return () => {
+      if (fetchController.current) {
+        fetchController.current.abort();
+      }
+    };
+  }, []);
+
+  const handleFavoriteToggle = async (vehicleId) => {
+    const isCurrentlyFavorite = favorites.includes(vehicleId);
+    setFavorites(prev =>
+      isCurrentlyFavorite
+        ? prev.filter(id => id !== vehicleId)
+        : [...prev, vehicleId]
+    );
+
+    try {
+      const response = await fetch('/api/vehicles', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_favorite',
+          vehicle_id: vehicleId,
+          is_favorite: !isCurrentlyFavorite
+        })
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        console.error('Failed to toggle favorite:', result.message);
+        setFavorites(prev =>
+          isCurrentlyFavorite
+            ? [...prev, vehicleId]
+            : prev.filter(id => id !== vehicleId)
+        );
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      setFavorites(prev =>
+        isCurrentlyFavorite
+          ? [...prev, vehicleId]
+          : prev.filter(id => id !== vehicleId)
+      );
+    }
+  };
+
+  const filterOptions = {
+    vehicle_type: ['sedan', 'suv', 'hatchback', 'crossover', 'pickup', 'supercar'],
+    brand: [
+      'Toyota', 'Honda', 'Mercedes', 'BMW', 'Audi', 'Hyundai', 'Kia', 'Mazda', 'Nissan',
+      'Lamborghini', 'Ferrari', 'Porsche', 'McLaren', 'Maserati', 'Aston Martin', 'Bentley'
+    ],
+    seats: ['2 chỗ', '4 chỗ', '5 chỗ', '7 chỗ', '8+ chỗ'],
+    fuel_type: ['Xăng', 'Dầu', 'Hybrid', 'Điện']
+  };
+
+  const formatCarTypeDisplay = (type) => {
+    const typeMap = {
+      'sedan': 'Sedan',
+      'suv': 'SUV',
+      'hatchback': 'Hatchback',
+      'crossover': 'Crossover',
+      'pickup': 'Pickup',
+      'supercar': 'Super Car'
+    };
+    return typeMap[type] || type;
+  };
+
+  const filteredCars = React.useMemo(() => {
+    console.log('🔄 Using cars as filteredCars:', cars.length, 'cars');
+    return cars;
+  }, [cars]);
+
   const handleFilterToggle = (category, value) => {
-    setFilters(prev => ({
-      ...prev,
-      [category]: prev[category].includes(value)
-        ? prev[category].filter(item => item !== value)
-        : [...prev[category], value]
-    }));
+    setFilters(prev => {
+      const newFilters = {
+        ...prev,
+        [category]: prev[category].includes(value)
+          ? prev[category].filter(item => item !== value)
+          : [...prev[category], value]
+      };
+      return newFilters;
+    });
   };
 
   const handleDiscountToggle = () => {
@@ -172,9 +293,6 @@ const CarListingPage = () => {
     setActivePopup(null);
   };
 
-  
-
-  // Thêm useEffect để khóa scroll khi popup mở
   useEffect(() => {
     if (activePopup) {
       document.body.classList.add('overflow-hidden');
@@ -194,157 +312,184 @@ const CarListingPage = () => {
     </div>
   );
 
-  const FilterPopup = ({ title, options, category, onClose }) => (
-    <PopupOverlay onClose={onClose}>
-      <div className="p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-black">{title}</h3>
-          <button onClick={onClose} className="p-1 hover:bg-black-100 rounded">
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="space-y-3">
-          {options.map((option) => (
-            <label key={option} className="flex items-center space-x-3 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={filters[category].includes(option)}
-                onChange={() => handleFilterToggle(category, option)}
-                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
-              <span className="text-black">
-                {category === 'carType' ? formatCarTypeDisplay(option) : option}
-              </span>
-            </label>
-          ))}
-        </div>
-        <div className="flex space-x-3 mt-6">
-          <button
-            onClick={onClose}
-            className="flex-1 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors">
-            Áp dụng
-          </button>
-          <button
-            onClick={() => {
-              setFilters(prev => ({ ...prev, [category]: [] }));
-              onClose();
-            }}
-            className="flex-1 px-4 py-2 border border-green-500 text-green-600 rounded-md hover:bg-green-50 transition-colors">
-            Xóa bộ lọc
-          </button>
-        </div>
-      </div>
-    </PopupOverlay>
-  );
-
   const PricePopup = ({ onClose }) => {
+    const [isVisible, setIsVisible] = useState(false);
     const minLimit = 0;
     const maxLimit = 10000000;
     const step = 100000;
-    const [values, setValues] = useState([priceMin, priceMax]);
-    const formatNumber = (num) => num.toLocaleString();
-    const handleChange = (newValues) => {
-      setValues(newValues);
+    // Chỉ sử dụng internal state trong component này
+    const [internalValues, setInternalValues] = useState([priceMin, priceMax]);
+
+    useEffect(() => {
+      // Trigger animation sau khi component mount
+      const timer = setTimeout(() => setIsVisible(true), 50);
+      return () => clearTimeout(timer);
+    }, []);
+
+    const handleClose = () => {
+      setIsVisible(false);
+      setTimeout(onClose, 300); // Đợi animation xong mới close
     };
 
+    const formatNumber = (num) => num.toLocaleString();
+
+    // Cập nhật internal state khi kéo slider
+    const handleChange = (newValues) => {
+      setInternalValues(newValues);
+    };
+
+    // Cũng chỉ cập nhật internal state khi thả tay
     const handleAfterChange = (newValues) => {
-      setPriceMin(newValues[0]);
-      setPriceMax(newValues[1]);
+      setInternalValues(newValues);
+    };
+
+    // Xử lý khi thay đổi input
+    const handleInputChange = (index, value) => {
+      const numValue = parseInt(value.replace(/,/g, '')) || 0;
+      const newValues = [...internalValues];
+
+      if (index === 0 && numValue <= internalValues[1]) {
+        newValues[0] = numValue;
+      } else if (index === 1 && numValue >= internalValues[0]) {
+        newValues[1] = numValue;
+      }
+
+      setInternalValues(newValues);
+    };
+
+    // Áp dụng thay đổi - cập nhật priceMin/priceMax ở component cha
+    const handleApply = () => {
+      setPriceMin(internalValues[0]);
+      setPriceMax(internalValues[1]);
+      handleClose();
+    };
+
+    // Reset về giá trị mặc định
+    const handleReset = () => {
+      const resetValues = [0, 10000000];
+      setInternalValues(resetValues);
+      setPriceMin(0);
+      setPriceMax(10000000);
+      setTimeout(handleClose, 100);
     };
 
     return (
-      <PopupOverlay onClose={onClose}>
-        <div className="p-6">
-          <h3 className="text-lg font-bold text-black">Chọn khoảng giá</h3>
-
-          <div className="flex space-x-4 mt-4">
-            <div className="flex-1">
-              <label className="block text-sm text-black">Từ</label>
-              <input
-                type="text"
-                value={formatNumber(values[0])}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                  if (v <= values[1]) setValues([v, values[1]]);
-                }}
-                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
-                placeholder="0"
-              />
+      <div
+        className={`
+          fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4
+          transition-opacity duration-300 ease-out
+          ${isVisible ? 'opacity-100' : 'opacity-0'}
+        `}
+        onClick={handleClose}
+      >
+        <div
+          className={`
+            bg-white rounded-xl shadow-2xl max-w-lg w-full max-h-[80vh] overflow-hidden
+            transition-all duration-300 ease-out
+            ${isVisible
+              ? 'opacity-100 scale-100'
+              : 'opacity-0 scale-95'
+            }
+          `}
+          onClick={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-6 py-4">
+            <div className="flex justify-between items-center">
+              <h3 className="text-xl font-bold text-white">Chọn khoảng giá</h3>
+              <button
+                onClick={handleClose}
+                className="p-2 hover:bg-white/20 rounded-full transition-colors duration-200"
+              >
+                <X className="h-5 w-5 text-white" />
+              </button>
             </div>
-            <div className="flex-1">
-              <label className="block text-sm text-black">Đến</label>
-              <input
-                type="text"
-                value={formatNumber(values[1])}
-                onChange={(e) => {
-                  const v = parseInt(e.target.value.replace(/,/g, '')) || 0;
-                  if (v >= values[0]) setValues([values[0], v]);
-                }}
-                className="w-full border rounded px-2 py-1 text-black placeholder:text-black"
-                placeholder="10.000.000"
+          </div>
+
+          {/* Content */}
+          <div className="p-6">
+            <div className="flex space-x-4 mb-6">
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Từ</label>
+                <input
+                  type="text"
+                  value={formatNumber(internalValues[0])}
+                  onChange={(e) => handleInputChange(0, e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                  placeholder="0"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Đến</label>
+                <input
+                  type="text"
+                  value={formatNumber(internalValues[1])}
+                  onChange={(e) => handleInputChange(1, e.target.value)}
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder:text-gray-500 
+                           focus:border-green-500 focus:ring-2 focus:ring-green-200 transition-all duration-200"
+                  placeholder="10.000.000"
+                />
+              </div>
+            </div>
+            <div className="px-2">
+              <Slider
+                range
+                min={minLimit}
+                max={maxLimit}
+                step={step}
+                defaultValue={[priceMin, priceMax]}
+                value={internalValues}
+                onChange={handleChange}
+                onChangeComplete={handleAfterChange}
+                trackStyle={[{ background: '#22c55e', height: 6 }]}
+                handleStyle={[
+                  {
+                    backgroundColor: '#fff',
+                    border: '2px solid #22c55e',
+                    width: 22,
+                    height: 22,
+                    marginTop: -8,
+                    boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                  },
+                  {
+                    backgroundColor: '#fff',
+                    border: '2px solid #22c55e',
+                    width: 22,
+                    height: 22,
+                    marginTop: -8,
+                    boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
+                  }
+                ]}
+                railStyle={{ background: '#e5e7eb', height: 6 }}
               />
             </div>
           </div>
 
-          <div className="mt-6 px-2">
-            <Slider
-              range
-              min={minLimit}
-              max={maxLimit}
-              step={step}
-              defaultValue={[priceMin, priceMax]}
-              value={values}
-              onChange={handleChange}
-              onChangeComplete={handleAfterChange}
-              trackStyle={[{ background: '#22c55e', height: 6 }]}
-              handleStyle={[
-                {
-                  backgroundColor: '#fff',
-                  border: '2px solid #22c55e',
-                  width: 22,
-                  height: 22,
-                  marginTop: -8, // căn giữa dot với thanh trượt cao 6px
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-                },
-                {
-                  backgroundColor: '#fff',
-                  border: '2px solid #22c55e',
-                  width: 22,
-                  height: 22,
-                  marginTop: -8,
-                  boxShadow: '0 2px 8px rgba(34,197,94,0.15)',
-                }
-              ]}
-              railStyle={{ background: '#e5e7eb', height: 6 }} // màu xám nhạt cho rail
-            />
+          {/* Footer Actions - CỐ Ý CHỈ CẬP NHẬT PRICE KHI BẤM "ÁP DỤNG" */}
+          <div className="px-6 py-4 bg-gray-50 border-t flex space-x-3">
+            <button
+              onClick={handleApply}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg font-semibold
+                         hover:from-green-600 hover:to-emerald-700 transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95 shadow-md hover:shadow-lg"
+            >
+              Áp dụng
+            </button>
+            <button
+              onClick={handleReset}
+              className="flex-1 px-4 py-3 border-2 border-green-500 text-green-600 rounded-lg font-semibold
+                         hover:bg-green-50 transition-all duration-200 transform hover:scale-[1.02]
+                         active:scale-95"
+            >
+              Đặt lại
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="mt-6 w-full px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors">
-            Áp dụng
-          </button>
         </div>
-      </PopupOverlay>
+      </div>
     );
   };
 
-  const [selectedCar, setSelectedCar] = useState(null);
-  const [showRentalModal, setShowRentalModal] = useState(false);
-
-  // Thêm state favorites
-  const [favorites, setFavorites] = useState([]);
-
-  // Thêm hàm xử lý favorite toggle
-  const handleFavoriteToggle = (vehicleId) => {
-    setFavorites(prev => {
-      if (prev.includes(vehicleId)) {
-        return prev.filter(id => id !== vehicleId);
-      } else {
-        return [...prev, vehicleId];
-      }
-    });
-  };
-
-  // Infinite scrolling logic
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -366,25 +511,51 @@ const CarListingPage = () => {
     };
   }, [filteredCars.length]);
 
+  useEffect(() => {
+    if (!isInitializedRef.current) return;
+
+    const timer = setTimeout(() => {
+      const params = new URLSearchParams(window.location.search);
+
+      if (filters.vehicle_type.length) params.set('vehicle_type', filters.vehicle_type.join(','));
+      else params.delete('vehicle_type');
+
+      if (filters.brand.length) params.set('brand', filters.brand.join(','));
+      else params.delete('brand');
+
+      if (filters.seats.length) params.set('seats', filters.seats.join(','));
+      else params.delete('seats');
+
+      if (filters.fuel_type.length) params.set('fuel_type', filters.fuel_type.join(','));
+      else params.delete('fuel_type');
+
+      if (filters.discount) params.set('discount', '1');
+      else params.delete('discount');
+
+      params.set('priceMin', priceMin);
+      params.set('priceMax', priceMax);
+
+      if (debouncedSearchTerm) params.set('search', debouncedSearchTerm);
+      else params.delete('search');
+
+      router.replace(`?${params.toString()}`);
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [filters, priceMin, priceMax, debouncedSearchTerm, router]);
+
   return (
     <div className="min-h-screen bg-gray-50 relative">
-      {isLoading && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60">
-          <CarLoadingScreen />
-        </div>
-      )}
-      {/* Navigation Header */}
       <Header />
-      {/* Spacer để header chiếm chỗ, chỉnh h-20 cho đúng chiều cao Header */}
       <div className="h-21 bg-gray-800/95"></div>
-
-      {/* Location & Time Bar */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
               <MapPin className="h-5 w-5 text-blue-600" />
-              <span className="font-medium text-gray-900">{pickUpLocation}</span>
+              <span className="font-medium text-gray-900">
+                {beautifyCityName(selectedLocation) || 'Địa điểm nhận xe'}
+              </span>
               <span className="text-gray-500">→</span>
               <span className="font-medium text-gray-900">{dropOffLocation}</span>
               <Calendar className="h-4 w-4 text-gray-500" />
@@ -395,64 +566,73 @@ const CarListingPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Filter Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center py-3">
             <span className="text-sm text-black font-semibold mr-4">Bộ Lọc:</span>
             <div className="flex flex-wrap gap-2">
               <button
-                onClick={() => setActivePopup('carType')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal"
+                onClick={() => setActivePopup('vehicle_type')}
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.vehicle_type.length > 0
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}
               >
                 Loại Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
-                {filters.carType.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {filters.carType.length}
+                {filters.vehicle_type.length > 0 && (
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {filters.vehicle_type.length}
                   </span>
                 )}
-
               </button>
               <button
                 onClick={() => setActivePopup('brand')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.brand.length > 0
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Hãng Xe
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.brand.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.brand.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={() => setActivePopup('seats')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.seats.length > 0
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Số Chỗ
                 <ChevronDown className="ml-1 h-3 w-3" />
                 {filters.seats.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
                     {filters.seats.length}
                   </span>
                 )}
               </button>
               <button
-                onClick={() => setActivePopup('fuel')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full hover:bg-gray-50 transition-colors text-black font-normal">
+                onClick={() => setActivePopup('fuel_type')}
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.fuel_type.length > 0
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}>
                 Nguyên Liệu
                 <ChevronDown className="ml-1 h-3 w-3" />
-                {filters.fuel.length > 0 && (
-                  <span className="ml-2 bg-blue-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                    {filters.fuel.length}
+                {filters.fuel_type.length > 0 && (
+                  <span className="ml-2 bg-green-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {filters.fuel_type.length}
                   </span>
                 )}
               </button>
               <button
                 onClick={handleDiscountToggle}
-                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors text-black font-normal ${filters.discount
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${filters.discount
                   ? 'border-green-600 bg-green-50 text-green-600'
-                  : 'border-gray-300 hover:bg-gray-50'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
                   }`}>
                 Giảm Giá
                 {filters.discount && (
@@ -463,17 +643,18 @@ const CarListingPage = () => {
               </button>
               <button
                 onClick={() => setActivePopup('price')}
-                className="flex items-center px-3 py-1.5 text-sm border border-gray-300 rounded-full text-black font-normal hover:bg-gray-50"
+                className={`flex items-center px-3 py-1.5 text-sm border rounded-full transition-colors font-normal ${(priceMin !== 0 || priceMax !== 10000000)
+                  ? 'border-green-600 bg-green-50 text-green-600'
+                  : 'border-gray-300 hover:bg-gray-50 text-black'
+                  }`}
               >
                 <span>Giá:</span>
-                <span className="ml-2 text-gray-700">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
+                <span className="ml-2">{priceMin.toLocaleString()} — {priceMax.toLocaleString()}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Search Section */}
       <div className="bg-gray-50 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
@@ -488,10 +669,9 @@ const CarListingPage = () => {
           </div>
         </div>
       </div>
-
-      {/* Car Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <VehicleList
+          key={`${filteredCars.length}-${JSON.stringify(filters)}`}
           vehicles={filteredCars.slice(0, displayedCount)}
           onFavoriteToggle={handleFavoriteToggle}
           favorites={favorites}
@@ -499,49 +679,42 @@ const CarListingPage = () => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
+          isLoading={isInitialLoading}
           noResultType={
             pickUpLocation && pickUpLocation !== 'Địa điểm nhận xe' && filteredCars.length === 0
               ? "location"
-              : filters.carType.length
+              : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
                 ? "filter"
-                : filters.brand.length
-                  ? "filter"
-                  : filters.seats.length
-                    ? "filter"
-                    : filters.fuel.length
-                      ? "filter"
-                      : filters.discount
-                        ? "filter"
-                        : priceRange && priceRange !== 'Tất cả giá'
-                          ? "filter"
-                          : undefined
+                : undefined
           }
           noResultFilter={
-            filters.carType.length
-              ? "carType"
+            filters.vehicle_type.length
+              ? "vehicle_type"
               : filters.brand.length
                 ? "brand"
                 : filters.seats.length
                   ? "seats"
-                  : filters.fuel.length
-                    ? "fuel"
+                  : filters.fuel_type.length
+                    ? "fuel_type"
                     : filters.discount
                       ? "discount"
-                      : priceRange && priceRange !== 'Tất cả giá'
-                        ? "price"
-                        : undefined
+                      : "price"
           }
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>
 
-      {/* Popups */}
-      {activePopup === 'carType' && (
+      {/* Sử dụng FilterPopup component với hiệu ứng */}
+      {activePopup === 'vehicle_type' && (
         <FilterPopup
           title="Loại Xe"
-          options={filterOptions.carType}
-          category="carType"
+          options={filterOptions.vehicle_type}
+          category="vehicle_type"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
+          formatDisplay={formatCarTypeDisplay}
         />
       )}
       {activePopup === 'brand' && (
@@ -550,6 +723,9 @@ const CarListingPage = () => {
           options={filterOptions.brand}
           category="brand"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
         />
       )}
       {activePopup === 'seats' && (
@@ -558,21 +734,37 @@ const CarListingPage = () => {
           options={filterOptions.seats}
           category="seats"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
         />
       )}
-      {activePopup === 'fuel' && (
+      {activePopup === 'fuel_type' && (
         <FilterPopup
           title="Nguyên Liệu"
-          options={filterOptions.fuel}
-          category="fuel"
+          options={filterOptions.fuel_type}
+          category="fuel_type"
           onClose={closePopup}
+          filters={filters}
+          onFilterToggle={handleFilterToggle}
+          onClearFilters={(category) => setFilters(prev => ({ ...prev, [category]: [] }))}
         />
       )}
       {activePopup === 'price' && (
         <PricePopup onClose={closePopup} />
       )}
-
-      {/* Footer */}
+      {showRentalModal && selectedCar && (
+        <CarRentalModal
+          car={selectedCar}
+          onClose={() => setShowRentalModal(false)}
+          pickUpLocation={pickUpLocation}
+          dropOffLocation={dropOffLocation}
+          pickUpDate={pickUpDate}
+          pickUpTime={pickUpTime}
+          dropOffDate={dropOffDate}
+          dropOffTime={dropOffTime}
+        />
+      )}
       <Footer />
     </div>
   );
