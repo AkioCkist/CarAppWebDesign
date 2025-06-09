@@ -352,30 +352,6 @@ export default function ProfileEditPanel() {
             <p className="text-gray-600 text-base">Notification settings will be available here.</p>
           </motion.div>
         )}
-
-        {activeTab === 'profile' && (
-          <motion.div
-            className="mt-8 border-t border-gray-200 pt-6"
-            variants={formVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <h3 className="text-xl leading-6 font-medium text-gray-900 mb-4">Link Other Accounts</h3>
-            <div className="grid grid-cols-1 gap-y-4">
-              {['Google', 'Facebook', 'GitHub', 'Discord'].map((provider) => (
-                <motion.button
-                  key={provider}
-                  onClick={() => handleLinkAccount(provider)}
-                  className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-base transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Link with {provider}
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
       </div>
     </motion.div>
   );
