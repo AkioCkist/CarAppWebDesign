@@ -163,7 +163,7 @@ export default function LoginPage() {
           action: 'login',
           phone: formData.phone,
           password: formData.password
-        }),
+        })
       });
 
       const data = await response.json();

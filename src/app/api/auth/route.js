@@ -17,6 +17,8 @@ export async function POST(request) {
       return await handleRegister(phone, password, name);
     } else if (action === 'login') {
       return await handleLogin(phone, password);
+    } else if (action === 'logout') {
+      return await handleLogout();
     } else {
       return NextResponse.json(
         { error: 'Invalid action' },
@@ -34,7 +36,6 @@ export async function POST(request) {
 
 async function handleRegister(phone, password, name) {
   try {
-    // Validate input
     if (!phone || !password || !name) {
       return NextResponse.json(
         { error: 'Phone, password, and name are required' },
@@ -42,7 +43,6 @@ async function handleRegister(phone, password, name) {
       );
     }
 
-    // Validate phone format
     if (!/^\+?\d{10,15}$/.test(phone)) {
       return NextResponse.json(
         { error: 'Please enter a valid phone number' },
@@ -50,7 +50,6 @@ async function handleRegister(phone, password, name) {
       );
     }
 
-    // Validate password length
     if (password.length < 6) {
       return NextResponse.json(
         { error: 'Password must be at least 6 characters' },
@@ -58,7 +57,6 @@ async function handleRegister(phone, password, name) {
       );
     }
 
-    // Check if user already exists
     const { data: existingUser } = await supabase
       .from('accounts')
       .select('account_id')
@@ -72,11 +70,8 @@ async function handleRegister(phone, password, name) {
       );
     }
 
-    // Hash password
-    const saltRounds = 12;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Create user account
     const { data: newUser, error: userError } = await supabase
       .from('accounts')
       .insert({
@@ -96,18 +91,13 @@ async function handleRegister(phone, password, name) {
       );
     }
 
-    // Assign default role (customer/renter)
-    const { error: roleError } = await supabase
-      .from('account_roles')
-      .insert({
-        account_id: newUser.account_id,
-        role_id: 2 // Assuming 2 is the customer/renter role ID
-      });
+    await supabase
+    .from('account_roles')
+    .insert({
+      account_id: newUser.account_id,
+      role_id: 2
+    });
 
-    if (roleError) {
-      console.error('Role assignment error:', roleError);
-      // Continue anyway, role can be assigned later
-    }
 
     return NextResponse.json({
       success: true,
@@ -130,7 +120,6 @@ async function handleRegister(phone, password, name) {
 
 async function handleLogin(phone, password) {
   try {
-    // Validate input
     if (!phone || !password) {
       return NextResponse.json(
         { error: 'Phone and password are required' },
@@ -138,7 +127,6 @@ async function handleLogin(phone, password) {
       );
     }
 
-    // Find user by phone
     const { data: user, error: userError } = await supabase
       .from('accounts')
       .select(`
@@ -165,9 +153,7 @@ async function handleLogin(phone, password) {
       );
     }
 
-    // Verify password
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    
     if (!isPasswordValid) {
       return NextResponse.json(
         { error: 'Phone number or password is incorrect' },
@@ -175,7 +161,6 @@ async function handleLogin(phone, password) {
       );
     }
 
-    // Prepare user data (exclude password)
     const userData = {
       id: user.account_id,
       name: user.username,
@@ -186,11 +171,24 @@ async function handleLogin(phone, password) {
       }))
     };
 
-    return NextResponse.json({
+    console.log('User data being set in session:', userData);
+
+    const response = NextResponse.json({
       success: true,
       message: 'Login successful',
       user: userData
     });
+
+    const sessionToken = btoa(JSON.stringify(userData));
+    response.cookies.set('session', sessionToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 60 * 60 * 24 * 7,
+      path: '/',
+      sameSite: 'lax',
+    });
+
+    return response;
 
   } catch (error) {
     console.error('Login error:', error);
@@ -201,41 +199,55 @@ async function handleLogin(phone, password) {
   }
 }
 
-// GET method for health check
+async function handleLogout() {
+  const response = NextResponse.json({
+    success: true,
+    message: 'Logout successful'
+  });
+
+  response.cookies.set('session', '', {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 0,
+    path: '/',
+    sameSite: 'lax',
+  });
+
+  return response;
+}
+
 export async function GET() {
   try {
-    // Test 1: Simple select to verify connection
     const { data, error } = await supabase
       .from('accounts')
       .select('account_id')
       .limit(1);
-    
+
     if (error) {
       console.error('Database connection error:', error);
-      return NextResponse.json({ 
+      return NextResponse.json({
         error: error.message,
-        code: error.code 
+        code: error.code
       }, { status: 500 });
     }
-    
-    // Test 2: Get count using the correct method
+
     const { count, error: countError } = await supabase
       .from('accounts')
       .select('*', { count: 'exact', head: true });
-    
-    return NextResponse.json({ 
+
+    return NextResponse.json({
       message: 'Auth API is working',
       dbConnection: 'OK',
       recordsFound: data?.length || 0,
       totalRecords: count || 0
     });
-    
+
   } catch (error) {
     console.error('API test error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Auth API is working',
       dbConnection: 'Failed',
-      error: error.message 
+      error: error.message
     }, { status: 500 });
   }
 }
