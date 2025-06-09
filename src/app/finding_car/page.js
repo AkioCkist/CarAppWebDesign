@@ -248,10 +248,10 @@ function CarListingPageContent() {
         fetchController.current.abort();
       }
     };
-  }, []);  const handleFavoriteToggle = async (vehicleId) => {
+  }, []); const handleFavoriteToggle = async (vehicleId) => {
     // Check if user is logged in
     const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
-    
+
     if (!user || (!user.account_id && !user.id)) {
       // Show login alert and redirect to signin
       alert('Please log in to add vehicles to your favorites!');
@@ -262,7 +262,7 @@ function CarListingPageContent() {
     // Use either account_id or id from user data
     const userId = user.account_id || user.id;
     const isCurrentlyFavorite = favorites.includes(vehicleId);
-    
+
     // Optimistic update
     setFavorites(prev =>
       isCurrentlyFavorite
@@ -279,9 +279,9 @@ function CarListingPageContent() {
           vehicle_id: vehicleId
         })
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
         throw new Error(result.error || 'Failed to toggle favorite');
       }
@@ -296,7 +296,7 @@ function CarListingPageContent() {
     } catch (error) {
       console.error('Error toggling favorite:', error);
       alert('Failed to update favorites. Please try again.');
-      
+
       // Revert optimistic update on error
       setFavorites(prev =>
         isCurrentlyFavorite

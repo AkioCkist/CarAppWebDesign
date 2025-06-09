@@ -236,25 +236,26 @@ export default function UserProfilePage() {
   };
   // Use user info from session, fallback to defaults if not available
   const avatar =
-  user.avatar && user.avatar.trim() !== ""
-    ? user.avatar
-    : "/avatar/default_avatar.jpg";
+    user.avatar && user.avatar.trim() !== ""
+      ? user.avatar
+      : "/avatar/default_avatar.jpg";
   const name = user.name || "Unknown User";
-  const phone = user.phone || "N/A";
-  // Handle favorite/unfavorite
+  const phone = user.phone || "N/A";  // Handle favorite/unfavorite
   const handleFavoriteToggle = async (vehicleId) => {
-    if (!user?.account_id) {
+    // Check for user ID with flexible field checking
+    const userId = user?.account_id || user?.id;
+    if (!userId) {
       alert('Please log in to manage favorites');
       return;
     }
 
     try {
-      const result = await toggleVehicleFavorite(user.account_id, vehicleId);
-      
+      const result = await toggleVehicleFavorite(userId, vehicleId);
+
       if (result.success) {
         if (result.action === 'added') {
           // Refresh favorites from server to get complete vehicle data
-          const updatedFavorites = await getUserFavorites(user.account_id);
+          const updatedFavorites = await getUserFavorites(userId);
           setFavoriteCars(updatedFavorites);
         } else {
           // Remove from local state
@@ -588,19 +589,19 @@ export default function UserProfilePage() {
                                 className="hover:bg-gray-50"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
-                              transition={{ delay: index * 0.1, duration: 0.3 }}
-                            >
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.id}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.pickup}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.rentDate}</td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.returnDate}</td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                  {order.status}
-                                </span>
-                              </td>
-                            </motion.tr>
+                                transition={{ delay: index * 0.1, duration: 0.3 }}
+                              >
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.id}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.pickup}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.rentDate}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.returnDate}</td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
+                                    {order.status}
+                                  </span>
+                                </td>
+                              </motion.tr>
                             ))}
                           </tbody>
                         </table>
@@ -699,29 +700,29 @@ export default function UserProfilePage() {
                         <p className="text-sm text-gray-600 mt-1">Cars you've marked as favorites</p>
                       </div>
                       <div className="p-6">                        {favoriteCars.length > 0 ? (
-                          <VehicleList 
-                            vehicles={favoriteCars}
-                            onFavoriteToggle={handleFavoriteToggle}
-                            favorites={favoriteCars.map(car => car.id)}
-                            showFavoriteButton={true}
-                          />
-                        ) : (
-                          <div className="text-center py-12">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                            </svg>
-                            <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
-                            <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
-                            <div className="mt-6">
-                              <button
-                                onClick={() => router.push('/vehicles')}
-                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                              >
-                                Browse Cars
-                              </button>
-                            </div>
+                        <VehicleList
+                          vehicles={favoriteCars}
+                          onFavoriteToggle={handleFavoriteToggle}
+                          favorites={favoriteCars.map(car => car.id)}
+                          showFavoriteButton={true}
+                        />
+                      ) : (
+                        <div className="text-center py-12">
+                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                          </svg>
+                          <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
+                          <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
+                          <div className="mt-6">
+                            <button
+                              onClick={() => router.push('/vehicles')}
+                              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            >
+                              Browse Cars
+                            </button>
                           </div>
-                        )}
+                        </div>
+                      )}
                       </div>
                     </div>
                   </motion.div>
