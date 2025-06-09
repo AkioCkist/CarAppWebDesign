@@ -176,7 +176,10 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
                 }`}
             >
               <img
-                src="/icons/IconDetailCarCard/Transmission.svg"
+                src={vehicle.transmission.toLowerCase().includes('manual')
+                  ? "/icons/IconDetailCarCard/Transmission.svg"
+                  : "/icons/IconDetailCarCard/transmissionautomatic.svg"
+                }
                 alt="transmission"
                 className="w-4 h-4"
               />
@@ -240,7 +243,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               alt="trips"
               className="w-4 h-4"
             />
-            {vehicle.trips} trips 
+            {vehicle.trips} trips
           </span>
         </div>
 
