@@ -133,10 +133,18 @@ export default function Header() {
   }, []);
   // Custom logout function
   const handleLogout = () => {
+    // Start white fade overlay
+    setShowWhiteFade(true);
+    
+    // Clear user data
     localStorage.removeItem('user');
     setUser(null);
     setShowDropdown(false);
-    router.push('/');
+    
+    // Wait for fade animation to complete, then refresh
+    setTimeout(() => {
+      window.location.reload();
+    }, 800); // 800ms to allow fade animation to complete
   };
 
   // Handle clicks outside dropdown to close it

@@ -14,6 +14,7 @@ export default function UserProfilePage() {
   const [fadeIn, setFadeIn] = useState(false);
   const [showFade, setShowFade] = useState(true);
   const [fadeOut, setFadeOut] = useState(false);
+  const [showWhiteFadeLogout, setShowWhiteFadeLogout] = useState(false);
   const [activePanel, setActivePanel] = useState('dashboard');
   const [favoriteCars, setFavoriteCars] = useState([]);
 
