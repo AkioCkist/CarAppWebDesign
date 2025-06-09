@@ -66,9 +66,11 @@ const CarRentalModal = ({
 }) => {
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
+
     const router = useRouter();
 
     // Lock scroll when modal is open
+
     useEffect(() => {
         if (isOpen) {
             document.body.classList.add('overflow-hidden');
@@ -86,6 +88,7 @@ const CarRentalModal = ({
             <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
                 <div className="bg-white p-8 rounded-lg shadow-lg text-center">
                     <BlinkBlur color="#16a34a" size="medium" text="Loading vehicle information" textColor="#374151" />
+
                 </div>
             </div>,
             typeof window !== "undefined" ? document.body : null
@@ -162,8 +165,7 @@ const CarRentalModal = ({
                                 src={getImageUrl(gallery[selectedImage])}
                                 alt={carData.name}
                                 className="object-cover w-full h-full"
-                            />
-                            {/* View All Photos Button */}
+                            />                            {/* View All Photos Button */}
                             <button className="absolute bottom-4 right-4 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
                                 <Camera className="w-4 h-4" />
                                 View all photos
@@ -330,6 +332,7 @@ const CarRentalModal = ({
                             <button
                                 className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
                                 onClick={() => {
+                                    // Use buildBookingUrl to include all search data in URL
                                     router.push(buildBookingUrl());
                                     onClose && onClose();
                                 }}>

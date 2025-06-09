@@ -59,8 +59,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  const searchParams = useSearchParams();
+
   // Tự động fill thông tin tìm kiếm nếu đã có preFilledSearchData
   useEffect(() => {
+    // Try to get search data from props first, then from URL
     if (preFilledSearchData) {
       setSearchData({
         pickupLocation: preFilledSearchData.pickupLocation || '',
@@ -70,8 +73,17 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         dropoffDate: preFilledSearchData.dropoffDate || '',
         dropoffTime: preFilledSearchData.dropoffTime || ''
       });
+    } else if (searchParams) {
+      setSearchData({
+        pickupLocation: searchParams.get('pickupLocation') || '',
+        dropoffLocation: searchParams.get('dropoffLocation') || '',
+        pickupDate: searchParams.get('pickupDate') || '',
+        pickupTime: searchParams.get('pickupTime') || '',
+        dropoffDate: searchParams.get('dropoffDate') || '',
+        dropoffTime: searchParams.get('dropoffTime') || ''
+      });
     }
-  }, [preFilledSearchData]);
+  }, [preFilledSearchData, searchParams]);
 
   // Debug: Log searchData khi nó thay đổi
   useEffect(() => {
@@ -225,11 +237,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     return selectedCar.base_price * Math.max(days, 1);
   };
 
-  const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount * 25000);
+  // Format number as Vietnamese currency (e.g. 8.500.000 VND)
+  const formatVND = (amount) => {
+    if (typeof amount !== 'number') amount = Number(amount) || 0;
+    return amount.toLocaleString('vi-VN') + ' VND';
   };
 
   const getDayCount = () => {
@@ -254,7 +265,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         {/* Info Boxes */}
         <div className="w-full max-w-4xl flex flex-col gap-2 mb-8">
           <div className="text-sm p-4 bg-gray-100 border border-green-200 rounded-md shadow text-green-900">
-            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {normalizedCar?.price} ₫/day
+            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {formatVND(normalizedCar?.price)} /day
           </div>
           <div className="text-sm p-4 bg-yellow-50 border border-yellow-200 rounded-md shadow text-yellow-900">
             <strong>Search info:</strong><br />
@@ -327,7 +338,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 </div>
                 <div className="text-right">
                   <div className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 rounded-2xl mb-2">
-                    <p className="text-2xl font-bold">{normalizedCar?.price} ₫</p>
+                    <p className="text-2xl font-bold">{formatVND(normalizedCar?.price)}</p>
                     <p className="text-sm opacity-90">/day</p>
                   </div>
                   <p className="text-green-600 font-medium flex items-center justify-end">
@@ -505,10 +516,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="flex justify-between items-center">
                       <div>
                         <p className="text-green-700 font-medium">Rental days: {getDayCount()} day(s)</p>
-                        <p className="text-green-600">Price: {normalizedCar.price} ₫ x {getDayCount()} day(s)</p>
+                        <p className="text-green-600">Price: {formatVND(normalizedCar.price)} x {getDayCount()} day(s)</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-2xl font-bold text-green-600">{calculateTotal()} ₫</p>
+                        <p className="text-2xl font-bold text-green-600">{formatVND(calculateTotal())}</p>
                       </div>
                     </div>
                   </div>
@@ -788,11 +799,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         </div>
                         <div className="flex justify-between">
                           <span>Account holder:</span>
-                          <span className="font-semibold">wHALE XE RENTAL CO., LTD</span>
+                          <span className="font-semibold">WHALE XE RENTAL CO., LTD</span>
                         </div>
                         <div className="flex justify-between">
                           <span>Amount to transfer:</span>
-                          <span className="font-semibold text-lg">{Math.round(calculateTotal() * 0.3)} ₫</span>
+                          <span className="font-semibold text-lg">{formatVND(Math.round(calculateTotal() * 0.3))}</span>
                         </div>
                         <div className="border-t border-blue-300 pt-3 mt-3">
                           <p className="text-sm">
@@ -899,33 +910,32 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <div className="space-y-3">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Rental price ({getDayCount()} day(s))</span>
-                        <span className="font-medium text-gray-900">{calculateTotal()} ₫</span>
+                        <span className="font-medium text-gray-900">{formatVND(calculateTotal())}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Service fee</span>
-                        <span className="font-medium text-gray-900">0 ₫</span>
+                        <span className="font-medium text-gray-900">{formatVND(0)}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">VAT (10%)</span>
-                        <span className="font-medium text-gray-900">{Math.round(calculateTotal() * 0.1)} ₫</span>
+                        <span className="font-medium text-gray-900">{formatVND(Math.round(calculateTotal() * 0.1))}</span>
                       </div>
                       <div className="border-t border-gray-200 pt-3">
                         <div className="flex justify-between text-lg font-bold">
                           <span className="text-gray-900">Total</span>
-                          <span className="text-green-600">{Math.round(calculateTotal() * 1.1)} ₫</span>
+                          <span className="text-green-600">{formatVND(Math.round(calculateTotal() * 1.1))}</span>
                         </div>
                       </div>
                     </div>
-
                     {paymentMethod === 'bank' && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
                         <div className="flex justify-between text-sm">
                           <span>Pay upfront:</span>
-                          <span className="font-semibold">{Math.round(calculateTotal() * 1.1 * 0.3)} ₫</span>
+                          <span className="font-semibold">{formatVND(Math.round(calculateTotal() * 1.1 * 0.3))}</span>
                         </div>
                         <div className="flex justify-between text-sm">
                           <span>Pay at pickup:</span>
-                          <span className="font-semibold">{Math.round(calculateTotal() * 1.1 * 0.7)} ₫</span>
+                          <span className="font-semibold">{formatVND(Math.round(calculateTotal() * 1.1 * 0.7))}</span>
                         </div>
                       </div>
                     )}
