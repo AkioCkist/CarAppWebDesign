@@ -176,7 +176,9 @@ export default function LoginPage() {
           success: true,
         });
         setTimeout(() => {
-          window.location.href = "/";
+          // Check if user is admin (role_id = 3)
+          const isAdmin = data.user.roles?.some(role => role.id === 3);
+          window.location.href = isAdmin ? "/dashboard" : "/";
         }, 2500);
       } else {
         setAuthMessage({
