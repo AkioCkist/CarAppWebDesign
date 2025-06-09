@@ -12,6 +12,7 @@ import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useToast } from "../../../hooks/useToast";
+import { BlinkBlur } from "react-loading-indicators"; // Import BlinkBlur
 
 // Component chính - bọc bởi Suspense
 export default function Page() {
@@ -608,11 +609,14 @@ function CarListingPageContent() {
 
       <Header />
       <div className="h-21 bg-gray-800/95"></div>
+
+      {/* Location & Date Info Bar */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
-              <MapPin className="h-5 w-5 text-blue-600" />              <span className="font-medium text-gray-900">
+              <MapPin className="h-5 w-5 text-blue-600" />
+              <span className="font-medium text-gray-900">
                 {beautifyCityName(selectedLocation) || 'Pick-up Location'}
               </span>
               <span className="text-gray-500">→</span>
@@ -625,9 +629,12 @@ function CarListingPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Filter Bar */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center py-3">            <span className="text-sm text-black font-semibold mr-4">Filters:</span>
+          <div className="flex items-center py-3">
+            <span className="text-sm text-black font-semibold mr-4">Filters:</span>
             <div className="flex flex-wrap gap-2">
               <button
                 onClick={() => setActivePopup('vehicle_type')}
@@ -712,60 +719,89 @@ function CarListingPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Search Bar */}
       <div className="bg-gray-50 py-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />            <input
+            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 ${isLoading ? 'text-green-500 animate-pulse' : 'text-gray-400'}`} />
+            <input
               type="text"
               placeholder="Search cars by name, brand..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg bg-white text-black"
+              className={`w-full pl-10 pr-4 py-3 border rounded-lg bg-white text-black transition-all duration-200 ${isLoading
+                  ? 'border-green-300 ring-2 ring-green-100'
+                  : 'border-gray-300 focus:border-green-500 focus:ring-2 focus:ring-green-200'
+                }`}
             />
+            {isLoading && searchTerm && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="w-5 h-5 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Vehicle List with Loading State */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <VehicleList
-          key={`${filteredCars.length}-${JSON.stringify(filters)}`}
-          vehicles={filteredCars.slice(0, displayedCount)}
-          onFavoriteToggle={handleFavoriteToggle}
-          favorites={favorites}
-          // Pass a custom onBookClick that includes search data
-          onBookClick={(car) => {
-            setSelectedCar(car);
-            setShowRentalModal(true);
-          }}
-          isLoading={isInitialLoading} noResultType={
-            pickUpLocation && pickUpLocation !== 'Pick-up Location' && filteredCars.length === 0
-              ? "location"
-              : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
-                ? "filter"
-                : undefined
-          }
-          noResultFilter={
-            filters.vehicle_type.length
-              ? "vehicle_type"
-              : filters.brand.length
-                ? "brand"
-                : filters.seats.length
-                  ? "seats"
-                  : filters.fuel_type.length
-                    ? "fuel_type"
-                    : filters.discount
-                      ? "discount"
-                      : "price"
-          }
-          // Pass search data to VehicleList for modal
-          searchData={{
-            pickupLocation: pickUpLocation,
-            dropoffLocation: dropOffLocation,
-            pickupDate: pickUpDate,
-            pickupTime: pickUpTime,
-            dropoffDate: dropOffDate,
-            dropoffTime: dropOffTime
-          }}
-        />
+        {/* Show loading overlay over the vehicle grid area when searching/filtering */}
+        <div className="relative">
+          {isLoading && !isInitialLoading && (
+            <div className="absolute inset-0 z-10 bg-white/80 backdrop-blur-sm rounded-lg flex items-center justify-center">
+              <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                <BlinkBlur
+                  color="#16a34a"
+                  size="medium"
+                  text="Updating results..."
+                  textColor="#374151"
+                />
+              </div>
+            </div>
+          )}
+
+          <VehicleList
+            key={`${filteredCars.length}-${JSON.stringify(filters)}`}
+            vehicles={filteredCars.slice(0, displayedCount)}
+            onFavoriteToggle={handleFavoriteToggle}
+            favorites={favorites}
+            onBookClick={(car) => {
+              setSelectedCar(car);
+              setShowRentalModal(true);
+            }}
+            isLoading={isInitialLoading} // Skeleton loading chỉ cho lần đầu
+            noResultType={
+              pickUpLocation && pickUpLocation !== 'Pick-up Location' && filteredCars.length === 0
+                ? "location"
+                : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
+                  ? "filter"
+                  : undefined
+            }
+            noResultFilter={
+              filters.vehicle_type.length
+                ? "vehicle_type"
+                : filters.brand.length
+                  ? "brand"
+                  : filters.seats.length
+                    ? "seats"
+                    : filters.fuel_type.length
+                      ? "fuel_type"
+                      : filters.discount
+                        ? "discount"
+                        : "price"
+            }
+            searchData={{
+              pickupLocation: pickUpLocation,
+              dropoffLocation: dropOffLocation,
+              pickupDate: pickUpDate,
+              pickupTime: pickUpTime,
+              dropoffDate: dropOffDate,
+              dropoffTime: dropOffTime
+            }}
+          />
+        </div>
+
         <div ref={loaderRef} className="h-10"></div>
       </div>
 
