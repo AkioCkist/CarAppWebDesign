@@ -554,11 +554,9 @@ export default function LoginPage() {
         <div
           className="absolute inset-0 bg-black opacity-50"
           style={{ zIndex: 1 }}
-        />
-
-        <div className="relative z-10 w-full max-w-[440px] mx-auto px-4 h-full flex items-center justify-center">
+        />        <div className="relative z-10 w-full max-w-[420px] mx-auto px-4 h-full flex items-center justify-center">
           <div className="transform scale-[0.95] md:scale-100 transition-transform duration-300 w-full">
-            <div className="w-full max-w-[390px] max-h-[780px]">
+            <div className="w-full max-w-[380px] max-h-[680px]">
               <motion.div
                 variants={pullUpVariant}
                 initial="hidden"
@@ -574,14 +572,12 @@ export default function LoginPage() {
                   custom={flipDirection}
                   variants={cardVariants}
                   initial="front"
-                  animate={isLogin ? "front" : "back"}
-                  className="w-full h-full relative preserve-3d"
+                  animate={isLogin ? "front" : "back"}                  className="w-full h-full relative preserve-3d"
                   style={{
                     transformStyle: "preserve-3d",
-                    minHeight: "800px" // Ensure enough height for content
+                    minHeight: "700px" // Ensure enough height for content
                   }}
-                >
-                  {/* Front side (Login) */}
+                >                  {/* Front side (Login) */}
                   <motion.div
                     className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 border border-white/30"
                     style={{
@@ -597,11 +593,10 @@ export default function LoginPage() {
                       initial="visible"
                       animate={isLogin ? "visible" : "hidden"}
                       variants={contentVariants}
-                    >
-                      {/* Header with typing animation */}
-                      <div className="text-center mb-8">
+                    >                      {/* Header with typing animation */}
+                      <div className="text-center mb-6 px-6">
                         <motion.div
-                          className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                          className="w-14 h-14 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-3"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{
@@ -613,46 +608,39 @@ export default function LoginPage() {
                         >
                           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </motion.div>
+                          </svg>                        </motion.div>
 
                         <motion.h2
-                          className="text-3xl font-bold text-white mb-2"
+                          className="text-2xl font-bold text-white mb-2"
                           variants={textVariants}
                           initial="hidden"
                           animate="visible"
                         >
                           {isLogin ? 'Welcome Back' : 'Create Account'}
                         </motion.h2>
-                      </div>
-
-                      {/* Form with extended bottom padding */}
-                      <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
-                        {!isLogin && (
-                          <div>
+                      </div>{/* Form with extended bottom padding */}
+                      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">                        {!isLogin && (
+                          <div className="px-6">
                             <label className="block text-sm font-medium text-white mb-2">Full Name</label>
                             <input
                               type="text"
                               name="name"
                               value={formData.name}
                               onChange={handleInputChange}
-                              className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
+                              className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
                                 errors.name ? 'border-red-500' : 'border-gray-300'
                               } bg-white bg-opacity-80 text-gray-900`}
                               placeholder="Enter your full name"
                             />
                             {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
                           </div>
-                        )}
-
-                        {/* Phone number input for login */}
-                        <motion.div
+                        )}{/* Phone number input for login */}                        <motion.div
                           variants={inputVariants}
                           initial="hidden"
                           animate="visible"
                           custom={1}
                         >
-                          <div>
+                          <div className="px-6">
                             <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
                             <input
                               type="tel"
@@ -661,7 +649,7 @@ export default function LoginPage() {
                               onChange={handlePhoneInput}
                               onFocus={() => handleFocus("phone")}
                               onBlur={handleBlur}
-                              className={`w-full px-4 py-3 border rounded-lg transition-all duration-300 ${
+                              className={`w-full px-3 py-2.5 border rounded-lg transition-all duration-300 ${
                                 errors.phone ? 'border-red-500' :
                                 focusedInput === "phone" ? 'border-green-500 ring-2 ring-green-500 ring-opacity-50' : 'border-gray-300'
                               } bg-white bg-opacity-80 text-gray-900`}
@@ -677,15 +665,13 @@ export default function LoginPage() {
                             />
                             {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                           </div>
-                        </motion.div>
-
-                        <motion.div
+                        </motion.div>                        <motion.div
                           variants={inputVariants}
                           initial="hidden"
                           animate="visible"
                           custom={2}
                         >
-                          <div>
+                          <div className="px-6">
                             <label className="block text-sm font-medium text-white mb-2">Password</label>
                             <div className="relative">
                               <input
@@ -693,7 +679,7 @@ export default function LoginPage() {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
                                   errors.password ? 'border-red-500' : 'border-gray-300'
                                 } bg-white bg-opacity-80 text-gray-900`}
                                 placeholder="Enter your password"
@@ -708,16 +694,14 @@ export default function LoginPage() {
                             </div>
                             {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                           </div>
-                        </motion.div>
-
-                        {!isLogin && (
+                        </motion.div>                        {!isLogin && (
                           <motion.div
                             variants={inputVariants}
                             initial="hidden"
                             animate="visible"
                             custom={3}
                           >
-                            <div>
+                            <div className="px-6">
                               <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
                               <div className="relative">
                                 <input
@@ -725,7 +709,7 @@ export default function LoginPage() {
                                   name="confirmPassword"
                                   value={formData.confirmPassword}
                                   onChange={handleInputChange}
-                                  className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                  className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
                                     errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                                   } bg-white bg-opacity-80 text-gray-900`}
                                   placeholder="Confirm your password"
@@ -741,10 +725,8 @@ export default function LoginPage() {
                               {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
                             </div>
                           </motion.div>
-                        )}
-
-                        {isLogin && (
-                          <div className="flex items-center justify-between">
+                        )}                        {isLogin && (
+                          <div className="flex items-center justify-between px-6">
                             <label className="flex items-center">
                               <input
                                 type="checkbox"
@@ -759,27 +741,31 @@ export default function LoginPage() {
                               Forgot password?
                             </a>
                           </div>
-                        )}
+                        )}                        
+                        {/* ########## START: BUTTON FIX ########## */}
+                        <div className="px-6 mt-auto">
+                          <motion.button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                            whileHover={{ scale: 1.03 }}
+                            whileTap={{ scale: 0.98 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1 }}
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                {isLogin ? 'Signing in...' : 'Creating account...'}
+                              </div>
+                            ) : (
+                              isLogin ? 'Sign In' : 'Create Account'
+                            )}
+                          </motion.button>
+                        </div>
+                        {/* ########## END: BUTTON FIX ########## */}
 
-                        <motion.button
-                          type="submit"
-                          disabled={isLoading}
-                          className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
-                          whileHover={{ scale: 1.03 }}
-                          whileTap={{ scale: 0.98 }}
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ delay: 1 }}
-                        >
-                          {isLoading ? (
-                            <div className="flex items-center justify-center">
-                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                              {isLogin ? 'Signing in...' : 'Creating account...'}
-                            </div>
-                          ) : (
-                            isLogin ? 'Sign In' : 'Create Account'
-                          )}
-                        </motion.button>
 
                         {/* Divider */}
                         <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
@@ -799,10 +785,8 @@ export default function LoginPage() {
                             90% { transform: rotate(360deg) translateY(0); opacity: 0.8; color: #9ca3af; }
                             100% { transform: rotate(0deg) translateY(0); opacity: 0.6; color: #9ca3af; }
                           }
-                        `}</style>
-
-                        {/* Social Login Buttons with Icons */}
-                        <div className="grid grid-cols-2 gap-3">
+                        `}</style>                        {/* Social Login Buttons with Icons */}
+                        <div className="grid grid-cols-2 gap-3 px-6">
                           <button
                             type="button"
                             onClick={() => handleSocialLogin('google')}
@@ -819,10 +803,8 @@ export default function LoginPage() {
                             <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
                             <span className="text-white">Facebook</span>
                           </button>
-                        </div>
-
-                        {/* Toggle Mode */}
-                        <div className="mt-6 text-center">
+                        </div>                        {/* Toggle Mode */}
+                        <div className="mt-6 text-center px-6">
                           <p className="text-sm text-white">
                             {isLogin ? "Don't have an account?" : "Already have an account?"}
                             <button
@@ -836,9 +818,7 @@ export default function LoginPage() {
                         </div>
                       </form>
                     </motion.div>
-                  </motion.div>
-
-                  {/* Back side (Register) - Adjusted the text for the "Back" side for consistency */}
+                  </motion.div>                  {/* Back side (Register) - Adjusted the text for the "Back" side for consistency */}
                   <motion.div
                     className="absolute w-full h-full backface-hidden rounded-2xl shadow-2xl p-8 border border-white/30"
                     style={{
@@ -854,10 +834,9 @@ export default function LoginPage() {
                       initial="hidden"
                       animate={isLogin ? "hidden" : "visible"}
                       variants={contentVariants}
-                    >
-                      <div className="text-center mb-8">
+                    >                      <div className="text-center mb-6 px-6">
                         <motion.div
-                          className="w-16 h-16 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                          className="w-14 h-14 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-3"
                           initial={{ scale: 0 }}
                           animate={{ scale: 1 }}
                           transition={{
@@ -869,10 +848,9 @@ export default function LoginPage() {
                         >
                           <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </motion.div>
+                          </svg>                        </motion.div>
                         <motion.h2
-                          className="text-3xl font-bold text-white mb-2"
+                          className="text-2xl font-bold text-white mb-2"
                           variants={textVariants}
                           initial="hidden"
                           animate="visible"
@@ -881,39 +859,35 @@ export default function LoginPage() {
                         </motion.h2>
                       </div>
 
-                      <form onSubmit={handleSubmit} className="space-y-6 flex-1 flex flex-col">
-                        {/* Name input for registration */}
-                        <div>
+                      <form onSubmit={handleSubmit} className="space-y-4 flex-1 flex flex-col">                        {/* Name input for registration */}
+                        <div className="px-6">
                           <label className="block text-sm font-medium text-white mb-2">Full Name</label>
                           <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
+                            className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition ${
                               errors.name ? 'border-red-500' : 'border-gray-300'
                             } bg-white bg-opacity-80 text-gray-900`}
                             placeholder="Enter your full name"
                           />
                           {errors.name && <p className="text-red-400 text-sm mt-1">{errors.name}</p>}
-                        </div>
-
-                        <motion.div
+                        </div>                        <motion.div
                           variants={inputVariants}
                           initial="hidden"
                           animate="visible"
                           custom={1}
                         >
-                          <div>
-                            <label className="block text-sm font-medium text-white mb-2">Phone Number</label>
-                            <input
+                          <div className="px-6">
+                            <label className="block text-sm font-medium text-white mb-2">Phone Number</label>                            <input
                               type="tel"
                               name="phone"
                               value={formData.phone}
                               onChange={handlePhoneInput}
                               onFocus={() => handleFocus("phone")}
                               onBlur={handleBlur}
-                              className={`w-full px-4 py-3 border rounded-lg transition-all duration-300 ${
+                              className={`w-full px-3 py-2.5 border rounded-lg transition-all duration-300 ${
                                 errors.phone ? 'border-red-500' :
                                 focusedInput === "phone" ? 'border-green-500 ring-2 ring-green-500 ring-opacity-50' : 'border-gray-300'
                               } bg-white bg-opacity-80 text-gray-900`}
@@ -929,15 +903,13 @@ export default function LoginPage() {
                             />
                             {errors.phone && <p className="text-red-400 text-sm mt-1">{errors.phone}</p>}
                           </div>
-                        </motion.div>
-
-                        <motion.div
+                        </motion.div>                        <motion.div
                           variants={inputVariants}
                           initial="hidden"
                           animate="visible"
                           custom={2}
                         >
-                          <div>
+                          <div className="px-6">
                             <label className="block text-sm font-medium text-white mb-2">Password</label>
                             <div className="relative">
                               <input
@@ -945,7 +917,7 @@ export default function LoginPage() {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
                                   errors.password ? 'border-red-500' : 'border-gray-300'
                                 } bg-white bg-opacity-80 text-gray-900`}
                                 placeholder="Enter your password"
@@ -960,15 +932,13 @@ export default function LoginPage() {
                             </div>
                             {errors.password && <p className="text-red-400 text-sm mt-1">{errors.password}</p>}
                           </div>
-                        </motion.div>
-
-                        <motion.div
+                        </motion.div>                        <motion.div
                           variants={inputVariants}
                           initial="hidden"
                           animate="visible"
                           custom={3}
                         >
-                          <div>
+                          <div className="px-6">
                             <label className="block text-sm font-medium text-white mb-2">Confirm Password</label>
                             <div className="relative">
                               <input
@@ -976,7 +946,7 @@ export default function LoginPage() {
                                 name="confirmPassword"
                                 value={formData.confirmPassword}
                                 onChange={handleInputChange}
-                                className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
+                                className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition pr-12 ${
                                   errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
                                 } bg-white bg-opacity-80 text-gray-900`}
                                 placeholder="Confirm your password"
@@ -991,34 +961,32 @@ export default function LoginPage() {
                             </div>
                             {errors.confirmPassword && <p className="text-red-400 text-sm mt-1">{errors.confirmPassword}</p>}
                           </div>
-                        </motion.div>
-
-                        <button
-                          type="submit"
-                          disabled={isLoading}
-                          className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-auto"
-                        >
-                          {isLoading ? (
-                            <div className="flex items-center justify-center">
-                              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                              Creating account...
-                            </div>
-                          ) : 'Create Account'}
-                        </button>
-
-                        {/* Divider */}
-                        <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
-                          ↓
+                        </motion.div>                        
+                        {/* ########## START: BUTTON FIX ########## */}
+                        <div className="px-6 mt-auto">
+                          <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="w-full bg-gradient-to-r from-green-500 to-blue-500 text-white py-3 px-4 rounded-lg font-medium hover:from-green-600 hover:to-blue-600 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {isLoading ? (
+                              <div className="flex items-center justify-center">
+                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                Creating account...
+                              </div>
+                            ) : 'Create Account'}
+                          </button>
                         </div>
+                        {/* ########## END: BUTTON FIX ########## */}
 
                         {/* Toggle Mode */}
-                        <div className="mt-6 text-center">
+                        <div className="mt-4 text-center px-6">
                           <p className="text-sm text-white">
-                            Already have an account?
+                            Already have an account?{' '}
                             <button
                               type="button"
                               onClick={toggleMode}
-                              className="ml-1 text-green-200 hover:text-green-100 font-medium"
+                              className="text-green-200 hover:text-green-100 font-medium"
                             >
                               Sign in
                             </button>

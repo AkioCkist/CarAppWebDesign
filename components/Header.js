@@ -206,9 +206,6 @@ export default function Header() {
                 <button onClick={() => handleNavigation("./")} className="hover:text-green-400 transition-colors">
                   Home
                 </button>
-                <button onClick={() => handleNavigation("/#news")} className="hover:text-green-400 transition-colors">
-                  News
-                </button>
                 <button
                   onClick={() => {
                     setShowWhiteFade(true);
@@ -315,15 +312,6 @@ export default function Header() {
                           <li><a href="/user_dashboard" className="block px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
                             <i className="fas fa-tachometer-alt w-4"></i> My Dashboard
                           </a></li>
-                          <li><a href="#" className="block px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                            <i className="fas fa-calendar-check w-4"></i> My Bookings
-                          </a></li>
-                          <li><a href="#" className="block px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                            <i className="fas fa-user-edit w-4"></i> Edit Profile
-                          </a></li>
-                          <li><a href="#" className="block px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                            <i className="fas fa-cog w-4"></i> Settings
-                          </a></li>
                         </ul>
                         <div className="py-1 border-t border-gray-100">
                           <button
@@ -378,12 +366,6 @@ export default function Header() {
                     className="block w-full text-left px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
                   >
                     Gallery
-                  </button>
-                  <button 
-                    onClick={() => handleNavigation("/#about")} 
-                    className="block w-full text-left px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
-                  >
-                    News
                   </button>
                 </nav>
               </motion.div>
