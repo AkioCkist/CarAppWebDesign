@@ -140,15 +140,20 @@ const CarRentalModal = ({
     // Render modal at end of body to ensure it covers the entire page
     return createPortal(
         <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
-            <div className="relative w-full max-w-[1440px] mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-y-auto">
-                {/* Close Button */}
-                <button
-                    className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-gray-100"
-                    onClick={onClose} aria-label="Close">
-                    <X className="w-6 h-6 text-gray-700" />
-                </button>
-                {/* Main Content */}
-                <div>
+            <div className="relative w-full max-w-[1440px] mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-hidden flex flex-col">
+                {/* Header with Close Button */}
+                <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">Vehicle Details</h2>
+                    <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                        onClick={onClose} 
+                        aria-label="Close">
+                        <X className="w-4 h-4 text-gray-600" />
+                    </button>
+                </div>
+
+                {/* Main Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto">
                     {/* Photo Gallery - Full Width */}
                     <div className="w-full h-[480px] flex gap-2 p-4">
                         {/* Main Image */}
@@ -157,12 +162,14 @@ const CarRentalModal = ({
                                 src={getImageUrl(gallery[selectedImage])}
                                 alt={carData.name}
                                 className="object-cover w-full h-full"
-                            />                            {/* View All Photos Button */}
+                            />
+                            {/* View All Photos Button */}
                             <button className="absolute bottom-4 right-4 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
                                 <Camera className="w-4 h-4" />
                                 View all photos
                             </button>
-                        </div>                        {/* Side Images: DISPLAY ALL IMAGES */}
+                        </div>
+                        {/* Side Images: DISPLAY ALL IMAGES */}
                         <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">
                             {gallery.map((img, idx) => (
                                 <button
