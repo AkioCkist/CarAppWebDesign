@@ -70,8 +70,6 @@ const locationOptions = [
   { value: "hcm", label: "TP. Hồ Chí Minh" },
   { value: "hanoi", label: "Hà Nội" },
   { value: "danang", label: "Đà Nẵng" },
-  { value: "hue", label: "Huế" },
-  { value: "bacninh", label: "Bắc Ninh" }
 ];
 
 const dropoffOptions = [
@@ -79,8 +77,6 @@ const dropoffOptions = [
   { value: "hcm", label: "TP. Hồ Chí Minh" },
   { value: "hanoi", label: "Hà Nội" },
   { value: "danang", label: "Đà Nẵng" },
-  { value: "hue", label: "Huế" },
-  { value: "bacninh", label: "Bắc Ninh" }
 ];
 
 // Notification Dot Components
@@ -480,7 +476,7 @@ export default function HomePage() {
           ref={heroImageRef}
           className="absolute inset-0 bg-cover bg-center pointer-events-none"
           style={{
-            backgroundImage: "url('/hero/hero.webp')",
+            backgroundImage: "url('/background/autumn_nature.jpg')",
             filter: "brightness(0.7)",
             top: `-48px`,
             height: "calc(100% + 48px)",
