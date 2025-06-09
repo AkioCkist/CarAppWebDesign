@@ -194,13 +194,7 @@ const CarRentalModal = ({
                                 <img
                                     src={getImageUrl(gallery[selectedImage])}
                                     alt={carData.name}
-                                    className="object-cover w-full h-full"
-                                />
-                                {/* View All Photos Button */}
-                                <button className="absolute bottom-4 right-4 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
-                                    <Camera className="w-4 h-4" />
-                                    View all photos
-                                </button>
+                                    className="object-cover w-full h-full"/>
                             </div>
                             {/* Side Images: DISPLAY ALL IMAGES */}
                             <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">

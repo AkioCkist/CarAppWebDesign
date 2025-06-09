@@ -72,7 +72,116 @@ export default function UserProfilePage() {
       </div>
     );
   }
-
+  // Mock user data - replace with actual data from your backend if needed
+  const userData = {
+    name: user.name || "Monica Lucas",
+    email: user.email || "monica@rentaly.com",
+    avatar: user.avatar || "/images/profile/1.jpg",
+    totalOrders: 3,
+    completedRides: 12,
+    totalBookings: 58,
+    totalCars: 24,
+    recentOrders: [
+      {
+        id: "RWR19",
+        car: "Jeep Renegade",
+        pickup: "New York",
+        destination: "Los Angeles",
+        rentDate: "March 8, 2023",
+        returnDate: "March 16, 2023",
+        status: "Completed"
+      },
+      {
+        id: "RWR20",
+        car: "Mini Cooper",
+        pickup: "San Francisco",
+        destination: "Chicago",
+        rentDate: "March 8, 2023",
+        returnDate: "March 16, 2023",
+        status: "Completed"
+      },
+      {
+        id: "RWR21",
+        car: "Ferrari Enzo",
+        pickup: "Philadelphia",
+        destination: "Washington",
+        rentDate: "March 8, 2023",
+        returnDate: "March 16, 2023",
+        status: "Pending"
+      },
+      {
+        id: "RWR22",
+        car: "Hyundai Santa",
+        pickup: "Kansas City",
+        destination: "Wichita",
+        rentDate: "March 13, 2023",
+        returnDate: "March 16, 2023",
+        status: "Completed"
+      },
+      {
+        id: "RWR23",
+        car: "Toyota Yaris",
+        pickup: "Baltimore",
+        destination: "Sacramento",
+        rentDate: "March 5, 2023",
+        returnDate: "March 16, 2023",
+        status: "Pending"
+      }
+    ],
+    favoriteCars: [
+      {
+        id: 1,
+        name: 'Porsche 911',
+        image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
+        transmission: 'Tự động',
+        fuel: 'Xăng',
+        seats: 2,
+        location: 'Quận Sơn Trà, Đà Nẵng',
+        rating: 5.0,
+        trips: 37,
+        priceDisplay: '865K',
+        oldPrice: 980000,
+        pricePer: 'ngày',
+        priceDiscount: 'Giảm 12%',
+        description: 'Xe thể thao sang trọng với hiệu suất vượt trội.',
+        isFavorite: false
+      },
+      {
+        id: 2,
+        name: 'Porsche 911 GT3 R rennsport',
+        image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
+        transmission: 'Tự động',
+        fuel: 'Xăng',
+        seats: 2,
+        location: 'Quận Sơn Trà, Đà Nẵng',
+        rating: 5.0,
+        trips: 170,
+        priceDisplay: '5585K',
+        oldPrice: 6412000,
+        pricePer: 'ngày',
+        priceDiscount: 'Giảm 13%',
+        description: 'Siêu xe đua với tốc độ đỉnh cao.',
+        isFavorite: false
+      },
+      {
+        id: 3,
+        name: 'SUZUKI XL7 2021',
+        image: 'https://images.unsplash.com/photo-1549399592-91b8e56a6b26?w=400&h=250&fit=crop',
+        transmission: 'Tự động',
+        fuel: 'Xăng',
+        seats: 7,
+        location: 'Quận Sơn Trà, Đà Nẵng',
+        rating: 4.8,
+        trips: 2,
+        priceDisplay: '865K',
+        oldPrice: 912000,
+        pricePer: 'ngày',
+        priceDiscount: 'Giảm 5%',
+        description: 'Xe gia đình rộng rãi, tiết kiệm nhiên liệu.',
+        isFavorite: false
+      }
+    ]
+  };
 
   const getStatusColor = (status) => {
     switch (status.toLowerCase()) {
