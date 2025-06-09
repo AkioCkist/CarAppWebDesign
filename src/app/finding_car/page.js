@@ -6,10 +6,12 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import CarRentalModal from "../../../components/CarRentalModal";
 import FilterPopup from "../../../components/FilterPopup";
+import ToastNotification from "../../../components/ToastNotification";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useToast } from "../../../hooks/useToast";
 
 // Component chính - bọc bởi Suspense
 export default function Page() {
@@ -34,9 +36,11 @@ function LoadingPlaceholder() {
 
 // Di chuyển toàn bộ code hiện tại vào component riêng biệt
 function CarListingPageContent() {
-
   const searchParams = useSearchParams();
-  const router = useRouter(); function beautifyCityName(str) {
+  const router = useRouter();
+  const { toasts, removeToast, showFavoriteToast, showUnfavoriteToast } = useToast();
+
+  function beautifyCityName(str) {
     if (!str) return "";
     if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
     const mapping = {
@@ -219,16 +223,53 @@ function CarListingPageContent() {
     }
   }, [fetchData]);
 
+  // Load user favorites when component mounts
+  useEffect(() => {
+    const loadUserFavorites = async () => {
+      try {
+        const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+        if (user && (user.account_id || user.id)) {
+          const userId = user.account_id || user.id;
+          const response = await fetch(`/api/favorites?account_id=${userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            // Extract vehicle IDs from favorites
+            const favoriteIds = data.data?.map(fav => fav.id) || [];
+            setFavorites(favoriteIds);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    };
+
+    loadUserFavorites();
+  }, []);
+
   useEffect(() => {
     return () => {
       if (fetchController.current) {
         fetchController.current.abort();
       }
     };
-  }, []);
+  }, []); const handleFavoriteToggle = async (vehicleId) => {
+    // Check if user is logged in
+    const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
 
-  const handleFavoriteToggle = async (vehicleId) => {
+    if (!user || (!user.account_id && !user.id)) {
+      // Show login alert and redirect to signin
+      showUnfavoriteToast('Please log in to add vehicles to your favorites!');
+      setTimeout(() => {
+        router.push('/signin_registration');
+      }, 2000);
+      return;
+    }
+
+    // Use either account_id or id from user data
+    const userId = user.account_id || user.id;
     const isCurrentlyFavorite = favorites.includes(vehicleId);
+
+    // Optimistic update
     setFavorites(prev =>
       isCurrentlyFavorite
         ? prev.filter(id => id !== vehicleId)
@@ -236,26 +277,33 @@ function CarListingPageContent() {
     );
 
     try {
-      const response = await fetch('/api/vehicles', {
+      const response = await fetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'toggle_favorite',
-          vehicle_id: vehicleId,
-          is_favorite: !isCurrentlyFavorite
+          account_id: userId,
+          vehicle_id: vehicleId
         })
       });
+
       const result = await response.json();
+
       if (!response.ok) {
-        console.error('Failed to toggle favorite:', result.message);
-        setFavorites(prev =>
-          isCurrentlyFavorite
-            ? [...prev, vehicleId]
-            : prev.filter(id => id !== vehicleId)
-        );
+        throw new Error(result.error || 'Failed to toggle favorite');
       }
+
+      // Show success toast
+      if (result.action === 'added') {
+        showFavoriteToast('Vehicle added to your favorites!');
+      } else {
+        showUnfavoriteToast('Vehicle removed from favorites');
+      }
+
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      showUnfavoriteToast('Failed to update favorites. Please try again.');
+
+      // Revert optimistic update on error
       setFavorites(prev =>
         isCurrentlyFavorite
           ? [...prev, vehicleId]
@@ -563,6 +611,9 @@ function CarListingPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
+      {/* Toast Notifications */}
+      <ToastNotification toasts={toasts} removeToast={removeToast} />
+
       <Header />
       <div className="h-21 bg-gray-800/95"></div>
       <div className="bg-white shadow-sm border-b">
