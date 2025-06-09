@@ -90,9 +90,9 @@ model bookings {
   return_time      DateTime      @db.Time
   pickup_location  String
   return_location  String
-  total_price      Decimal       @db.Decimal(10, 2)
-  discount_applied Decimal?      @default(0.00) @db.Decimal(10, 2)
-  final_price      Decimal       @db.Decimal(10, 2)
+  total_price      Decimal       @db.Decimal(15, 2)
+  discount_applied Decimal?      @default(0.00) @db.Decimal(15, 2)
+  final_price      Decimal       @db.Decimal(15, 2)
   status           BookingStatus @default(pending)
   created_at       DateTime      @default(now())
   updated_at       DateTime      @default(now()) @updatedAt
