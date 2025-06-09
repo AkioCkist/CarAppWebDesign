@@ -42,7 +42,7 @@ function CarListingPageContent() {
 
   function beautifyCityName(str) {
     if (!str) return "";
-    if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
+    if (["TP.HCM", "Hà Nội", "Đà Nẵng"].includes(str)) return str;
     const mapping = {
       'hcm': 'TP.HCM',
       'tp.hcm': 'TP.HCM',
@@ -50,9 +50,6 @@ function CarListingPageContent() {
       'ha noi': 'Hà Nội',
       'danang': 'Đà Nẵng',
       'da nang': 'Đà Nẵng',
-      'hue': 'Huế',
-      'bacninh': 'Bắc Ninh',
-      'bac ninh': 'Bắc Ninh'
     };
     const normalized = str.trim().toLowerCase();
     return mapping[normalized] || str;
@@ -65,14 +62,9 @@ function CarListingPageContent() {
     'ha noi': 'Hà Nội',
     'danang': 'Đà Nẵng',
     'da nang': 'Đà Nẵng',
-    'hue': 'Huế',
-    'bacninh': 'Bắc Ninh',
-    'bac ninh': 'Bắc Ninh',
     'TP.HCM': 'TP.HCM',
     'Hà Nội': 'Hà Nội',
     'Đà Nẵng': 'Đà Nẵng',
-    'Huế': 'Huế',
-    'Bắc Ninh': 'Bắc Ninh'
   };
 
   function normalizeCity(str) {
