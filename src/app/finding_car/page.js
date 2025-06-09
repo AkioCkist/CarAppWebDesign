@@ -294,7 +294,7 @@ function CarListingPageContent() {
 
       // Show success toast
       if (result.action === 'added') {
-        showFavoriteToast('🚗 Vehicle added to your favorites!');
+        showFavoriteToast('Vehicle added to your favorites!');
       } else {
         showUnfavoriteToast('Vehicle removed from favorites');
       }
