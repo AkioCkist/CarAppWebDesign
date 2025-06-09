@@ -17,7 +17,7 @@ export default function UserProfilePage() {
   const [showWhiteFadeLogout, setShowWhiteFadeLogout] = useState(false);
   const [activePanel, setActivePanel] = useState('dashboard');
   const [favoriteCars, setFavoriteCars] = useState([]);
-
+//
   // User data effect
   useEffect(() => {
     const userData = localStorage.getItem('user');
