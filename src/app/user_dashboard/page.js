@@ -6,6 +6,7 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import VehicleList from "../../../components/VehicleList";
 import ProfileEditPanel from "../../../components/ProfileEditPanel";
+import { getUserFavorites, toggleVehicleFavorite } from "../../../lib/auth-utils";
 
 export default function UserProfilePage() {
   // MOVE ALL HOOKS TO THE TOP - BEFORE ANY CONDITIONAL LOGIC
@@ -39,122 +40,22 @@ export default function UserProfilePage() {
       clearTimeout(timer);
       clearTimeout(removeTimer);
     };
-  }, []);
-
-  // Initialize favorite cars when user data is available
+  }, []);  // Initialize favorite cars when user data is available
   useEffect(() => {
-    if (user) {
-      const userData = {
-        name: user.name || "Monica Lucas",
-        email: user.email || "monica@rentaly.com",
-        avatar: user.avatar || "/images/profile/1.jpg",
-        totalOrders: 3,
-        completedRides: 12,
-        totalBookings: 58,
-        totalCars: 24,
-        recentOrders: [
-          {
-            id: "RWR19",
-            car: "Jeep Renegade",
-            pickup: "New York",
-            destination: "Los Angeles",
-            rentDate: "March 8, 2023",
-            returnDate: "March 16, 2023",
-            status: "Completed"
-          },
-          {
-            id: "RWR20",
-            car: "Mini Cooper",
-            pickup: "San Francisco",
-            destination: "Chicago",
-            rentDate: "March 8, 2023",
-            returnDate: "March 16, 2023",
-            status: "Completed"
-          },
-          {
-            id: "RWR21",
-            car: "Ferrari Enzo",
-            pickup: "Philadelphia",
-            destination: "Washington",
-            rentDate: "March 8, 2023",
-            returnDate: "March 16, 2023",
-            status: "Pending"
-          },
-          {
-            id: "RWR22",
-            car: "Hyundai Santa",
-            pickup: "Kansas City",
-            destination: "Wichita",
-            rentDate: "March 13, 2023",
-            returnDate: "March 16, 2023",
-            status: "Completed"
-          },
-          {
-            id: "RWR23",
-            car: "Toyota Yaris",
-            pickup: "Baltimore",
-            destination: "Sacramento",
-            rentDate: "March 5, 2023",
-            returnDate: "March 16, 2023",
-            status: "Pending"
-          }
-        ],
-        favoriteCars: [
-          {
-            id: 1,
-            name: 'Porsche 911',
-            image: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=400&h=250&fit=crop',
-            transmission: 'Tự động',
-            fuel: 'Xăng',
-            seats: 2,
-            location: 'Quận Sơn Trà, Đà Nẵng',
-            rating: 5.0,
-            trips: 37,
-            priceDisplay: '865K',
-            oldPrice: 980000,
-            pricePer: 'ngày',
-            priceDiscount: 'Giảm 12%',
-            description: 'Xe thể thao sang trọng với hiệu suất vượt trội.',
-            isFavorite: false
-          },
-          {
-            id: 2,
-            name: 'Porsche 911 GT3 R rennsport',
-            image: 'https://images.unsplash.com/photo-1544636331-e26879cd4d9b?w=400&h=250&fit=crop',
-            transmission: 'Tự động',
-            fuel: 'Xăng',
-            seats: 2,
-            location: 'Quận Sơn Trà, Đà Nẵng',
-            rating: 5.0,
-            trips: 170,
-            priceDisplay: '5585K',
-            oldPrice: 6412000,
-            pricePer: 'ngày',
-            priceDiscount: 'Giảm 13%',
-            description: 'Siêu xe đua với tốc độ đỉnh cao.',
-            isFavorite: false
-          },
-          {
-            id: 3,
-            name: 'SUZUKI XL7 2021',
-            image: 'https://images.unsplash.com/photo-1549399592-91b8e56a6b26?w=400&h=250&fit=crop',
-            transmission: 'Tự động',
-            fuel: 'Xăng',
-            seats: 7,
-            location: 'Quận Sơn Trà, Đà Nẵng',
-            rating: 4.8,
-            trips: 2,
-            priceDisplay: '865K',
-            oldPrice: 912000,
-            pricePer: 'ngày',
-            priceDiscount: 'Giảm 5%',
-            description: 'Xe gia đình rộng rãi, tiết kiệm nhiên liệu.',
-            isFavorite: false
-          }
-        ]
-      };
-      setFavoriteCars(userData.favoriteCars);
-    }
+    const loadFavorites = async () => {
+      if (user && (user.account_id || user.id)) {
+        try {
+          const userId = user.account_id || user.id;
+          const favorites = await getUserFavorites(userId);
+          setFavoriteCars(favorites);
+        } catch (error) {
+          console.error('Error loading favorite cars:', error);
+          setFavoriteCars([]);
+        }
+      }
+    };
+
+    loadFavorites();
   }, [user]);
 
   // NOW HANDLE LOADING STATE AFTER ALL HOOKS ARE DECLARED
@@ -340,20 +241,32 @@ export default function UserProfilePage() {
     : "/avatar/default_avatar.jpg";
   const name = user.name || "Unknown User";
   const phone = user.phone || "N/A";
-
   // Handle favorite/unfavorite
-  const handleFavoriteToggle = (vehicleId) => {
-    setFavoriteCars(prev => {
-      const isFavorite = prev.some(car => car.id === vehicleId);
-      if (isFavorite) {
-        // Remove from favorites
-        return prev.filter(car => car.id !== vehicleId);
+  const handleFavoriteToggle = async (vehicleId) => {
+    if (!user?.account_id) {
+      alert('Please log in to manage favorites');
+      return;
+    }
+
+    try {
+      const result = await toggleVehicleFavorite(user.account_id, vehicleId);
+      
+      if (result.success) {
+        if (result.action === 'added') {
+          // Refresh favorites from server to get complete vehicle data
+          const updatedFavorites = await getUserFavorites(user.account_id);
+          setFavoriteCars(updatedFavorites);
+        } else {
+          // Remove from local state
+          setFavoriteCars(prev => prev.filter(car => car.id !== vehicleId));
+        }
       } else {
-        // Add to favorites
-        const carToAdd = userData.favoriteCars.find(car => car.id === vehicleId); // Use userData.favoriteCars for all available cars if needed
-        return [...prev, carToAdd];
+        alert('Failed to update favorite status');
       }
-    });
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      alert('An error occurred while updating favorites');
+    }
   };
 
   // Animation variants for sidebar buttons
@@ -785,11 +698,11 @@ export default function UserProfilePage() {
                         <h3 className="text-lg font-semibold text-gray-800">My Favorite Cars</h3>
                         <p className="text-sm text-gray-600 mt-1">Cars you've marked as favorites</p>
                       </div>
-                      <div className="p-6">
-                        {favoriteCars.length > 0 ? (
+                      <div className="p-6">                        {favoriteCars.length > 0 ? (
                           <VehicleList 
                             vehicles={favoriteCars}
                             onFavoriteToggle={handleFavoriteToggle}
+                            favorites={favoriteCars.map(car => car.id)}
                             showFavoriteButton={true}
                           />
                         ) : (

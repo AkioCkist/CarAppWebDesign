@@ -219,16 +219,51 @@ function CarListingPageContent() {
     }
   }, [fetchData]);
 
+  // Load user favorites when component mounts
+  useEffect(() => {
+    const loadUserFavorites = async () => {
+      try {
+        const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+        if (user && (user.account_id || user.id)) {
+          const userId = user.account_id || user.id;
+          const response = await fetch(`/api/favorites?account_id=${userId}`);
+          if (response.ok) {
+            const data = await response.json();
+            // Extract vehicle IDs from favorites
+            const favoriteIds = data.data?.map(fav => fav.id) || [];
+            setFavorites(favoriteIds);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+      }
+    };
+
+    loadUserFavorites();
+  }, []);
+
   useEffect(() => {
     return () => {
       if (fetchController.current) {
         fetchController.current.abort();
       }
     };
-  }, []);
+  }, []);  const handleFavoriteToggle = async (vehicleId) => {
+    // Check if user is logged in
+    const user = typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null;
+    
+    if (!user || (!user.account_id && !user.id)) {
+      // Show login alert and redirect to signin
+      alert('Please log in to add vehicles to your favorites!');
+      router.push('/signin_registration');
+      return;
+    }
 
-  const handleFavoriteToggle = async (vehicleId) => {
+    // Use either account_id or id from user data
+    const userId = user.account_id || user.id;
     const isCurrentlyFavorite = favorites.includes(vehicleId);
+    
+    // Optimistic update
     setFavorites(prev =>
       isCurrentlyFavorite
         ? prev.filter(id => id !== vehicleId)
@@ -236,26 +271,33 @@ function CarListingPageContent() {
     );
 
     try {
-      const response = await fetch('/api/vehicles', {
+      const response = await fetch('/api/favorites', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'toggle_favorite',
-          vehicle_id: vehicleId,
-          is_favorite: !isCurrentlyFavorite
+          account_id: userId,
+          vehicle_id: vehicleId
         })
       });
+      
       const result = await response.json();
+      
       if (!response.ok) {
-        console.error('Failed to toggle favorite:', result.message);
-        setFavorites(prev =>
-          isCurrentlyFavorite
-            ? [...prev, vehicleId]
-            : prev.filter(id => id !== vehicleId)
-        );
+        throw new Error(result.error || 'Failed to toggle favorite');
       }
+
+      // Show success alert
+      if (result.action === 'added') {
+        alert('🚗 Vehicle added to your favorites!');
+      } else {
+        alert('Vehicle removed from favorites.');
+      }
+
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      alert('Failed to update favorites. Please try again.');
+      
+      // Revert optimistic update on error
       setFavorites(prev =>
         isCurrentlyFavorite
           ? [...prev, vehicleId]
