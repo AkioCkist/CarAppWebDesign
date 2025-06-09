@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { BlinkBlur } from "react-loading-indicators";
 import {
     X, Star, MapPin, Users, Fuel, Cog, Gauge, Camera, Bluetooth, RotateCcw, Circle, Package, Tablet, CreditCard, Shield, ShieldCheck, RotateCw, Zap, Radar, Sun, Map, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -65,7 +66,11 @@ const CarRentalModal = ({
 }) => {
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
-    const router = useRouter();    // Lock scroll when modal is open
+
+    const router = useRouter();
+
+    // Lock scroll when modal is open
+
     useEffect(() => {
         if (isOpen) {
             document.body.classList.add('overflow-hidden');
@@ -81,8 +86,9 @@ const CarRentalModal = ({
     if (loading || !carData) {
         return createPortal(
             <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
-                <div className="bg-white p-8 rounded-lg shadow-lg text-center text-lg font-semibold">
-                    Loading vehicle information...
+                <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+                    <BlinkBlur color="#16a34a" size="medium" text="Loading vehicle information" textColor="#374151" />
+
                 </div>
             </div>,
             typeof window !== "undefined" ? document.body : null
@@ -137,15 +143,20 @@ const CarRentalModal = ({
     // Render modal at end of body to ensure it covers the entire page
     return createPortal(
         <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
-            <div className="relative w-full max-w-[1440px] mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-y-auto">
-                {/* Close Button */}
-                <button
-                    className="absolute top-4 right-4 z-10 p-2 rounded-full hover:bg-gray-100"
-                    onClick={onClose} aria-label="Close">
-                    <X className="w-6 h-6 text-gray-700" />
-                </button>
-                {/* Main Content */}
-                <div>
+            <div className="relative w-full max-w-[1440px] mx-auto bg-white rounded-lg shadow-xl m-4 max-h-[90vh] overflow-hidden flex flex-col">
+                {/* Header with Close Button */}
+                <div className="sticky top-0 z-20 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+                    <h2 className="text-xl font-semibold text-gray-900">Vehicle Details</h2>
+                    <button
+                        className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
+                        onClick={onClose} 
+                        aria-label="Close">
+                        <X className="w-4 h-4 text-gray-600" />
+                    </button>
+                </div>
+
+                {/* Main Content - Scrollable */}
+                <div className="flex-1 overflow-y-auto">
                     {/* Photo Gallery - Full Width */}
                     <div className="w-full h-[480px] flex gap-2 p-4">
                         {/* Main Image */}
@@ -159,7 +170,8 @@ const CarRentalModal = ({
                                 <Camera className="w-4 h-4" />
                                 View all photos
                             </button>
-                        </div>                        {/* Side Images: DISPLAY ALL IMAGES */}
+                        </div>
+                        {/* Side Images: DISPLAY ALL IMAGES */}
                         <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">
                             {gallery.map((img, idx) => (
                                 <button
@@ -245,9 +257,7 @@ const CarRentalModal = ({
                                     </div>
                                 </div>
                                 <hr className="my-4 border-gray-200" />
-                            </div>
-
-                            {/* Terms & Conditions*/}
+                            </div>                            {/* Terms & Conditions*/}
                             <div className="mt-6">
                                 <div className="text-green-700 font-semibold mb-2 flex items-center gap-2">
                                     <span>Terms of Use</span>

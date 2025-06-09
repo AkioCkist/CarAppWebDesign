@@ -8,7 +8,6 @@ import { useCarLoading } from "../../components/CarLoading";
 import SimpleFaqSection from "../../components/SimpleFaqSection";
 import VehicleList from "../../components/VehicleList";
 import CarRentalModal from "../../components/CarRentalModal";
-import vehicles from "../../lib/seed";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
 import Script from "next/script";

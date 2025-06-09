@@ -693,8 +693,7 @@ function CarListingPageContent() {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
-          isLoading={isInitialLoading}
-          noResultType={
+          isLoading={isInitialLoading} noResultType={
             pickUpLocation && pickUpLocation !== 'Pick-up Location' && filteredCars.length === 0
               ? "location"
               : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
