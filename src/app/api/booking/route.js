@@ -320,22 +320,11 @@ async function createBooking(data) {
 
         const nextBookingId = (latestBooking?.booking_id || 0) + 1;
 
-        // Get a valid renter_id from accounts table
-        const validRenter = await prisma.accounts.findFirst({
-            select: {
-                account_id: true
-            }
-        });
-
-        if (!validRenter) {
-            throw new Error('No valid renter found');
-        }
-
         const booking = await prisma.bookings.create({
             data: {
                 booking_id: nextBookingId,
                 vehicle_id: safeParseInt(vehicle_id),
-                renter_id: validRenter.account_id,
+                renter_id: 18, // Sử dụng ID 18 làm mặc định
                 pickup_date: new Date(start_date),
                 pickup_time: parsedStartTime,
                 return_date: new Date(end_date),
