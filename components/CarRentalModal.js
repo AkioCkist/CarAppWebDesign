@@ -128,7 +128,7 @@ const CarRentalModal = ({
         }; const params = new URLSearchParams();
         Object.entries(searchDataValues).forEach(([key, value]) => {
             if (value) {
-                params.append(key, value); // Không encode 2 lần, URLSearchParams tự xử lý
+                params.append(key, value); // Don't double encode, URLSearchParams handles it
             }
         });
         return `/booking_car?${params.toString()}`;
@@ -245,7 +245,9 @@ const CarRentalModal = ({
                                     </div>
                                 </div>
                                 <hr className="my-4 border-gray-200" />
-                            </div>                            {/* Terms & Conditions*/}
+                            </div>
+
+                            {/* Terms & Conditions*/}
                             <div className="mt-6">
                                 <div className="text-green-700 font-semibold mb-2 flex items-center gap-2">
                                     <span>Terms of Use</span>
@@ -320,6 +322,7 @@ const CarRentalModal = ({
                             <button
                                 className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
                                 onClick={() => {
+                                    // Use buildBookingUrl to include all search data in URL
                                     router.push(buildBookingUrl());
                                     onClose && onClose();
                                 }}>

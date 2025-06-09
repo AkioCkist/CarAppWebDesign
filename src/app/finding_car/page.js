@@ -688,11 +688,13 @@ function CarListingPageContent() {
           vehicles={filteredCars.slice(0, displayedCount)}
           onFavoriteToggle={handleFavoriteToggle}
           favorites={favorites}
+          // Pass a custom onBookClick that includes search data
           onBookClick={(car) => {
             setSelectedCar(car);
             setShowRentalModal(true);
           }}
-          isLoading={isInitialLoading} noResultType={
+          isLoading={isInitialLoading}
+          noResultType={
             pickUpLocation && pickUpLocation !== 'Pick-up Location' && filteredCars.length === 0
               ? "location"
               : filters.vehicle_type.length || filters.brand.length || filters.seats.length || filters.fuel_type.length || filters.discount
@@ -712,6 +714,15 @@ function CarListingPageContent() {
                       ? "discount"
                       : "price"
           }
+          // Pass search data to VehicleList for modal
+          searchData={{
+            pickupLocation: pickUpLocation,
+            dropoffLocation: dropOffLocation,
+            pickupDate: pickUpDate,
+            pickupTime: pickUpTime,
+            dropoffDate: dropOffDate,
+            dropoffTime: dropOffTime
+          }}
         />
         <div ref={loaderRef} className="h-10"></div>
       </div>
@@ -774,6 +785,7 @@ function CarListingPageContent() {
           pickUpTime={pickUpTime}
           dropOffDate={dropOffDate}
           dropOffTime={dropOffTime}
+          // Pass searchData for fallback (if needed)
           searchData={{
             pickupLocation: pickUpLocation,
             dropoffLocation: dropOffLocation,
