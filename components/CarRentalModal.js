@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import { BlinkBlur } from "react-loading-indicators";
 import {
     X, Star, MapPin, Users, Fuel, Cog, Gauge, Camera, Bluetooth, RotateCcw, Circle, Package, Tablet, CreditCard, Shield, ShieldCheck, RotateCw, Zap, Radar, Sun, Map, ChevronDown, ChevronUp
 } from "lucide-react";
@@ -65,7 +66,9 @@ const CarRentalModal = ({
 }) => {
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
-    const router = useRouter();    // Lock scroll when modal is open
+    const router = useRouter();
+
+    // Lock scroll when modal is open
     useEffect(() => {
         if (isOpen) {
             document.body.classList.add('overflow-hidden');
@@ -81,8 +84,8 @@ const CarRentalModal = ({
     if (loading || !carData) {
         return createPortal(
             <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
-                <div className="bg-white p-8 rounded-lg shadow-lg text-center text-lg font-semibold">
-                    Loading vehicle information...
+                <div className="bg-white p-8 rounded-lg shadow-lg text-center">
+                    <BlinkBlur color="#16a34a" size="medium" text="Loading vehicle information" textColor="#374151" />
                 </div>
             </div>,
             typeof window !== "undefined" ? document.body : null
