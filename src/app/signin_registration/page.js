@@ -147,88 +147,91 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!validateForm()) return;
+  e.preventDefault();
+  if (!validateForm()) return;
 
-    setIsLoading(true);
-    setAuthMessage({ show: false, message: "", success: false });    try {
-      if (isLogin) {
-        // Use custom auth API for login
-        const response = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'login',
-            phone: formData.phone,
-            password: formData.password
-          }),
-        });        const data = await response.json();
-        if (response.ok && data.success) {
-          // Store user data in localStorage
-          localStorage.setItem('user', JSON.stringify(data.user));
-          
-          setAuthMessage({
-            show: true,
-            message: "Login successful! Redirecting...",
-            success: true,
-          });
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 2500);
-        } else {
-          setAuthMessage({
-            show: true,
-            message: data.error || "Phone number or password is incorrect.",
-            success: false,
-          });
-          setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
-        }
-      } else {
-        // Registration logic (keep your custom API call for registration)
-        const response = await fetch('/api/auth', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            action: 'register',
-            phone: formData.phone,
-            password: formData.password,
-            name: formData.name
-          }),
-        });        const data = await response.json();
-        if (response.ok && data.success) {
-          // Store user data in localStorage after successful registration
-          localStorage.setItem('user', JSON.stringify(data.user));
-          
-          setAuthMessage({
-            show: true,
-            message: 'Account created successfully!',
-            success: true,
-          });
-          setTimeout(() => {
-            setAuthMessage({ show: false, message: "", success: false });
-            // Redirect to home instead of switching to login
-            window.location.href = "/";
-          }, 2500);
-        } else {
-          setAuthMessage({
-            show: true,
-            message: data.error || 'Registration failed. Please try again.',
-            success: false,
-          });
-          setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
-        }
-      }
-    } catch (error) {
-      setAuthMessage({
-        show: true,
-        message: 'Network error. Please check your connection and try again.',
-        success: false,
+  setIsLoading(true);
+  setAuthMessage({ show: false, message: "", success: false });
+
+  try {
+    if (isLogin) {
+      // Login logic
+      const response = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'login',
+          phone: formData.phone,
+          password: formData.password
+        }),
       });
-      setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
-    } finally {
-      setIsLoading(false);
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setAuthMessage({
+          show: true,
+          message: "Login successful! Redirecting...",
+          success: true,
+        });
+        setTimeout(() => {
+          window.location.href = "/";
+        }, 2500);
+      } else {
+        setAuthMessage({
+          show: true,
+          message: data.error || "Phone number or password is incorrect.",
+          success: false,
+        });
+        setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
+      }
+    } else {
+      // Registration logic (fixed key names)
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name,
+          phone: formData.phone,
+          password: formData.password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+        setAuthMessage({
+          show: true,
+          message: 'Account created successfully!',
+          success: true,
+        });
+        setTimeout(() => {
+          setAuthMessage({ show: false, message: "", success: false });
+          window.location.href = "/";
+        }, 2500);
+      } else {
+        setAuthMessage({
+          show: true,
+          message: data.error || 'Registration failed. Please try again.',
+          success: false,
+        });
+        setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
+      }
     }
-  };
+  } catch (error) {
+    setAuthMessage({
+      show: true,
+      message: 'Network error. Please check your connection and try again.',
+      success: false,
+    });
+    setTimeout(() => setAuthMessage({ show: false, message: "", success: false }), 2500);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   // Placeholder for social login (not implemented yet)
   const handleSocialLogin = async (provider) => {
     setAuthMessage({ 
@@ -1006,26 +1009,6 @@ export default function LoginPage() {
                         {/* Divider */}
                         <div className="text-gray-400 text-2xl text-center mt-4 arrow-cycle">
                           ↓
-                        </div>
-
-                        {/* Social Login Buttons with Icons (repeated for register side for consistency) */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <button
-                            type="button"
-                            onClick={() => handleSocialLogin('google')}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                          >
-                            <Image src="/icons/google.svg" alt="Google" width={24} height={24} className="mr-2" />
-                            <span className="text-white">Google</span>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleSocialLogin('facebook')}
-                            className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition"
-                          >
-                            <Image src="/icons/facebook.svg" alt="Facebook" width={24} height={24} className="mr-2" />
-                            <span className="text-white">Facebook</span>
-                          </button>
                         </div>
 
                         {/* Toggle Mode */}
