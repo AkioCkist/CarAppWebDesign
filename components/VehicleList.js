@@ -284,7 +284,7 @@ function VehicleCard({ vehicle, onBookClick, onFavoriteToggle, isFavorite }) {
               : 'hover:from-green-600 hover:to-green-700 hover:shadow-md'
               } active:scale-95 active:shadow-inner`}
           >            <span className="flex items-center justify-center gap-2">
-              Book Now
+              More Details
               <svg
                 className={`w-4 h-4 transition-transform duration-300 ${isHovered ? 'translate-x-1' : ''
                   }`}

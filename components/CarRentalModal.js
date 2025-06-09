@@ -149,7 +149,7 @@ const CarRentalModal = ({
                     <h2 className="text-xl font-semibold text-gray-900">Vehicle Details</h2>
                     <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
-                        onClick={onClose} 
+                        onClick={onClose}
                         aria-label="Close">
                         <X className="w-4 h-4 text-gray-600" />
                     </button>
@@ -239,7 +239,12 @@ const CarRentalModal = ({
                             <div >
                                 <div className="font-semibold text-lg text-gray-900 mb-3">Features</div>
                                 <div className="grid grid-cols-2 gap-4 mb-3">                                    <div className="flex items-center gap-2">
-                                    <img src="/icons/IconDetailCarCard/Transmission.svg" alt="Transmission" className="w-5 h-5 text-blue-600" />
+                                    <img src={
+                                        carData.transmission &&
+                                            carData.transmission.toLowerCase().includes('manual')
+                                            ? "/icons/IconDetailCarCard/Transmission.svg"
+                                            : "/icons/IconDetailCarCard/transmissionautomatic.svg"
+                                    } alt="Transmission" className="w-5 h-5 text-blue-600" />
                                     <div>
                                         <div className="text-xxs text-black font-bold">Transmission</div>
                                         <div className="text-sm text-black">{carData.transmission}</div>
