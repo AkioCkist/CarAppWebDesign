@@ -1061,7 +1061,14 @@ export default function HomePage() {
                           <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 gap-x-4 gap-y-1">
                             <div className="grid grid-cols-3 gap-2 w-full text-sm text-gray-600 mb-2">
                               <span className="flex items-center gap-2">
-                                <img src="/icons/IconDetailCarCard/Transmission.svg" alt="transmission" className="w-4 h-4" />
+                                <img
+                                  src={vehicle.transmission.toLowerCase().includes('manual')
+                                    ? "/icons/IconDetailCarCard/Transmission.svg"
+                                    : "/icons/IconDetailCarCard/transmissionautomatic.svg"
+                                  }
+                                  alt="transmission"
+                                  className="w-4 h-4"
+                                />
                                 {vehicle.transmission}
                               </span>
                               <span className="flex items-center gap-2">
@@ -1119,7 +1126,7 @@ export default function HomePage() {
                               className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
                             >
                               <span className="flex items-center justify-center gap-2">
-                                Rent now
+                                More Details
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                 </svg>
