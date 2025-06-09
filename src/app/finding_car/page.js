@@ -6,10 +6,12 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import CarRentalModal from "../../../components/CarRentalModal";
 import FilterPopup from "../../../components/FilterPopup";
+import ToastNotification from "../../../components/ToastNotification";
 import Slider from 'rc-slider';
 import 'rc-slider/assets/index.css';
 import CarLoadingScreen from '../../../components/CarLoading';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { useToast } from "../../../hooks/useToast";
 
 // Component chính - bọc bởi Suspense
 export default function Page() {
@@ -34,9 +36,11 @@ function LoadingPlaceholder() {
 
 // Di chuyển toàn bộ code hiện tại vào component riêng biệt
 function CarListingPageContent() {
-
   const searchParams = useSearchParams();
-  const router = useRouter(); function beautifyCityName(str) {
+  const router = useRouter();
+  const { toasts, removeToast, showFavoriteToast, showUnfavoriteToast } = useToast();
+
+  function beautifyCityName(str) {
     if (!str) return "";
     if (["TP.HCM", "Hà Nội", "Đà Nẵng", "Huế", "Bắc Ninh"].includes(str)) return str;
     const mapping = {
@@ -254,8 +258,10 @@ function CarListingPageContent() {
 
     if (!user || (!user.account_id && !user.id)) {
       // Show login alert and redirect to signin
-      alert('Please log in to add vehicles to your favorites!');
-      router.push('/signin_registration');
+      showUnfavoriteToast('Please log in to add vehicles to your favorites!');
+      setTimeout(() => {
+        router.push('/signin_registration');
+      }, 2000);
       return;
     }
 
@@ -286,16 +292,16 @@ function CarListingPageContent() {
         throw new Error(result.error || 'Failed to toggle favorite');
       }
 
-      // Show success alert
+      // Show success toast
       if (result.action === 'added') {
-        alert('🚗 Vehicle added to your favorites!');
+        showFavoriteToast('🚗 Vehicle added to your favorites!');
       } else {
-        alert('Vehicle removed from favorites.');
+        showUnfavoriteToast('Vehicle removed from favorites');
       }
 
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      alert('Failed to update favorites. Please try again.');
+      showUnfavoriteToast('Failed to update favorites. Please try again.');
 
       // Revert optimistic update on error
       setFavorites(prev =>
@@ -605,6 +611,9 @@ function CarListingPageContent() {
 
   return (
     <div className="min-h-screen bg-gray-50 relative">
+      {/* Toast Notifications */}
+      <ToastNotification toasts={toasts} removeToast={removeToast} />
+
       <Header />
       <div className="h-21 bg-gray-800/95"></div>
       <div className="bg-white shadow-sm border-b">

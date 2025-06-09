@@ -6,11 +6,14 @@ import Header from "../../../components/Header";
 import Footer from "../../../components/Footer";
 import VehicleList from "../../../components/VehicleList";
 import ProfileEditPanel from "../../../components/ProfileEditPanel";
+import ToastNotification from "../../../components/ToastNotification";
 import { getUserFavorites, toggleVehicleFavorite } from "../../../lib/auth-utils";
+import { useToast } from "../../../hooks/useToast";
 
 export default function UserProfilePage() {
   // MOVE ALL HOOKS TO THE TOP - BEFORE ANY CONDITIONAL LOGIC
   const router = useRouter();
+  const { toasts, removeToast, showFavoriteToast, showUnfavoriteToast } = useToast();
   const [user, setUser] = useState(null);
   const [fadeIn, setFadeIn] = useState(false);
   const [showFade, setShowFade] = useState(true);
@@ -245,7 +248,7 @@ export default function UserProfilePage() {
     // Check for user ID with flexible field checking
     const userId = user?.account_id || user?.id;
     if (!userId) {
-      alert('Please log in to manage favorites');
+      showUnfavoriteToast('Please log in to manage favorites');
       return;
     }
 
@@ -257,16 +260,18 @@ export default function UserProfilePage() {
           // Refresh favorites from server to get complete vehicle data
           const updatedFavorites = await getUserFavorites(userId);
           setFavoriteCars(updatedFavorites);
+          showFavoriteToast('🚗 Vehicle added to your favorites!');
         } else {
           // Remove from local state
           setFavoriteCars(prev => prev.filter(car => car.id !== vehicleId));
+          showUnfavoriteToast('Vehicle removed from favorites');
         }
       } else {
-        alert('Failed to update favorite status');
+        showUnfavoriteToast('Failed to update favorite status');
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      alert('An error occurred while updating favorites');
+      showUnfavoriteToast('An error occurred while updating favorites');
     }
   };
 
@@ -346,6 +351,9 @@ export default function UserProfilePage() {
 
   return (
     <div className="font-sans bg-gray-50 text-gray-900 min-h-screen relative">
+      {/* Toast Notifications */}
+      <ToastNotification toasts={toasts} removeToast={removeToast} />
+
       {/* White fade-in overlay */}
       {showFade && (
         <div
