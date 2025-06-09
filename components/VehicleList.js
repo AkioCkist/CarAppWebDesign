@@ -307,7 +307,8 @@ export default function VehicleList({
   noResultType,
   noResultFilter,
   onBookClick,
-  isLoading = false // Thêm prop isLoading
+  isLoading = false, // Thêm prop isLoading
+  searchData // <-- Accept searchData prop
 }) {
   const [vehicles, setVehicles] = useState(vehiclesProp || []);
   const [isMounted, setIsMounted] = useState(false);
@@ -399,6 +400,7 @@ export default function VehicleList({
         onClose={handleCloseModal}
         carData={selectedCar}
         loading={loadingDetail}
+        searchData={searchData} // Pass searchData to modal
       />
     </>
   );

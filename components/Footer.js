@@ -21,7 +21,7 @@ export default function Footer() {
             variants={fadeVariant}
             initial="hidden"
             animate="visible"
-            className="text-white py-12 mt-20 relative overflow-hidden"
+            className="text-white py-12 relative overflow-hidden"
         >
             <div className="absolute inset-0 z-0">
                 <Image

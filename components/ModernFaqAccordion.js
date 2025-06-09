@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { ChevronDown, FileText, Car, CreditCard, MapPin, Calendar, Shield, Users, AlertCircle, Phone, Search, X } from 'lucide-react';
+import Header from './Header';
+import Footer from './Footer';
 
 export default function ImprovedFaqAccordion({ faqData }) {
   const [openIndex, setOpenIndex] = useState(null);
@@ -305,180 +307,184 @@ Payment and pricing details:
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 text-white">
-        <div className="max-w-6xl mx-auto px-6 py-16 text-center">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-green-100 text-xl mb-8">Find answers to common questions about car rental in Vietnam</p>
-          
-          {/* Search Bar */}
-          <div className="max-w-md mx-auto relative">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search questions..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-12 py-4 rounded-xl text-gray-900 placeholder-gray-500 border border-white focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50 shadow-xl bg-white"
-              />
-              {searchTerm && (
-                <button
-                  onClick={clearSearch}
-                  className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              )}
+    <>
+      <Header />
+      <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 pb-0"> 
+        {/* Header */}
+        <div className="bg-gradient-to-r from-green-400 via-green-500 to-emerald-600 text-white pt-24"> {/* Added pt-24 for header spacing */}
+          <div className="max-w-6xl mx-auto px-6 py-16 text-center">
+            <h1 className="text-5xl md:text-6xl font-bold mb-4">
+              Frequently Asked Questions
+            </h1>
+            <p className="text-green-100 text-xl mb-8">Find answers to common questions about car rental in Vietnam</p>
+            
+            {/* Search Bar */}
+            <div className="max-w-md mx-auto relative">
+              <div className="relative">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
+                  type="text"
+                  placeholder="Search questions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-12 py-4 rounded-xl text-gray-900 placeholder-gray-500 border border-white focus:border-green-500 focus:outline-none focus:ring-4 focus:ring-green-300 focus:ring-opacity-50 shadow-xl bg-white"
+                />
+                {searchTerm && (
+                  <button
+                    onClick={clearSearch}
+                    className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-6xl mx-auto px-6 py-12">
-        <div className="grid lg:grid-cols-12 gap-8">
-          {/* Sidebar Navigation */}
-          <div className="lg:col-span-4">
-            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 sticky top-8">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-xl font-bold text-gray-800 flex items-center">
-                  <FileText className="w-6 h-6 mr-3 text-green-600" />
-                  Quick Navigation
-                </h3>
-                <p className="text-gray-600 text-sm mt-2">Jump to any section</p>
-              </div>
-              
-              <div className="p-6 max-h-96 overflow-y-auto">
-                <nav className="space-y-2">
-                  {filteredSections.map((section, index) => {
-                    const originalIndex = sections.findIndex(s => s.title === section.title);
-                    const isActive = openIndex === originalIndex;
-                    
-                    return (
-                      <button
-                        key={index}
-                        onClick={() => scrollToQuestion(originalIndex)}
-                        className={`w-full text-left p-4 rounded-xl text-sm transition-all duration-300 group ${
-                          isActive
-                            ? 'bg-green-100 text-green-800 shadow-md transform scale-105'
-                            : 'text-gray-700 hover:bg-green-50 hover:text-green-700'
-                        }`}
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className={`p-2 rounded-lg transition-colors duration-200 flex-shrink-0 ${
-                            isActive 
-                              ? 'bg-green-200 text-green-800' 
-                              : 'bg-gray-100 text-gray-600 group-hover:bg-green-100 group-hover:text-green-700'
-                          }`}>
-                            {section.icon}
+        <div className="max-w-6xl mx-auto px-6 py-12">
+          <div className="grid lg:grid-cols-12 gap-8">
+            {/* Sidebar Navigation */}
+            <div className="lg:col-span-4">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 sticky top-8">
+                <div className="p-6 border-b border-gray-200">
+                  <h3 className="text-xl font-bold text-gray-800 flex items-center">
+                    <FileText className="w-6 h-6 mr-3 text-green-600" />
+                    Quick Navigation
+                  </h3>
+                  <p className="text-gray-600 text-sm mt-2">Jump to any section</p>
+                </div>
+                
+                <div className="p-6 max-h-96 overflow-y-auto">
+                  <nav className="space-y-2">
+                    {filteredSections.map((section, index) => {
+                      const originalIndex = sections.findIndex(s => s.title === section.title);
+                      const isActive = openIndex === originalIndex;
+                      
+                      return (
+                        <button
+                          key={index}
+                          onClick={() => scrollToQuestion(originalIndex)}
+                          className={`w-full text-left p-4 rounded-xl text-sm transition-all duration-300 group ${
+                            isActive
+                              ? 'bg-green-100 text-green-800 shadow-md transform scale-105'
+                              : 'text-gray-700 hover:bg-green-50 hover:text-green-700'
+                          }`}
+                        >
+                          <div className="flex items-start space-x-3">
+                            <div className={`p-2 rounded-lg transition-colors duration-200 flex-shrink-0 ${
+                              isActive 
+                                ? 'bg-green-200 text-green-800' 
+                                : 'bg-gray-100 text-gray-600 group-hover:bg-green-100 group-hover:text-green-700'
+                            }`}>
+                              {section.icon}
+                            </div>
+                            <span className="font-medium leading-tight">{section.title}</span>
                           </div>
-                          <span className="font-medium leading-tight">{section.title}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </nav>
+                        </button>
+                      );
+                    })}
+                  </nav>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Main Content */}
-          <div className="lg:col-span-8">
-            <div ref={contentRef} className="space-y-6">
-              {filteredSections.length === 0 && searchTerm ? (
-                <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-                  <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
-                  <p className="text-gray-600">Try adjusting your search terms or browse all questions above.</p>
-                  <button
-                    onClick={clearSearch}
-                    className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                  >
-                    Clear Search
-                  </button>
-                </div>
-              ) : (
-                filteredSections.map((section, index) => {
-                  const originalIndex = sections.findIndex(s => s.title === section.title);
-                  const isOpen = openIndex === originalIndex;
-                  
-                  return (
-                    <div
-                      key={originalIndex}
-                      id={`question-${originalIndex}`}
-                      className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-2xl"
+            {/* Main Content */}
+            <div className="lg:col-span-8">
+              <div ref={contentRef} className="space-y-6">
+                {filteredSections.length === 0 && searchTerm ? (
+                  <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
+                    <Search className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No results found</h3>
+                    <p className="text-gray-600">Try adjusting your search terms or browse all questions above.</p>
+                    <button
+                      onClick={clearSearch}
+                      className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
                     >
-                      <button
-                        className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
-                        onClick={() => toggleAccordion(originalIndex)}
+                      Clear Search
+                    </button>
+                  </div>
+                ) : (
+                  filteredSections.map((section, index) => {
+                    const originalIndex = sections.findIndex(s => s.title === section.title);
+                    const isOpen = openIndex === originalIndex;
+                    
+                    return (
+                      <div
+                        key={originalIndex}
+                        id={`question-${originalIndex}`}
+                        className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-2xl"
                       >
-                        <div className="flex items-center space-x-4">
-                          <div className="p-3 rounded-xl bg-green-100 text-green-600 flex-shrink-0">
-                            {section.icon}
+                        <button
+                          className="w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-200"
+                          onClick={() => toggleAccordion(originalIndex)}
+                        >
+                          <div className="flex items-center space-x-4">
+                            <div className="p-3 rounded-xl bg-green-100 text-green-600 flex-shrink-0">
+                              {section.icon}
+                            </div>
+                            <div>
+                              <h3 className="text-lg font-bold text-gray-900">
+                                {section.title}
+                              </h3>
+                            </div>
                           </div>
-                          <div>
-                            <h3 className="text-lg font-bold text-gray-900">
-                              {section.title}
-                            </h3>
+                          <div className={`transition-transform duration-300 ${
+                            isOpen ? 'rotate-180' : ''
+                          }`}>
+                            <ChevronDown className="w-6 h-6 text-gray-400" />
                           </div>
-                        </div>
-                        <div className={`transition-transform duration-300 ${
-                          isOpen ? 'rotate-180' : ''
+                        </button>
+                        
+                        <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                          isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
                         }`}>
-                          <ChevronDown className="w-6 h-6 text-gray-400" />
-                        </div>
-                      </button>
-                      
-                      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                        isOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
-                      }`}>
-                        <div className="px-8 pb-8 border-t border-gray-100">
-                          <div className="pt-6 text-gray-700 leading-relaxed">
-                            {renderContent(section.content)}
+                          <div className="px-8 pb-8 border-t border-gray-100">
+                            <div className="pt-6 text-gray-700 leading-relaxed">
+                              {renderContent(section.content)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })
-              )}
+                    );
+                  })
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Stats Section */}
-        <div className="mt-16 bg-white rounded-2xl shadow-xl p-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Car className="w-8 h-8 text-white" />
+          {/* Stats Section */}
+          <div className="mt-16 bg-white rounded-2xl shadow-xl p-8 mb-0"> {/* Added mb-0 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Car className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-2xl font-bold text-gray-900 mb-2">500+</h4>
+                <p className="text-gray-600">Vehicles Available</p>
+                <p className="text-sm text-gray-500 mt-1">Across Vietnam</p>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-2">500+</h4>
-              <p className="text-gray-600">Vehicles Available</p>
-              <p className="text-sm text-gray-500 mt-1">Across Vietnam</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="w-8 h-8 text-white" />
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Shield className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-2xl font-bold text-gray-900 mb-2">Full</h4>
+                <p className="text-gray-600">Insurance Coverage</p>
+                <p className="text-sm text-gray-500 mt-1">Comprehensive protection</p>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-2">Full</h4>
-              <p className="text-gray-600">Insurance Coverage</p>
-              <p className="text-sm text-gray-500 mt-1">Comprehensive protection</p>
-            </div>
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <CreditCard className="w-8 h-8 text-white" />
+              <div className="text-center">
+                <div className="w-16 h-16 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <CreditCard className="w-8 h-8 text-white" />
+                </div>
+                <h4 className="text-2xl font-bold text-gray-900 mb-2">Easy</h4>
+                <p className="text-gray-600">Online Booking</p>
+                <p className="text-sm text-gray-500 mt-1">Simple reservation process</p>
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-2">Easy</h4>
-              <p className="text-gray-600">Online Booking</p>
-              <p className="text-sm text-gray-500 mt-1">Simple reservation process</p>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <Footer />
+    </>
   );
 }

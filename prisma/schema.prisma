@@ -16,9 +16,9 @@ datasource db {
 
 model accounts {
   account_id   Int      @id @default(autoincrement())
-  username     String   @unique @db.VarChar(50)
-  phone_number String?  @unique @db.VarChar(20)
-  password     String   @db.VarChar(255)
+  username     String
+  phone_number String   @unique
+  password     String
   created_at   DateTime @default(now())
 
   // Relations

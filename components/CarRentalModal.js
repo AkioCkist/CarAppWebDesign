@@ -66,9 +66,11 @@ const CarRentalModal = ({
 }) => {
     const [additionalInsurance, setAdditionalInsurance] = useState(false);
     const [selectedImage, setSelectedImage] = useState(0);
+
     const router = useRouter();
 
     // Lock scroll when modal is open
+
     useEffect(() => {
         if (isOpen) {
             document.body.classList.add('overflow-hidden');
@@ -86,6 +88,7 @@ const CarRentalModal = ({
             <div className="fixed inset-0 z-[9999] bg-black/50 flex items-center justify-center">
                 <div className="bg-white p-8 rounded-lg shadow-lg text-center">
                     <BlinkBlur color="#16a34a" size="medium" text="Loading vehicle information" textColor="#374151" />
+
                 </div>
             </div>,
             typeof window !== "undefined" ? document.body : null
@@ -361,6 +364,7 @@ const CarRentalModal = ({
                             <button
                                 className="mt-4 w-full py-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700 transition"
                                 onClick={() => {
+                                    // Use buildBookingUrl to include all search data in URL
                                     router.push(buildBookingUrl());
                                     onClose && onClose();
                                 }}>
