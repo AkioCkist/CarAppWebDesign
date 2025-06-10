@@ -255,14 +255,14 @@ export default function AboutUs() {
           
           <div className="grid md:grid-cols-3 gap-8 text-lg">
             {[
-              { icon: Phone, text: "+987654321", delay: "delay-500" },
-              { icon: Mail, text: "whalexek@gmail.com", delay: "delay-600" },
+              { icon: Phone, text: "+84 0236 3738 399", delay: "delay-500" },
+              { icon: Mail, text: "contact@whalexe.com", delay: "delay-600" },
               { icon: MapPin, text: "158A Le Loi, Hai Chau, Da Nang", delay: "delay-700" }
             ].map((contact, index) => (
               <div key={index} className={`group transition-all duration-1000 ${contact.delay} transform ${
                 isVisible.contact ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'
               }`}>
-                <div className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white/10 hover:border-green-400/30 hover:bg-white/10 transition-all duration-500 group-hover:scale-105">
+                <div className="bg-white/5 backdrop-blur-sm p-8 rounded-2xl border border-white/10 hover:border-green-400/30 hover:bg-white/10 transition-all duration-500 group-hover:scale-105 min-h-[200px] flex items-center justify-center">
                   <div className="flex flex-col items-center">
                     <div className="bg-green-600/20 p-4 rounded-full mb-4 group-hover:bg-green-600/30 transition-colors duration-300">
                       <contact.icon className="w-8 h-8 text-green-400 group-hover:scale-110 transition-transform duration-300" />
