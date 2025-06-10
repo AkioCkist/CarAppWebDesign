@@ -146,6 +146,7 @@ const pdfStyles = StyleSheet.create({
 const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
   <Document>
     <Page size="A4" style={pdfStyles.page}>
+      {/* Update header with booking ID */}
       <View style={pdfStyles.header}>
         <Text style={pdfStyles.companyName}>CAR RENTAL</Text>
         <Text style={pdfStyles.companyInfo}>WHALE XE vehicle rental service</Text>
@@ -226,30 +227,46 @@ const TicketPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [booking, setBooking] = useState(null);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     try {
-      const encodedData = searchParams.get('data');
-      if (encodedData) {
-        const decodedData = JSON.parse(decodeURIComponent(encodedData));
-        setBooking(decodedData);
-      } else {
-        // If no data, redirect back to booking
-        router.push('/booking');
+      const data = searchParams.get('data');
+      if (!data) throw new Error('No booking data found');
+      
+      const decodedData = JSON.parse(decodeURIComponent(data));
+      // Accept new structure from CarBookingPage
+      if (!decodedData.car || !decodedData.searchData) {
+        throw new Error('Invalid booking data');
       }
-    } catch (error) {
-      console.error('Error parsing booking data:', error);
-      router.push('/booking');
+      
+      setBooking(decodedData);
+      setError(null);
+    } catch (err) {
+      console.error('Error parsing booking data:', err);
+      setError(err.message);
+      // Redirect after 3 seconds on error
+      setTimeout(() => router.push('/booking_car'), 3000);
     }
   }, [searchParams, router]);
 
-  // If booking data is not loaded yet, show loading state
+  if (error) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-xl">
+          <div className="text-red-500 mb-4 text-xl">⚠️ {error}</div>
+          <p className="text-gray-600">Redirecting to booking page...</p>
+        </div>
+      </main>
+    );
+  }
+
   if (!booking) {
     return (
-      <main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
+      <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-4 border-green-500 border-t-transparent mb-4"></div>
-          <p className="text-green-800">Loading booking details...</p>
+          <p className="text-green-800">Loading your booking details...</p>
         </div>
       </main>
     );
