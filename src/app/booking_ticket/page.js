@@ -3,12 +3,12 @@
 import { Barlow_Condensed, Oswald } from 'next/font/google';
 import { Car, Calendar, MapPin, Users, Star, CheckCircle, ArrowLeft, Download } from 'lucide-react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react'; // Import Suspense
 import { PDFDownloadLink, Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
 
-// Register PDF renderer with font family
+// --- Fonts and Styles ---
 Font.register({
   family: 'Roboto',
   fonts: [
@@ -23,8 +23,6 @@ Font.register({
   ],
 });
 
-// --- Fonts ---
-// Using fonts that capture the bold, condensed style of the reference image
 const oswald = Oswald({
   subsets: ['latin'],
   weight: ['700'],
@@ -35,53 +33,52 @@ const barlow = Barlow_Condensed({
   weight: ['400', '700'],
 });
 
-// PDF styles
 const pdfStyles = StyleSheet.create({
   page: {
     padding: 30,
     backgroundColor: '#f0fdf4',
-    fontFamily: 'Roboto'  // Updated from Helvetica
+    fontFamily: 'Roboto'
   },
   header: {
     backgroundColor: '#ffffff',
-    padding: 15, // Reduced from 20
+    padding: 15,
     borderRadius: 16,
-    marginBottom: 15, // Reduced from 20
+    marginBottom: 15,
     borderWidth: 1,
     borderColor: '#22c55e'
   },
   companyName: {
     fontSize: 20,
     fontWeight: 'bold',
-    fontFamily: 'Roboto',  // Added explicit font family
+    fontFamily: 'Roboto',
     color: '#000000',
-    marginBottom: 6, // Reduced from 8
+    marginBottom: 6,
     textAlign: 'center'
   },
   companyInfo: {
     fontSize: 8,
-    fontFamily: 'Roboto',  // Added explicit font family
-    marginBottom: 3, // Reduced from 4
-    color: '#666666', // Unaccented gray
+    fontFamily: 'Roboto',
+    marginBottom: 3,
+    color: '#666666',
     textAlign: 'center'
   },
   documentTitle: {
-    fontSize: 14, // Reduced from 18
+    fontSize: 14,
     fontWeight: 'bold',
     textAlign: 'right',
-    marginBottom: 15 // Reduced from 20
+    marginBottom: 15
   },
   section: {
     marginBottom: 15
   },
   sectionTitle: {
-    backgroundColor: '#22c55e', // Changed from #8B0000 to green
+    backgroundColor: '#22c55e',
     color: 'white',
-    padding: 6, // Reduced from 8
-    borderRadius: 6, // Reduced from 8
-    fontSize: 10, // Reduced from 12
+    padding: 6,
+    borderRadius: 6,
+    fontSize: 10,
     fontWeight: 'bold',
-    marginBottom: 8 // Reduced from 10
+    marginBottom: 8
   },
   table: {
     marginTop: 10,
@@ -105,10 +102,10 @@ const pdfStyles = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: '#999'
   },
-  col1: { width: '40%', fontSize: 9 }, // Added fontSize
-  col2: { width: '20%', textAlign: 'center', fontSize: 9 }, // Added fontSize
-  col3: { width: '20%', textAlign: 'right', fontSize: 9 }, // Added fontSize
-  col4: { width: '20%', textAlign: 'right', fontSize: 9 }, // Added fontSize
+  col1: { width: '40%', fontSize: 9 },
+  col2: { width: '20%', textAlign: 'center', fontSize: 9 },
+  col3: { width: '20%', textAlign: 'right', fontSize: 9 },
+  col4: { width: '20%', textAlign: 'right', fontSize: 9 },
   infoBlock: {
     backgroundColor: '#ffffff',
     padding: 12,
@@ -118,11 +115,11 @@ const pdfStyles = StyleSheet.create({
     borderColor: '#dcfce7'
   },
   label: {
-    fontSize: 8, // Reduced from 10
+    fontSize: 8,
     color: '#666'
   },
   value: {
-    fontSize: 9, // Reduced from 11
+    fontSize: 9,
     marginTop: 2
   },
   totalSection: {
@@ -168,16 +165,15 @@ const pdfStyles = StyleSheet.create({
   },
   customerValue: {
     fontSize: 9,
-    fontFamily: 'Roboto',  // Added explicit font family
+    fontFamily: 'Roboto',
     color: '#000'
   },
 });
 
-// PDF Document Component
+// --- PDF Document Component ---
 const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
   <Document>
     <Page size="A4" style={pdfStyles.page}>
-      {/* Update header with booking ID */}
       <View style={pdfStyles.header}>
         <Text style={pdfStyles.companyName}>CAR RENTAL</Text>
         <Text style={pdfStyles.companyInfo}>WHALE XE vehicle rental service</Text>
@@ -186,7 +182,6 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
       </View>
       <Text style={pdfStyles.documentTitle}>TAX INVOICE</Text>
 
-      {/* Invoice Info */}
       <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         <View style={{ flex: 1, marginLeft: 20 }}>
           <View style={pdfStyles.infoBlock}>
@@ -200,7 +195,6 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
         </View>
       </View>
 
-      {/* Add Customer Information section after the invoice info */}
       <View style={pdfStyles.customerInfo}>
         <View style={pdfStyles.customerBlock}>
           <Text style={pdfStyles.customerLabel}>Customer Name:</Text>
@@ -216,7 +210,6 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
         </View>
       </View>
 
-      {/* Items Table */}
       <View style={pdfStyles.table}>
         <View style={pdfStyles.tableHeader}>
           <Text style={pdfStyles.col1}>Items</Text>
@@ -232,7 +225,6 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
         </View>
       </View>
 
-      {/* Total Section */}
       <View style={pdfStyles.totalSection}>
         <View style={pdfStyles.totalRow}>
           <Text>Taxable Amount</Text>
@@ -248,7 +240,6 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
         </View>
       </View>
 
-      {/* Footer */}
       <View style={pdfStyles.footer}>
         <View>
           <Text style={{ fontSize: 10, marginBottom: 30 }}>Customer Signature</Text>
@@ -263,44 +254,49 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
   </Document>
 );
 
-const TicketPage = () => {
+// This new component handles all the client-side logic and rendering
+const BookingTicket = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [booking, setBooking] = useState(null);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const data = searchParams.get('data');
+    if (!data) {
+      setError('No booking data found in URL.');
+      const timer = setTimeout(() => router.push('/booking_car'), 3000);
+      return () => clearTimeout(timer); // Cleanup timer on unmount
+    }
+    
     try {
-      const data = searchParams.get('data');
-      if (!data) throw new Error('No booking data found');
-      
       const decodedData = JSON.parse(decodeURIComponent(data));
-      // Accept new structure from CarBookingPage
       if (!decodedData.car || !decodedData.searchData) {
-        throw new Error('Invalid booking data');
+        throw new Error('The booking data is incomplete or invalid.');
       }
-      
       setBooking(decodedData);
       setError(null);
     } catch (err) {
-      console.error('Error parsing booking data:', err);
-      setError(err.message);
-      // Redirect after 3 seconds on error
-      setTimeout(() => router.push('/booking_car'), 3000);
+      console.error('Failed to parse booking data:', err);
+      setError('Failed to load booking details. Data might be corrupted.');
+      const timer = setTimeout(() => router.push('/booking_car'), 3000);
+      return () => clearTimeout(timer); // Cleanup timer on unmount
     }
   }, [searchParams, router]);
 
+  // Loading State
   if (error) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
         <div className="text-center p-8 bg-white rounded-2xl shadow-xl">
           <div className="text-red-500 mb-4 text-xl">⚠️ {error}</div>
-          <p className="text-gray-600">Redirecting to booking page...</p>
+          <p className="text-gray-600">Redirecting to the booking page shortly...</p>
         </div>
       </main>
     );
   }
 
+  // Error State
   if (!booking) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
@@ -311,8 +307,8 @@ const TicketPage = () => {
       </main>
     );
   }
-
-  // --- Derived Data ---
+  
+  // --- Helper Functions ---
   const getDayCount = () => {
     const { pickupDate, dropoffDate } = booking.searchData;
     if (!pickupDate || !dropoffDate) return 1;
@@ -327,6 +323,7 @@ const TicketPage = () => {
     return amount.toLocaleString('vi-VN') + ' VND';
   };
 
+  // --- Derived Data ---
   const rentalDays = getDayCount();
   const pricePerDay = booking.car.base_price;
   const rentalPrice = pricePerDay * rentalDays;
@@ -536,6 +533,15 @@ const TicketPage = () => {
       </div>
       <Footer className="w-full mt-auto" />
     </main>
+  );
+};
+
+// The main page component now uses Suspense to wrap the client-side component
+const TicketPage = () => {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading Booking Details...</div>}>
+      <BookingTicket />
+    </Suspense>
   );
 };
 
