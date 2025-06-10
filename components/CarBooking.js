@@ -15,27 +15,27 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   // Chuẩn hóa dữ liệu xe đã chọn
   const normalizedCar = selectedCar
     ? {
-        id: selectedCar.vehicle_id || selectedCar.id,
-        name: selectedCar.name || '',
-        type: selectedCar.vehicle_type || selectedCar.type || '',
-        seats: selectedCar.seats || '',
-        transmission: selectedCar.transmission || '',
-        fuel: selectedCar.fuel_type || selectedCar.fuel || '',
-        price: selectedCar.base_price || selectedCar.price || 0,
-        base_price: selectedCar.base_price || selectedCar.price || 0,
-        imageUrl: selectedCar.image
-          ? (typeof selectedCar.image === 'string'
-              ? selectedCar.image
-              : null)
-          : (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0
-              ? selectedCar.vehicle_images[0].image_url
-              : null),
-        features: (selectedCar.features || selectedCar.amenities?.map(a => a.name) || []).slice(0, 5),
-        rating: selectedCar.rating || 5,
-        trips: selectedCar.total_trips || selectedCar.trips || 0,
-        location: selectedCar.location || '',
-        description: selectedCar.description || '',
-      }
+      id: selectedCar.vehicle_id || selectedCar.id,
+      name: selectedCar.name || '',
+      type: selectedCar.vehicle_type || selectedCar.type || '',
+      seats: selectedCar.seats || '',
+      transmission: selectedCar.transmission || '',
+      fuel: selectedCar.fuel_type || selectedCar.fuel || '',
+      price: selectedCar.base_price || selectedCar.price || 0,
+      base_price: selectedCar.base_price || selectedCar.price || 0,
+      imageUrl: selectedCar.image
+        ? (typeof selectedCar.image === 'string'
+          ? selectedCar.image
+          : null)
+        : (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0
+          ? selectedCar.vehicle_images[0].image_url
+          : null),
+      features: (selectedCar.features || selectedCar.amenities?.map(a => a.name) || []).slice(0, 5),
+      rating: selectedCar.rating || 5,
+      trips: selectedCar.total_trips || selectedCar.trips || 0,
+      location: selectedCar.location || '',
+      description: selectedCar.description || '',
+    }
     : null;
 
   const [searchData, setSearchData] = useState({
@@ -62,7 +62,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   const searchParams = useSearchParams();
 
-  const MAX_PRICE = 999999999.99; // Maximum value for numeric(10,2)
+  const MAX_PRICE = 9999999999999.99; // Maximum value for numeric(15,2)
 
   // Tự động fill thông tin tìm kiếm nếu đã có preFilledSearchData
   useEffect(() => {
@@ -97,17 +97,17 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     if (!searchData.pickupDate || !searchData.dropoffDate || !normalizedCar?.price) {
       return 0;
     }
-    
+
     const startDate = new Date(`${searchData.pickupDate}T${searchData.pickupTime || '00:00'}`);
     const endDate = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime || '00:00'}`);
-    
+
     if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
       return 0;
     }
-    
+
     const timeDiff = endDate.getTime() - startDate.getTime();
     const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    
+
     const totalPrice = normalizedCar.price * Math.max(days, 1);
     return Math.min(totalPrice, MAX_PRICE);
   };
@@ -118,7 +118,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   const validateStep1 = () => {
     const newErrors = {};
-    
+
     if (!searchData.pickupLocation?.trim()) {
       newErrors.pickupLocation = 'Please enter pickup location';
     }
@@ -142,21 +142,21 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     if (searchData.pickupDate && searchData.dropoffDate && searchData.pickupTime && searchData.dropoffTime) {
       const pickupDateTime = new Date(`${searchData.pickupDate}T${searchData.pickupTime}`);
       const dropoffDateTime = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime}`);
-      
+
       if (isNaN(pickupDateTime.getTime()) || isNaN(dropoffDateTime.getTime())) {
         newErrors.pickupDate = 'Invalid date or time format';
       } else if (dropoffDateTime <= pickupDateTime) {
         newErrors.dropoffDate = 'Dropoff date and time must be after pickup date and time';
       }
     }
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = () => {
     const newErrors = {};
-    
+
     if (!userInfo.fullName.trim()) {
       newErrors.fullName = 'Please enter your full name';
     }
@@ -193,7 +193,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     }
   };
 
- const handleBookingComplete = async () => {
+  const handleBookingComplete = async () => {
     setIsSubmitting(true);
     setErrors({});
 
@@ -306,9 +306,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   const CarImage = ({ className = "w-16 h-16 object-cover rounded-xl" }) => {
     if (!normalizedCar?.imageUrl) return null;
     return (
-      <img 
-        src={normalizedCar.imageUrl} 
-        alt={normalizedCar.name} 
+      <img
+        src={normalizedCar.imageUrl}
+        alt={normalizedCar.name}
         className={className}
       />
     );
@@ -338,17 +338,15 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
           <div className="flex items-center space-x-4">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ${
-                  currentStep >= step 
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg scale-110' 
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ${currentStep >= step
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg scale-110'
                     : 'bg-gray-300'
-                } ${currentStep === step ? 'ring-4 ring-green-200' : ''}`}>
+                  } ${currentStep === step ? 'ring-4 ring-green-200' : ''}`}>
                   {currentStep > step ? <CheckCircle className="w-6 h-6" /> : step}
                 </div>
                 {step < 3 && (
-                  <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300 ${
-                    currentStep > step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-300'
-                  }`}></div>
+                  <div className={`w-20 h-2 mx-3 rounded-full transition-all duration-300 ${currentStep > step ? 'bg-gradient-to-r from-green-500 to-emerald-500' : 'bg-gray-300'
+                    }`}></div>
                 )}
               </div>
             ))}
@@ -419,7 +417,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 </div>
                 Trip Information
               </h2>
-              
+
               <div className="space-y-8">
                 <div className="grid md:grid-cols-2 gap-8">
                   <div>
@@ -429,11 +427,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     </label>
                     <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
-                        errors.pickupLocation 
-                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.pickupLocation
+                          ? 'border-red-300 focus:border-red-500 bg-red-50'
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                      }`}
+                        }`}
                       value={searchData.pickupLocation}
                       onChange={(e) =>
                         setSearchData((prev) => ({ ...prev, pickupLocation: e.target.value }))
@@ -443,7 +440,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <p className="text-red-500 text-sm mt-1">{errors.pickupLocation}</p>
                     )}
                   </div>
-                  
+
                   <div>
                     <label className="block text-green-700 font-semibold mb-3 text-lg">
                       <MapPin className="inline w-5 h-5 mr-2" />
@@ -451,15 +448,14 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     </label>
                     <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
-                        errors.dropoffLocation 
-                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.dropoffLocation
+                          ? 'border-red-300 focus:border-red-500 bg-red-50'
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                      }`}
+                        }`}
                       value={searchData.dropoffLocation}
                       onChange={(e) => {
-                        setSearchData({...searchData, dropoffLocation: e.target.value});
-                        if (errors.dropoffLocation) setErrors({...errors, dropoffLocation: ''});
+                        setSearchData({ ...searchData, dropoffLocation: e.target.value });
+                        if (errors.dropoffLocation) setErrors({ ...errors, dropoffLocation: '' });
                       }}
                     />
                     {errors.dropoffLocation && (
@@ -480,11 +476,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <input
                           type="date"
                           min={new Date().toISOString().split('T')[0]}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
-                            errors.pickupDate 
-                              ? 'border-red-300 focus:border-red-500' 
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.pickupDate
+                              ? 'border-red-300 focus:border-red-500'
                               : 'border-green-200 focus:border-green-500'
-                          }`}
+                            }`}
                           value={searchData.pickupDate} // <-- Thêm dòng này để auto fill
                           onChange={(e) => {
                             setSearchData(prev => ({ ...prev, pickupDate: e.target.value }));
@@ -495,20 +490,19 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                           <p className="text-red-500 text-sm mt-1">{errors.pickupDate}</p>
                         )}
                       </div>
-                      
+
                       <div>
                         <label className="block text-green-700 font-medium mb-2">Time</label>
                         <input
                           type="time"
                           value={searchData.pickupTime}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
-                            errors.pickupTime 
-                              ? 'border-red-300 focus:border-red-500' 
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.pickupTime
+                              ? 'border-red-300 focus:border-red-500'
                               : 'border-green-200 focus:border-green-500'
-                          }`}
+                            }`}
                           onChange={(e) => {
-                            setSearchData({...searchData, pickupTime: e.target.value});
-                            if (errors.pickupTime) setErrors({...errors, pickupTime: ''});
+                            setSearchData({ ...searchData, pickupTime: e.target.value });
+                            if (errors.pickupTime) setErrors({ ...errors, pickupTime: '' });
                           }}
                         />
                         {errors.pickupTime && (
@@ -529,35 +523,33 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <input
                           type="date"
                           min={searchData.pickupDate || new Date().toISOString().split('T')[0]}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
-                            errors.dropoffDate 
-                              ? 'border-red-300 focus:border-red-500' 
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.dropoffDate
+                              ? 'border-red-300 focus:border-red-500'
                               : 'border-green-200 focus:border-green-500'
-                          }`}
+                            }`}
                           value={searchData.dropoffDate}
                           onChange={(e) => {
-                            setSearchData({...searchData, dropoffDate: e.target.value});
-                            if (errors.dropoffDate) setErrors({...errors, dropoffDate: ''});
+                            setSearchData({ ...searchData, dropoffDate: e.target.value });
+                            if (errors.dropoffDate) setErrors({ ...errors, dropoffDate: '' });
                           }}
                         />
                         {errors.dropoffDate && (
                           <p className="text-red-500 text-sm mt-1">{errors.dropoffDate}</p>
                         )}
                       </div>
-                      
+
                       <div>
                         <label className="block text-green-700 font-medium mb-2">Time</label>
                         <input
                           type="time"
                           value={searchData.dropoffTime}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
-                            errors.dropoffTime 
-                              ? 'border-red-300 focus:border-red-500' 
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.dropoffTime
+                              ? 'border-red-300 focus:border-red-500'
                               : 'border-green-200 focus:border-green-500'
-                          }`}
+                            }`}
                           onChange={(e) => {
-                            setSearchData({...searchData, dropoffTime: e.target.value});
-                            if (errors.dropoffTime) setErrors({...errors, dropoffTime: ''});
+                            setSearchData({ ...searchData, dropoffTime: e.target.value });
+                            if (errors.dropoffTime) setErrors({ ...errors, dropoffTime: '' });
                           }}
                         />
                         {errors.dropoffTime && (
@@ -614,27 +606,26 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   Back
                 </button>
               </div>
-              
+
               <div className="space-y-6">
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-green-700 font-semibold mb-3">
                       <User className="inline w-4 h-4 mr-2" />
                       Full Name *
-                    </label>                    
-                      <input
+                    </label>
+                    <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
-                        errors.fullName 
-                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.fullName
+                          ? 'border-red-300 focus:border-red-500 bg-red-50'
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                      }`}
+                        }`}
                       placeholder="Nguyễn Văn A"
                       value={userInfo.fullName}
                       onChange={(e) => {
                         const value = e.target.value;
-                        setUserInfo({...userInfo, fullName: e.target.value});
-                        if (errors.fullName) setErrors({...errors, fullName: ''});
+                        setUserInfo({ ...userInfo, fullName: e.target.value });
+                        if (errors.fullName) setErrors({ ...errors, fullName: '' });
                       }}
                     />
                     {errors.fullName && (
@@ -648,16 +639,15 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       Phone Number *
                     </label>                    <input
                       type="tel"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
-                        errors.phone 
-                          ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.phone
+                          ? 'border-red-300 focus:border-red-500 bg-red-50'
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                      }`}
+                        }`}
                       placeholder="0123 456 789"
                       value={userInfo.phone}
                       onChange={(e) => {
-                        setUserInfo({...userInfo, phone: e.target.value});
-                        if (errors.phone) setErrors({...errors, phone: ''});
+                        setUserInfo({ ...userInfo, phone: e.target.value });
+                        if (errors.phone) setErrors({ ...errors, phone: '' });
                       }}
                     />
                     {errors.phone && (
@@ -672,16 +662,15 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     Email *
                   </label>                  <input
                     type="email"
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
-                      errors.email 
-                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.email
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                    }`}
+                      }`}
                     placeholder="example@email.com"
                     value={userInfo.email}
                     onChange={(e) => {
-                      setUserInfo({...userInfo, email: e.target.value});
-                      if (errors.email) setErrors({...errors, email: ''});
+                      setUserInfo({ ...userInfo, email: e.target.value });
+                      if (errors.email) setErrors({ ...errors, email: '' });
                     }}
                   />
                   {errors.email && (
@@ -694,17 +683,16 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <MapPin className="inline w-4 h-4 mr-2" />
                     Address *
                   </label>                  <textarea
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black resize-none ${
-                      errors.address 
-                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black resize-none ${errors.address
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                    }`}
+                      }`}
                     placeholder="123 Đường ABC, Phường XYZ, Quận/Huyện, Thành phố"
                     rows="3"
                     value={userInfo.address}
                     onChange={(e) => {
-                      setUserInfo({...userInfo, address: e.target.value});
-                      if (errors.address) setErrors({...errors, address: ''});
+                      setUserInfo({ ...userInfo, address: e.target.value });
+                      if (errors.address) setErrors({ ...errors, address: '' });
                     }}
                   />
                   {errors.address && (
@@ -718,16 +706,15 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     Driver's License Number *
                   </label>                  <input
                     type="text"
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
-                      errors.driverLicense 
-                        ? 'border-red-300 focus:border-red-500 bg-red-50' 
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.driverLicense
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                    }`}
+                      }`}
                     placeholder="123456789"
                     value={userInfo.driverLicense}
                     onChange={(e) => {
-                      setUserInfo({...userInfo, driverLicense: e.target.value});
-                      if (errors.driverLicense) setErrors({...errors, driverLicense: ''});
+                      setUserInfo({ ...userInfo, driverLicense: e.target.value });
+                      if (errors.driverLicense) setErrors({ ...errors, driverLicense: '' });
                     }}
                   />
                   {errors.driverLicense && (
@@ -785,20 +772,18 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 {/* Payment Methods */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-green-800 mb-6">Choose payment method</h3>
-                  
+
                   <div className="space-y-4">
-                    <div 
-                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
-                        paymentMethod === 'cash' 
-                          ? 'border-green-500 bg-green-50' 
+                    <div
+                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${paymentMethod === 'cash'
+                          ? 'border-green-500 bg-green-50'
                           : 'border-gray-200 hover:border-green-300'
-                      }`}
+                        }`}
                       onClick={() => setPaymentMethod('cash')}
                     >
                       <div className="flex items-center">
-                        <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
-                          paymentMethod === 'cash' ? 'border-green-500' : 'border-gray-300'
-                        }`}>
+                        <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${paymentMethod === 'cash' ? 'border-green-500' : 'border-gray-300'
+                          }`}>
                           {paymentMethod === 'cash' && <div className="w-3 h-3 bg-green-500 rounded-full"></div>}
                         </div>
                         <div className="flex items-center">
@@ -811,18 +796,16 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       </div>
                     </div>
 
-                    <div 
-                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${
-                        paymentMethod === 'bank' 
-                          ? 'border-green-500 bg-green-50' 
+                    <div
+                      className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${paymentMethod === 'bank'
+                          ? 'border-green-500 bg-green-50'
                           : 'border-gray-200 hover:border-green-300'
-                      }`}
+                        }`}
                       onClick={() => setPaymentMethod('bank')}
                     >
                       <div className="flex items-center">
-                        <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${
-                          paymentMethod === 'bank' ? 'border-green-500' : 'border-gray-300'
-                        }`}>
+                        <div className={`w-6 h-6 rounded-full border-2 mr-4 flex items-center justify-center ${paymentMethod === 'bank' ? 'border-green-500' : 'border-gray-300'
+                          }`}>
                           {paymentMethod === 'bank' && <div className="w-3 h-3 bg-green-500 rounded-full"></div>}
                         </div>
                         <div className="flex items-center">
@@ -903,7 +886,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                 {/* Order Summary */}
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-green-800 mb-6">Order Summary</h3>
-                  
+
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6">
                     {/* Car Info Summary */}
                     <div className="flex items-center mb-4">
@@ -1002,11 +985,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <button
                     onClick={handleBookingComplete}
                     disabled={isSubmitting}
-                    className={`w-full font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg flex items-center justify-center ${
-                      isSubmitting
+                    className={`w-full font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg flex items-center justify-center ${isSubmitting
                         ? 'bg-gray-400 cursor-not-allowed'
                         : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white hover:shadow-xl transform hover:scale-105'
-                    }`}
+                      }`}
                   >
                     {isSubmitting ? (
                       <>
@@ -1036,7 +1018,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
               <h3 className="font-bold text-green-800 mb-2">Comprehensive Insurance</h3>
               <p className="text-green-600 text-sm">Fully insured vehicles for your peace of mind</p>
             </div>
-            
+
             <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Users className="w-8 h-8 text-green-600" />
@@ -1044,7 +1026,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
               <h3 className="font-bold text-green-800 mb-2">24/7 Support</h3>
               <p className="text-green-600 text-sm">Our support team is always ready to assist you</p>
             </div>
-            
+
             <div className="bg-white rounded-2xl p-6 text-center shadow-lg border border-green-100">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Award className="w-8 h-8 text-green-600" />
