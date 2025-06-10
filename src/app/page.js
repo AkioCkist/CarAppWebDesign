@@ -1016,33 +1016,9 @@ export default function HomePage() {
         custom={3}
         id="renting"
         className="w-full bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 py-20 text-center"> {/* Increased max-width and padding */}
+        <div className="max-w-7xl mx-auto px-4 py-32 text-center"> {/* Increased vertical padding from py-20 to py-32 */}
           <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Our Fleet</h2> {/* Enhanced title */}
           <div className="relative">
-            {/* Navigation Arrows */}
-            <button
-              onClick={() => scrollFleet('left')}
-              className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-3 shadow-lg transition-all duration-300 ${
-                canScrollLeft ? 'opacity-100 hover:scale-110' : 'opacity-50 cursor-not-allowed'
-              } md:opacity-0 md:hover:opacity-100`}
-              disabled={!canScrollLeft}
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <button
-              onClick={() => scrollFleet('right')}
-              className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-3 shadow-lg transition-all duration-300 ${
-                canScrollRight ? 'opacity-100 hover:scale-110' : 'opacity-50 cursor-not-allowed'
-              } md:opacity-0 md:hover:opacity-100`}
-              disabled={!canScrollRight}
-            >
-              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
             {/* Scroll Hint for Mobile */}
             <div className="md:hidden flex justify-center items-center gap-2 mb-6 text-sm text-gray-500">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1055,7 +1031,7 @@ export default function HomePage() {
             </div>
 
             {/* Fleet Container with Hidden Scrollbars */}
-            <div 
+            <div
               ref={fleetScrollRef}
               className="overflow-x-auto overflow-y-hidden scrollbar-hide"
               style={{
@@ -1112,14 +1088,15 @@ export default function HomePage() {
                         ease: "easeOut"
                       }}
                     >
-                      <div className="bg-white rounded-2xl shadow-lg overflow-visible flex flex-col border border-gray-100 relative h-[600px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-3 group"> {/* Enhanced styling and size */}
+                      <div className="bg-white rounded-2xl shadow-lg overflow-visible flex flex-col border border-gray-100 relative h-[600px] w-full"> {/* Removed all hover effects */}
                         <div className="relative w-full h-80 overflow-hidden rounded-t-2xl"> {/* Larger image height, rounded corners */}
                           <img
                             src={vehicle.image}
                             alt={vehicle.name}
-                            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
+                            className="w-full h-full object-cover"
+                            // Removed hover scale effect
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0" /> {/* Removed hover opacity effect */}
                         </div>
                         <div className="p-6 flex flex-col flex-1"> {/* Increased padding */}
                           <div className="flex items-center gap-2 mb-3"> {/* Increased margin */}
@@ -1192,7 +1169,8 @@ export default function HomePage() {
                           <div className="mt-auto">
                             <button
                               onClick={() => handleBookClick(vehicle.id)}
-                              className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-105 active:scale-95" // Larger padding, text, rounded corners
+                              className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-base"
+                              // Removed hover effects
                             >
                               <span className="flex items-center justify-center gap-2">
                                 More Details
@@ -1323,23 +1301,37 @@ export default function HomePage() {
         initial="hidden"
         animate="visible"
         custom={5}
-        className="py-4 bg-gray-50">
+        className="py-2 bg-gray-50"> {/* Reduced padding from py-4 to py-2 */}
         <div className="max-w-[98vw] xl:max-w-[1170px] mx-auto px-4">
           <div className="space-y-4">
             <SimpleFaqSection />
+            
+            {/* View More FAQ Button */}
+            <div className="text-center mt-4"> {/* Reduced margin from mt-8 to mt-4 */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center gap-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold px-8 py-3 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 shadow-md hover:shadow-lg"
+              >
+                <span>View More FAQ</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </motion.button>
+            </div>
           </div>
         </div>
       </motion.section>
 
       {/* Contact Form Section */}
-      <section id="contact-us" className="py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-slate-100"> {/* Changed background, padding */}
-        <div className="max-w-xl mx-auto px-4"> {/* Reduced max-width for a more compact form */}
+      <section id="contact-us" className="py-8 sm:py-12 bg-gradient-to-br from-gray-50 to-slate-100"> {/* Reduced padding from py-12 sm:py-16 to py-8 sm:py-12 */}
+        <div className="max-w-[98vw] xl:max-w-[1170px] mx-auto px-4"> {/* Expanded to match FAQ section width */}
           <div className="text-center mb-8 sm:mb-10"> {/* Adjusted margin */}
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Get in Touch</h2> {/* Changed text */}
             <p className="text-sm sm:text-base text-gray-600">We'd love to hear from you! Send us a message and we'll respond as soon as possible.</p>
           </div>
           <form
-            className="bg-white p-6 sm:p-8 rounded-xl shadow-xl space-y-5 border border-gray-200" /* Added border, adjusted padding, shadow, spacing */
+            className="bg-white p-6 sm:p-8 rounded-xl shadow-xl space-y-5 border border-gray-200 max-w-4xl mx-auto" /* Added max-width and center alignment to match FAQ width */
             onSubmit={async e => {
               e.preventDefault();
               const form = e.target;
@@ -1388,7 +1380,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      <Footer />
+      <div className="mt-2.5"> {/* 10px top margin above footer */}
+        <Footer />
+      </div>
 
       {/* Floating Chat Bubbles */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-4">
