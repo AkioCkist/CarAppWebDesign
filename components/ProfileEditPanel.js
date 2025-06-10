@@ -1,3 +1,4 @@
+// ProfileEditPanel.js
 "use client";
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -64,11 +65,29 @@ export default function ProfileEditPanel() {
 
   const validateForm = () => {
     const newErrors = {};
-    if (!formData.username.trim()) newErrors.username = 'Username is required';
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
-    else if (!/^\+?\d{10,15}$/.test(formData.phone)) newErrors.phone = 'Please enter a valid phone number';
-    if (formData.newPassword && formData.newPassword.length < 6) newErrors.newPassword = 'Password must be at least 6 characters';
-    if (formData.newPassword && formData.newPassword !== formData.reEnterPassword) newErrors.reEnterPassword = 'Passwords do not match';
+    
+    if (!formData.username.trim()) {
+      newErrors.username = 'Username is required';
+    }
+    
+    if (!formData.phone.trim()) {
+      newErrors.phone = 'Phone number is required';
+    } else if (!/^\+?\d{10,15}$/.test(formData.phone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+    
+    if (formData.newPassword) {
+      if (formData.newPassword.length < 6) {
+        newErrors.newPassword = 'Password must be at least 6 characters';
+      }
+      
+      if (!formData.reEnterPassword) {
+        newErrors.reEnterPassword = 'Please confirm your new password';
+      } else if (formData.newPassword !== formData.reEnterPassword) {
+        newErrors.reEnterPassword = 'Passwords do not match';
+      }
+    }
+    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -76,26 +95,48 @@ export default function ProfileEditPanel() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
+    
+    // Check if user data is available
+    if (!user || !user.id) {
+      setErrors({ submit: 'User session not found. Please log in again.' });
+      return;
+    }
+
     setIsLoading(true);
     setSuccessMessage('');
 
     try {
       const updateData = {
-        account_id: accountId,
+        account_id: user.id,
         username: formData.username,
         phone_number: formData.phone,
         ...(formData.newPassword && { new_password: formData.newPassword })
       };
 
-      const response = await fetch('http://localhost/myapi/profile_update.php', {
-        method: 'POST',
+      console.log('Sending update data:', updateData);
+      console.log('Account ID:', user.id);
+      console.log('User object:', user);
+
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updateData),
       });
 
-      const result = await response.json();
+      console.log('Response status:', response.status);
+      console.log('Response ok:', response.ok);
 
-      if (response.ok && result.success) {
+      if (!response.ok) {
+        // Try to read the error response from the server
+        const errorData = await response.json(); // Assuming API always returns JSON errors
+        console.error('Non-OK response error data:', errorData);
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+      }
+
+      const result = await response.json();
+      console.log('Response result:', result);
+
+      if (result.success) {
         setSuccessMessage('Profile updated successfully!');
         setFormData(prev => ({
           ...prev,
@@ -112,18 +153,23 @@ export default function ProfileEditPanel() {
         localStorage.setItem('user', JSON.stringify(updatedUser));
         setUser(updatedUser);
 
-        await update({
-          user: {
-            name: formData.username,
-            phone: formData.phone
-          }
-        });
+        // Trigger a storage event to update other components
+        window.dispatchEvent(new Event('storage'));
       } else {
         setErrors({ submit: result.error || 'Failed to update profile' });
       }
     } catch (error) {
       console.error('Update profile error:', error);
-      setErrors({ submit: 'Network error or API issue. Please try again.' });
+      
+      // Check if it's a network error
+      if (error.message.includes('Failed to fetch')) {
+        setErrors({ submit: 'Network error. Please check your connection and try again.' });
+      } else if (error.message.includes('HTTP error!')) {
+        setErrors({ submit: error.message }); // Display specific HTTP error message
+      }
+      else {
+        setErrors({ submit: 'An unexpected error occurred. Please try again.' });
+      }
     } finally {
       setIsLoading(false);
     }
@@ -304,30 +350,6 @@ export default function ProfileEditPanel() {
             className="space-y-4"
           >
             <p className="text-gray-600 text-base">Notification settings will be available here.</p>
-          </motion.div>
-        )}
-
-        {activeTab === 'profile' && (
-          <motion.div
-            className="mt-8 border-t border-gray-200 pt-6"
-            variants={formVariants}
-            initial="hidden"
-            animate="visible"
-          >
-            <h3 className="text-xl leading-6 font-medium text-gray-900 mb-4">Link Other Accounts</h3>
-            <div className="grid grid-cols-1 gap-y-4">
-              {['Google', 'Facebook', 'GitHub', 'Discord'].map((provider) => (
-                <motion.button
-                  key={provider}
-                  onClick={() => handleLinkAccount(provider)}
-                  className="w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 text-base transition-colors"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  Link with {provider}
-                </motion.button>
-              ))}
-            </div>
           </motion.div>
         )}
       </div>

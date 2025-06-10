@@ -23,14 +23,13 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         fuel: selectedCar.fuel_type || selectedCar.fuel || '',
         price: selectedCar.base_price || selectedCar.price || 0,
         base_price: selectedCar.base_price || selectedCar.price || 0,
-        image:
-          selectedCar.image
-            ? (typeof selectedCar.image === 'string'
-                ? <img src={selectedCar.image} alt={selectedCar.name} className="w-16 h-16 object-cover rounded-xl" />
-                : selectedCar.image)
-            : (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0
-                ? <img src={selectedCar.vehicle_images[0].image_url} alt={selectedCar.name} className="w-16 h-16 object-cover rounded-xl" />
-                : null),
+        imageUrl: selectedCar.image
+          ? (typeof selectedCar.image === 'string'
+              ? selectedCar.image
+              : null)
+          : (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0
+              ? selectedCar.vehicle_images[0].image_url
+              : null),
         features: (selectedCar.features || selectedCar.amenities?.map(a => a.name) || []).slice(0, 5),
         rating: selectedCar.rating || 5,
         trips: selectedCar.total_trips || selectedCar.trips || 0,
@@ -63,6 +62,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   const searchParams = useSearchParams();
 
+  const MAX_PRICE = 99999999.99; // Maximum value for numeric(10,2)
+
   // Tự động fill thông tin tìm kiếm nếu đã có preFilledSearchData
   useEffect(() => {
     // Try to get search data from props first, then from URL
@@ -92,6 +93,29 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     console.log('Current searchData:', searchData);
   }, [searchData]);
 
+  const calculateTotal = () => {
+    if (!searchData.pickupDate || !searchData.dropoffDate || !normalizedCar?.price) {
+      return 0;
+    }
+    
+    const startDate = new Date(`${searchData.pickupDate}T${searchData.pickupTime || '00:00'}`);
+    const endDate = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime || '00:00'}`);
+    
+    if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+      return 0;
+    }
+    
+    const timeDiff = endDate.getTime() - startDate.getTime();
+    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
+    
+    const totalPrice = normalizedCar.price * Math.max(days, 1);
+    return Math.min(totalPrice, MAX_PRICE);
+  };
+
+  const formatPrice = (price) => {
+    return Number(Math.min(price, MAX_PRICE).toFixed(2));
+  };
+
   const validateStep1 = () => {
     const newErrors = {};
     
@@ -114,13 +138,15 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
       newErrors.dropoffTime = 'Please select dropoff time';
     }
 
-    // Validate dates
-    if (searchData.pickupDate && searchData.dropoffDate) {
-      const pickupDateTime = new Date(`${searchData.pickupDate}T${searchData.pickupTime || '00:00'}`);
-      const dropoffDateTime = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime || '00:00'}`);
+    // Validate dates and times
+    if (searchData.pickupDate && searchData.dropoffDate && searchData.pickupTime && searchData.dropoffTime) {
+      const pickupDateTime = new Date(`${searchData.pickupDate}T${searchData.pickupTime}`);
+      const dropoffDateTime = new Date(`${searchData.dropoffDate}T${searchData.dropoffTime}`);
       
-      if (dropoffDateTime <= pickupDateTime) {
-        newErrors.dropoffDate = 'Dropoff date must be after pickup date';
+      if (isNaN(pickupDateTime.getTime()) || isNaN(dropoffDateTime.getTime())) {
+        newErrors.pickupDate = 'Invalid date or time format';
+      } else if (dropoffDateTime <= pickupDateTime) {
+        newErrors.dropoffDate = 'Dropoff date and time must be after pickup date and time';
       }
     }
     
@@ -167,10 +193,44 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     }
   };
 
-  const handleBookingComplete = async () => {
-    setIsSubmitting(true);
-    
-    // Create a serializable version of the car data
+ const handleBookingComplete = async () => {
+  setIsSubmitting(true);
+
+  try {
+    // Validate all required data
+    if (!normalizedCar?.id) {
+      throw new Error('Car information is missing');
+    }
+
+    if (!validateStep1()) {
+      throw new Error('Please check your trip information');
+    }
+
+    if (!validateStep2()) {
+      throw new Error('Please check your personal information');
+    }
+
+    // Calculate total price
+    const totalPrice = calculateTotal();
+    console.log('Calculated total price:', totalPrice);
+
+    if (!totalPrice || totalPrice <= 0) {
+      throw new Error('Invalid total price calculation. Please check your booking dates and car price.');
+    }
+
+    // Format dates and times
+    const formatDate = (dateStr) => {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      return date.toISOString().split('T')[0];
+    };
+
+    const formatTime = (timeStr) => {
+      if (!timeStr) return null;
+      return timeStr;
+    };
+
+    // Create a serializable version of the car data for navigation
     const serializableCar = {
       ...normalizedCar,
       // Convert image React element to image URL/path
@@ -180,30 +240,124 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                : ''),
     };
 
-    // Create booking data object with serializable car data
+    // Create booking data matching the API structure
     const bookingData = {
+      action: 'create_booking',
+      vehicle_id: normalizedCar.id,
+      renter_id: Math.floor(Math.random() * 1000) + 1, // Random ID for testing
+      start_date: formatDate(searchData.pickupDate),
+      end_date: formatDate(searchData.dropoffDate),
+      start_time: formatTime(searchData.pickupTime),
+      end_time: formatTime(searchData.dropoffTime),
+      total_price: formatPrice(totalPrice),
+      discount_applied: 0,
+      final_price: formatPrice(totalPrice),
+      status: 'pending',
+      pickup_location: searchData.pickupLocation,
+      return_location: searchData.dropoffLocation,
+      renter_info: {
+        full_name: userInfo.fullName,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        address: userInfo.address,
+        driver_license: userInfo.driverLicense
+      }
+    };
+
+    // Debug log
+    console.log('Booking Data:', bookingData);
+
+    // Send request to API
+    const response = await fetch('/api/booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+    });
+
+    const result = await response.json();
+    console.log('API Response:', result);
+
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create booking');
+    }
+
+    // Update vehicle status to rented
+    const updateVehicleResponse = await fetch('/api/vehicles', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'update_status',
+        vehicle_id: normalizedCar.id,
+        status: 'rented'
+      }),
+    });
+
+    if (!updateVehicleResponse.ok) {
+      console.error('Failed to update vehicle status');
+    }
+
+    // Prepare success message data
+    const carName = normalizedCar?.name || '';
+    const carType = normalizedCar?.type || '';
+    const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
+    const rentalDays = getDayCount();
+    const pricePerDay = normalizedCar?.price ? `${formatVND(normalizedCar.price)}` : '';
+    const total = formatVND(totalPrice);
+    const vat = formatVND(Math.round(totalPrice * 0.1));
+    const totalWithVat = formatVND(Math.round(totalPrice * 1.1));
+
+    // Show success message
+    const successMessage = `🎉 Booking successful!
+
+🚗 Car: ${carName} (${carType}${carSeats ? ' • ' + carSeats : ''})
+📅 Rental: ${searchData.pickupDate} ${searchData.pickupTime} → ${searchData.dropoffDate} ${searchData.dropoffTime} (${rentalDays} day(s))
+💵 Price per day: ${pricePerDay}
+🧾 VAT (10%): ${vat}
+💰 Total: ${totalWithVat}
+
+📋 Booking ID: ${result.booking?.booking_id || 'Pending'}
+💳 Payment method: ${paymentMethod === 'cash' ? 'Pay on Pickup' : 'Bank Transfer'}
+
+📧 Details have been sent to your email.
+📞 We will contact you for confirmation within 30 minutes.`;
+
+    // Navigate to booking ticket page with all booking data
+    const navigationData = {
       car: serializableCar,
       searchData,
       userInfo,
-      paymentMethod
+      paymentMethod,
+      bookingResult: result,
+      totalPrice: totalPrice,
+      rentalDays: getDayCount(),
+      successMessage: successMessage
     };
-
-    // Encode booking data for URL
-    const encodedData = encodeURIComponent(JSON.stringify(bookingData));
     
-    // Navigate to booking ticket page with data
+    const encodedData = encodeURIComponent(JSON.stringify(navigationData));
     router.push(`/booking_ticket?data=${encodedData}`);
-  };
 
-  const calculateTotal = () => {
-    if (!searchData.pickupDate || !searchData.dropoffDate) return selectedCar.price;
-    
-    const startDate = new Date(searchData.pickupDate);
-    const endDate = new Date(searchData.dropoffDate);
-    const timeDiff = endDate.getTime() - startDate.getTime();
-    const days = Math.ceil(timeDiff / (1000 * 3600 * 24));
-    
-    return selectedCar.base_price * Math.max(days, 1);
+  } catch (error) {
+    console.error('Booking error:', error);
+    setErrors({
+      submit: error.message || 'An error occurred while booking. Please try again.'
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+    } catch (error) {
+      console.error('Booking error:', error);
+      setErrors({
+        submit: error.message || 'An error occurred while booking. Please try again.'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Format number as Vietnamese currency (e.g. 8.500.000 VND)
@@ -218,6 +372,18 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     const endDate = new Date(searchData.dropoffDate);
     const timeDiff = endDate.getTime() - startDate.getTime();
     return Math.max(1, Math.ceil(timeDiff / (1000 * 3600 * 24)));
+  };
+
+  // Render car image component
+  const CarImage = ({ className = "w-16 h-16 object-cover rounded-xl" }) => {
+    if (!normalizedCar?.imageUrl) return null;
+    return (
+      <img 
+        src={normalizedCar.imageUrl} 
+        alt={normalizedCar.name} 
+        className={className}
+      />
+    );
   };
 
   return (
@@ -289,7 +455,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-6">
                   <div className="text-5xl bg-green-50 p-4 rounded-2xl">
-                    {normalizedCar?.image}
+                    <CarImage />
                   </div>
                   <div>
                     <h3 className="text-2xl font-bold text-green-800 mb-1">{normalizedCar?.name}</h3>
@@ -340,7 +506,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     </label>
                     <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg ${
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
                         errors.pickupLocation 
                           ? 'border-red-300 focus:border-red-500 bg-red-50' 
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -362,7 +528,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     </label>
                     <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg ${
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
                         errors.dropoffLocation 
                           ? 'border-red-300 focus:border-red-500 bg-red-50' 
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -390,9 +556,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <label className="block text-green-700 font-medium mb-2">Date</label>
                         <input
                           type="date"
-                         
                           min={new Date().toISOString().split('T')[0]}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
                             errors.pickupDate 
                               ? 'border-red-300 focus:border-red-500' 
                               : 'border-green-200 focus:border-green-500'
@@ -412,7 +577,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <input
                           type="time"
                           value={searchData.pickupTime}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
                             errors.pickupTime 
                               ? 'border-red-300 focus:border-red-500' 
                               : 'border-green-200 focus:border-green-500'
@@ -440,7 +605,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <input
                           type="date"
                           min={searchData.pickupDate || new Date().toISOString().split('T')[0]}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
                             errors.dropoffDate 
                               ? 'border-red-300 focus:border-red-500' 
                               : 'border-green-200 focus:border-green-500'
@@ -461,7 +626,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                         <input
                           type="time"
                           value={searchData.dropoffTime}
-                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                          className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
                             errors.dropoffTime 
                               ? 'border-red-300 focus:border-red-500' 
                               : 'border-green-200 focus:border-green-500'
@@ -821,10 +986,12 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="bg-green-50 border border-green-200 rounded-xl p-6">
                     {/* Car Info Summary */}
                     <div className="flex items-center mb-4">
-                      <div className="text-3xl mr-4">{normalizedCar.image}</div>
+                      <div className="text-3xl mr-4">
+                        <CarImage />
+                      </div>
                       <div>
-                        <h4 className="font-semibold text-green-800">{normalizedCar.name}</h4>
-                        <p className="text-green-600 text-sm">{normalizedCar.type} • {normalizedCar.seats} seats</p>
+                        <h4 className="font-semibold text-green-800">{normalizedCar?.name}</h4>
+                        <p className="text-green-600 text-sm">{normalizedCar?.type} • {normalizedCar?.seats} seats</p>
                       </div>
                     </div>
 

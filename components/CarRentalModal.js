@@ -149,41 +149,67 @@ const CarRentalModal = ({
                     <h2 className="text-xl font-semibold text-gray-900">Vehicle Details</h2>
                     <button
                         className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors duration-200"
-                        onClick={onClose} 
+                        onClick={onClose}
                         aria-label="Close">
                         <X className="w-4 h-4 text-gray-600" />
                     </button>
-                </div>
-
-                {/* Main Content - Scrollable */}
+                </div>                {/* Main Content - Scrollable */}
                 <div className="flex-1 overflow-y-auto">
-                    {/* Photo Gallery - Full Width */}
-                    <div className="w-full h-[480px] flex gap-2 p-4">
-                        {/* Main Image */}
-                        <div className="relative rounded-lg overflow-hidden basis-[70%]">
-                            <img
-                                src={getImageUrl(gallery[selectedImage])}
-                                alt={carData.name}
-                                className="object-cover w-full h-full"
-                            />                            {/* View All Photos Button */}
-                            <button className="absolute bottom-4 right-4 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
-                                <Camera className="w-4 h-4" />
-                                View all photos
-                            </button>
-                        </div>
-                        {/* Side Images: DISPLAY ALL IMAGES */}
-                        <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">
-                            {gallery.map((img, idx) => (
-                                <button
-                                    key={idx}
-                                    className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
-                                    onClick={() => setSelectedImage(idx)}
-                                    aria-label={`Image ${idx + 1}`}
-                                    style={{ minHeight: 0, height: "calc((100% - 8px * " + (gallery.length - 1) + ") / " + gallery.length + ")" }}
-                                >
-                                    <img src={getImageUrl(img)} alt="" className="object-cover w-full h-full" />
+                    {/* Photo Gallery - Mobile: Stack, Desktop: Side by side */}
+                    <div className="w-full p-4">
+                        {/* Mobile Layout */}
+                        <div className="md:hidden">
+                            {/* Main Image */}
+                            <div className="relative rounded-lg overflow-hidden w-full h-[280px] mb-4">
+                                <img
+                                    src={getImageUrl(gallery[selectedImage])}
+                                    alt={carData.name}
+                                    className="object-cover w-full h-full"
+                                />
+                                {/* View All Photos Button */}
+                                <button className="absolute bottom-4 right-4 bg-white text-gray-700 px-3 py-2 rounded-lg shadow-md text-sm font-medium flex items-center gap-2 hover:bg-gray-50">
+                                    <Camera className="w-4 h-4" />
+                                    View all photos
                                 </button>
-                            ))}
+                            </div>
+                            {/* Thumbnail Images - Horizontal scroll */}
+                            <div className="flex gap-2 overflow-x-auto pb-2">
+                                {gallery.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        className={`flex-shrink-0 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors w-20 h-16`}
+                                        onClick={() => setSelectedImage(idx)}
+                                        aria-label={`Image ${idx + 1}`}
+                                    >
+                                        <img src={getImageUrl(img)} alt="" className="object-cover w-full h-full" />
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Desktop Layout - Original */}
+                        <div className="hidden md:flex h-[480px] gap-2">
+                            {/* Main Image */}
+                            <div className="relative rounded-lg overflow-hidden basis-[70%]">
+                                <img
+                                    src={getImageUrl(gallery[selectedImage])}
+                                    alt={carData.name}
+                                    className="object-cover w-full h-full"/>
+                            </div>
+                            {/* Side Images: DISPLAY ALL IMAGES */}
+                            <div className="flex flex-col gap-2 basis-[30%] overflow-y-auto max-h-[480px]">
+                                {gallery.map((img, idx) => (
+                                    <button
+                                        key={idx}
+                                        className={`flex-1 rounded-lg overflow-hidden border-2 ${selectedImage === idx ? "border-green-600" : "border-gray-200"} hover:border-green-400 transition-colors`}
+                                        onClick={() => setSelectedImage(idx)}
+                                        aria-label={`Image ${idx + 1}`}
+                                        style={{ minHeight: 0, height: "calc((100% - 8px * " + (gallery.length - 1) + ") / " + gallery.length + ")" }}
+                                    >
+                                        <img src={getImageUrl(img)} alt="" className="object-cover w-full h-full" />
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6 p-4 md:p-8 pt-0">
@@ -207,7 +233,12 @@ const CarRentalModal = ({
                             <div >
                                 <div className="font-semibold text-lg text-gray-900 mb-3">Features</div>
                                 <div className="grid grid-cols-2 gap-4 mb-3">                                    <div className="flex items-center gap-2">
-                                    <img src="/icons/IconDetailCarCard/Transmission.svg" alt="Transmission" className="w-5 h-5 text-blue-600" />
+                                    <img src={
+                                        carData.transmission &&
+                                            carData.transmission.toLowerCase().includes('manual')
+                                            ? "/icons/IconDetailCarCard/Transmission.svg"
+                                            : "/icons/IconDetailCarCard/transmissionautomatic.svg"
+                                    } alt="Transmission" className="w-5 h-5 text-blue-600" />
                                     <div>
                                         <div className="text-xxs text-black font-bold">Transmission</div>
                                         <div className="text-sm text-black">{carData.transmission}</div>

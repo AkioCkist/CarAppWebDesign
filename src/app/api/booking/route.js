@@ -45,6 +45,10 @@ export async function POST(request) {
             return await updateBookingStatus(body)
         }
 
+        if (action === 'create_booking') {
+            return await createBooking(body)
+        }
+
         return NextResponse.json(
             { error: 'Action không hợp lệ' },
             { status: 400 }
@@ -274,4 +278,76 @@ function formatBookingData(booking) {
     console.log('Inside formatBookingData, before return:', formattedBooking);
 
     return formattedBooking;
+}
+
+async function createBooking(data) {
+    try {
+        const {
+            vehicle_id,
+            renter_id,
+            start_date,
+            end_date,
+            start_time,
+            end_time,
+            total_price,
+            discount_applied,
+            final_price,
+            status,
+            pickup_location,
+            return_location
+        } = data;
+
+        // Validate required fields
+        if (!start_date || !end_date || !start_time || !end_time || !total_price) {
+            throw new Error('Missing required fields');
+        }
+
+        // Create Date objects for time fields, using a dummy date (e.g., 1970-01-01)
+        const parsedStartTime = new Date(`1970-01-01T${start_time}:00Z`);
+        const parsedEndTime = new Date(`1970-01-01T${end_time}:00Z`);
+
+        // Validate dates
+        if (isNaN(parsedStartTime.getTime()) || isNaN(parsedEndTime.getTime())) {
+            throw new Error('Invalid time format');
+        }
+
+        // Get the latest booking_id
+        const latestBooking = await prisma.bookings.findFirst({
+            orderBy: {
+                booking_id: 'desc'
+            }
+        });
+
+        const nextBookingId = (latestBooking?.booking_id || 0) + 1;
+
+        const booking = await prisma.bookings.create({
+            data: {
+                booking_id: nextBookingId,
+                vehicle_id: safeParseInt(vehicle_id),
+                renter_id: 18, // Sử dụng ID 18 làm mặc định
+                pickup_date: new Date(start_date),
+                pickup_time: parsedStartTime,
+                return_date: new Date(end_date),
+                return_time: parsedEndTime,
+                total_price: safeParseFloat(total_price),
+                discount_applied: safeParseFloat(discount_applied || 0),
+                final_price: safeParseFloat(final_price || total_price),
+                status: status || 'pending',
+                pickup_location: pickup_location,
+                return_location: return_location
+            }
+        });
+
+        return NextResponse.json({
+            success: true,
+            message: 'Đặt xe thành công',
+            booking: formatBookingData(booking)
+        });
+    } catch (error) {
+        console.error('createBooking Error:', error);
+        return NextResponse.json({
+            success: false,
+            error: error.message
+        }, { status: 500 });
+    }
 }
