@@ -624,12 +624,6 @@ export default function UserProfilePage() {
                     >
                       <div className="p-6 border-b border-gray-200">
                         <h3 className="text-lg font-semibold text-gray-800">All My Orders</h3>
-                        <p className="text-sm text-gray-600 mt-1">
-                          {userBookings.length > 0
-                            ? `Showing ${Math.min(5, userBookings.length)} of ${userBookings.length} orders`
-                            : 'No orders found'
-                          }
-                        </p>
                         {bookingsError && (
                           <div className="mt-2 text-red-600 text-sm">
                             Error loading orders: {bookingsError}
@@ -663,12 +657,14 @@ export default function UserProfilePage() {
                         ) : (
                           <div className="overflow-x-auto">
                             {/* Fixed height container with scroll */}
-                            <div
-                              className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
-                              style={{
-                                scrollbarWidth: 'thin',
-                                scrollbarColor: '#D1D5DB #F3F4F6'
-                              }}
+                            <div className="max-h-80 overflow-y-auto
+                              [&::-webkit-scrollbar]:w-2
+                              [&::-webkit-scrollbar-track]:rounded-full
+                              [&::-webkit-scrollbar-track]:bg-gray-100
+                              [&::-webkit-scrollbar-thumb]:rounded-full
+                              [&::-webkit-scrollbar-thumb]:bg-gray-300
+                              dark:[&::-webkit-scrollbar-track]:bg-neutral-700
+                              dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
                             >
                               <table className="w-full">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
