@@ -21,7 +21,8 @@ export default function Header() {
 
   const isCarFindingPage = pathname?.includes('/finding_car');
   const isBookingPage = pathname?.includes('/booking_car');
-  const isBookingTicketPage = pathname?.includes('/booking_ticket'); // Thêm dòng này
+  const isBookingTicketPage = pathname?.includes('/booking_ticket');
+  const isAboutUsPage = pathname?.includes('/about_us'); // Thêm dòng này
 
   useEffect(() => {
     const handleScroll = () => {
@@ -204,8 +205,8 @@ export default function Header() {
         animate={{
           ...fadeVariant.visible,
           y: isHeaderVisible ? 0 : -100,
-          // Nếu là booking_ticket thì luôn opacity 1, không hiệu ứng mờ
-          opacity: isCarFindingPage || isBookingPage || isBookingTicketPage
+          // Nếu là about_us thì luôn opacity 1, không hiệu ứng mờ
+          opacity: isCarFindingPage || isBookingPage || isBookingTicketPage || isAboutUsPage
             ? 1
             : scrollY > 5
               ? Math.max(1 - (scrollY - 5) / 5, 0.9)
@@ -219,12 +220,12 @@ export default function Header() {
         style={{
           backgroundColor: isCarFindingPage
             ? "rgba(17, 24, 39, 0.95)"
-            : isBookingPage || isBookingTicketPage
-              ? "rgba(17, 24, 39, 0.95)" // Luôn nền đậm cho booking và booking_ticket, không hiệu ứng
+            : isBookingPage || isBookingTicketPage || isAboutUsPage
+              ? "rgba(17, 24, 39, 0.95)" // Luôn nền đậm cho booking, booking_ticket và about_us, không hiệu ứng
               : scrollY > 50
                 ? "rgba(17, 24, 39, 0.9)"
                 : "rgba(17, 24, 39, " + bgOpacity + ")",
-          backdropFilter: isCarFindingPage || isBookingPage || isBookingTicketPage ? "blur(10px)" : "none",
+          backdropFilter: isCarFindingPage || isBookingPage || isBookingTicketPage || isAboutUsPage ? "blur(10px)" : "none",
         }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">

@@ -40,6 +40,7 @@ export default function AboutUs() {
   return (
     <div className="bg-white text-gray-800 overflow-hidden">
       <Header />
+      <div className="h-15 bg-gray/100"></div>
 
       {/* Hero Section */}
       <section 
