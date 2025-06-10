@@ -10,10 +10,16 @@ import Footer from '../../../components/Footer';
 
 // Register PDF renderer with font family
 Font.register({
-  family: 'Helvetica',
+  family: 'Roboto',
   fonts: [
-    { src: 'https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu4mxP.ttf', fontWeight: 'normal' },
-    { src: 'https://fonts.gstatic.com/s/roboto/v27/KFOlCnqEu92Fr1MmWUlfBBc9.ttf', fontWeight: 'bold' }
+    { 
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-light-webfont.ttf',
+      fontWeight: 'normal'
+    },
+    { 
+      src: 'https://cdnjs.cloudflare.com/ajax/libs/ink/3.1.10/fonts/Roboto/roboto-bold-webfont.ttf',
+      fontWeight: 'bold'
+    }
   ],
 });
 
@@ -32,9 +38,9 @@ const barlow = Barlow_Condensed({
 // PDF styles
 const pdfStyles = StyleSheet.create({
   page: {
-    padding: 30, // Reduced from 40
-    backgroundColor: '#f0fdf4', // Light green background
-    fontFamily: 'Helvetica'
+    padding: 30,
+    backgroundColor: '#f0fdf4',
+    fontFamily: 'Roboto'  // Updated from Helvetica
   },
   header: {
     backgroundColor: '#ffffff',
@@ -45,14 +51,16 @@ const pdfStyles = StyleSheet.create({
     borderColor: '#22c55e'
   },
   companyName: {
-    fontSize: 20, // Reduced from 24
+    fontSize: 20,
     fontWeight: 'bold',
-    color: '#000000', // Changed to black
+    fontFamily: 'Roboto',  // Added explicit font family
+    color: '#000000',
     marginBottom: 6, // Reduced from 8
     textAlign: 'center'
   },
   companyInfo: {
-    fontSize: 8, // Reduced from 10
+    fontSize: 8,
+    fontFamily: 'Roboto',  // Added explicit font family
     marginBottom: 3, // Reduced from 4
     color: '#666666', // Unaccented gray
     textAlign: 'center'
@@ -139,7 +147,30 @@ const pdfStyles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#dcfce7'
-  }
+  },
+  customerInfo: {
+    flexDirection: 'row',
+    marginBottom: 15,
+  },
+  customerBlock: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    padding: 12,
+    borderRadius: 8,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: '#dcfce7'
+  },
+  customerLabel: {
+    fontSize: 8,
+    color: '#666',
+    marginBottom: 2
+  },
+  customerValue: {
+    fontSize: 9,
+    fontFamily: 'Roboto',  // Added explicit font family
+    color: '#000'
+  },
 });
 
 // PDF Document Component
@@ -166,6 +197,22 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
             <Text style={pdfStyles.label}>Date:</Text>
             <Text style={pdfStyles.value}>{new Date().toLocaleDateString()}</Text>
           </View>
+        </View>
+      </View>
+
+      {/* Add Customer Information section after the invoice info */}
+      <View style={pdfStyles.customerInfo}>
+        <View style={pdfStyles.customerBlock}>
+          <Text style={pdfStyles.customerLabel}>Customer Name:</Text>
+          <Text style={pdfStyles.customerValue}>{booking.customer?.name || 'Guest User'}</Text>
+        </View>
+        <View style={pdfStyles.customerBlock}>
+          <Text style={pdfStyles.customerLabel}>Pickup Location:</Text>
+          <Text style={pdfStyles.customerValue}>{booking.searchData.pickupLocation}</Text>
+        </View>
+        <View style={pdfStyles.customerBlock}>
+          <Text style={pdfStyles.customerLabel}>Dropoff Location:</Text>
+          <Text style={pdfStyles.customerValue}>{booking.searchData.dropoffLocation}</Text>
         </View>
       </View>
 
