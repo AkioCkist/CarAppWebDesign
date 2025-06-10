@@ -63,10 +63,22 @@ async function getBookings(searchParams, request) {
     try {
         const userId = searchParams.get('userId')
         const status = searchParams.get('status')
+        const search = searchParams.get('search') // Get search term
         const limit = searchParams.get('limit') ? safeParseInt(searchParams.get('limit')) : undefined
         const offset = searchParams.get('offset') ? safeParseInt(searchParams.get('offset')) : undefined
 
         let whereClause = {}
+
+        // Add search filter if search term is provided
+        if (search) {
+            whereClause.OR = [
+                { vehicle: { name: { contains: search, mode: 'insensitive' } } },
+                { renter: { username: { contains: search, mode: 'insensitive' } } },
+                { renter: { phone_number: { contains: search, mode: 'insensitive' } } },
+                { pickup_location: { contains: search, mode: 'insensitive' } },
+                { return_location: { contains: search, mode: 'insensitive' } },
+            ];
+        }
 
         // If userId is provided, filter by that user's bookings
         if (userId) {
@@ -76,7 +88,9 @@ async function getBookings(searchParams, request) {
 
         if (status && status !== 'all') {
             whereClause.status = status;
-        } const [bookings, total] = await Promise.all([
+        }
+
+        const [bookings, total] = await Promise.all([
             prisma.bookings.findMany({
                 where: whereClause,
                 include: {

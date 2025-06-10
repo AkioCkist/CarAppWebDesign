@@ -6,6 +6,9 @@ if (process.env.NODE_ENV === 'production') {
     prisma = new PrismaClient()
 } else {
     if (!global.prisma) {
+        console.log('Initializing Prisma Client in development...');
+        console.log('DATABASE_URL:', process.env.DATABASE_URL ? 'Set' : 'Not Set');
+        console.log('DIRECT_URL:', process.env.DIRECT_URL ? 'Set' : 'Not Set');
         global.prisma = new PrismaClient({
             datasources: {
                 db: {
