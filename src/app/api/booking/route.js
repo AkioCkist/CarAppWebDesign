@@ -69,18 +69,46 @@ async function getBookings(searchParams) {
         const offset = searchParams.get('offset') ? safeParseInt(searchParams.get('offset')) : undefined
 
         let whereClause = {}
-        if (userId) whereClause.renter_id = safeParseInt(userId)
-        if (status) whereClause.status = status
+
+        // If userId is provided, filter by that user's bookings
+        if (userId) {
+            const requestedUserId = safeParseInt(userId);
+            whereClause.renter_id = requestedUserId;
+        }
+
+        if (status && status !== 'all') {
+            whereClause.status = status;
+        }
 
         // Add search filter if search term is provided
         if (search) {
-            whereClause.OR = [
-                { vehicle: { name: { contains: search, mode: 'insensitive' } } },
-                { renter: { username: { contains: search, mode: 'insensitive' } } },
-                { renter: { phone_number: { contains: search, mode: 'insensitive' } } },
-                { pickup_location: { contains: search, mode: 'insensitive' } },
-                { return_location: { contains: search, mode: 'insensitive' } },
-            ];
+            // If there are existing conditions in whereClause, we need to wrap them in an AND
+            // otherwise, simply add the OR condition for search
+            if (Object.keys(whereClause).length > 0) {
+                whereClause = {
+                    AND: [
+                        whereClause, // Existing conditions
+                        {
+                            OR: [
+                                { vehicle: { name: { contains: search, mode: 'insensitive' } } },
+                                { renter: { username: { contains: search, mode: 'insensitive' } } },
+                                { renter: { phone_number: { contains: search, mode: 'insensitive' } } },
+                                { pickup_location: { contains: search, mode: 'insensitive' } },
+                                { return_location: { contains: search, mode: 'insensitive' } },
+                            ],
+                        },
+                    ],
+                };
+            } else {
+                // No existing conditions, just add the OR for search
+                whereClause.OR = [
+                    { vehicle: { name: { contains: search, mode: 'insensitive' } } },
+                    { renter: { username: { contains: search, mode: 'insensitive' } } },
+                    { renter: { phone_number: { contains: search, mode: 'insensitive' } } },
+                    { pickup_location: { contains: search, mode: 'insensitive' } },
+                    { return_location: { contains: search, mode: 'insensitive' } },
+                ];
+            }
         }
 
         const [bookings, total] = await Promise.all([

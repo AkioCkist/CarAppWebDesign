@@ -22,15 +22,62 @@ if (process.env.NODE_ENV === 'production') {
 export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url)
-        const id = searchParams.get('id')
+        const action = searchParams.get('action')
+        const page = parseInt(searchParams.get('page')) || 1
+        const limit = parseInt(searchParams.get('limit')) || 10
+        const skip = (page - 1) * limit
+        const status = searchParams.get('status')
 
-        if (id) {
-            return await getVehicleDetail(parseInt(id))
+        if (action === 'get_all') {
+            // Build where clause
+            const whereClause = {}
+            if (status && status !== 'all') {
+                whereClause.status = status
+            }
+
+            // Get total count
+            const total = await prisma.vehicles.count({
+                where: whereClause
+            })
+
+            // Get paginated vehicles
+            const vehicles = await prisma.vehicles.findMany({
+                where: whereClause,
+                orderBy: [
+                    { rating: 'desc' },
+                    { created_at: 'desc' }
+                ],
+                skip,
+                take: limit,
+                include: {
+                    vehicle_images: {
+                        orderBy: [
+                            { is_primary: 'desc' },
+                            { display_order: 'asc' }
+                        ],
+                        take: 1
+                    },
+                    vehicle_amenity_mapping: {
+                        include: {
+                            amenity: true
+                        }
+                    }
+                }
+            })
+
+            return NextResponse.json({
+                success: true,
+                vehicles,
+                total,
+                page,
+                limit
+            })
         }
-        return await getVehicles(searchParams)
+
+        return NextResponse.json({ success: false, error: 'Invalid action' })
     } catch (error) {
-        console.error('GET Error:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('Error in vehicles API:', error)
+        return NextResponse.json({ success: false, error: error.message })
     }
 }
 
@@ -38,22 +85,27 @@ export async function GET(request) {
 export async function POST(request) {
     try {
         const body = await request.json()
-        const { action } = body
+        const { action, vehicle_id } = body
 
-        if (action === 'update_status') {
+        if (action === 'delete' && vehicle_id) {
+            await prisma.vehicles.delete({
+                where: { vehicle_id }
+            })
+
+            return NextResponse.json({ success: true })
+        } else if (action === 'update_status') {
             return await updateVehicleStatus(body)
         } else if (action === 'toggle_favorite') {
             return await toggleFavorite(body)
         }
 
-        return NextResponse.json(
-            { error: 'Action không hợp lệ' },
-            { status: 400 }
-        )
+        return NextResponse.json({ success: false, error: 'Invalid action' })
     } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('Error in vehicles API:', error)
+        return NextResponse.json({ success: false, error: error.message })
     }
 }
+
 async function getVehicles(searchParams) {
     try {
         // Xử lý tham số query
@@ -72,63 +124,63 @@ async function getVehicles(searchParams) {
         }
 
         // Price
-        const priceMin = searchParams.get('priceMin');
-        const priceMax = searchParams.get('priceMax');
+        const priceMin = searchParams.get('priceMin')
+        const priceMax = searchParams.get('priceMax')
         if (priceMin || priceMax) {
-            whereClause.base_price = {};
-            if (priceMin) whereClause.base_price.gte = parseFloat(priceMin);
-            if (priceMax) whereClause.base_price.lte = parseFloat(priceMax);
+            whereClause.base_price = {}
+            if (priceMin) whereClause.base_price.gte = parseFloat(priceMin)
+            if (priceMax) whereClause.base_price.lte = parseFloat(priceMax)
         }
 
         // Seats
-        const seats = searchParams.get('seats');
+        const seats = searchParams.get('seats')
         if (seats) {
             whereClause.seats = {
                 in: seats.split(',').map(s => parseInt(s))
-            };
+            }
         }
 
         // Fuel
-        const fuel = searchParams.get('fuel_type');
+        const fuel = searchParams.get('fuel_type')
         if (fuel) {
             whereClause.fuel_type = {
                 in: fuel.split(',').map(f => f.trim().toLowerCase())
-            };
+            }
         }
 
         // Search term
-        const search = searchParams.get('search');
+        const search = searchParams.get('search')
         if (search) {
             whereClause.OR = [
                 { name: { contains: search, mode: 'insensitive' } },
                 { description: { contains: search, mode: 'insensitive' } }
-            ];
+            ]
         }
 
         // Xử lý loại xe
-        const carType = searchParams.get('vehicle_type');
-        console.log('Filter loại xe (vehicle_type):', carType);
+        const carType = searchParams.get('vehicle_type')
+        console.log('Filter loại xe (vehicle_type):', carType)
         if (carType) {
             whereClause.vehicle_type = {
                 in: carType.split(',')
-            };
+            }
         }
 
         // Location
-        const location = searchParams.get('location');
+        const location = searchParams.get('location')
         if (location) {
             whereClause.location = {
                 contains: location,
                 mode: 'insensitive'
-            };
+            }
         }
 
         // Brand filter
-        const brand = searchParams.get('brand');
+        const brand = searchParams.get('brand')
         if (brand) {
-            const brands = brand.split(',');
+            const brands = brand.split(',')
             // Tìm kiếm các xe có tên chứa brand được chọn
-            whereClause.OR = whereClause.OR || [];
+            whereClause.OR = whereClause.OR || []
             whereClause.OR.push(
                 ...brands.map(brandName => ({
                     name: {
@@ -136,9 +188,9 @@ async function getVehicles(searchParams) {
                         mode: 'insensitive'
                     }
                 }))
-            );
+            )
         }
-        console.log('Điều kiện whereClause:', whereClause);
+        console.log('Điều kiện whereClause:', whereClause)
 
         const vehicles = await prisma.vehicles.findMany({
             where: whereClause,
