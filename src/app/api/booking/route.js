@@ -282,72 +282,102 @@ function formatBookingData(booking) {
 
 async function createBooking(data) {
     try {
-        const {
-            vehicle_id,
-            renter_id,
-            start_date,
-            end_date,
-            start_time,
-            end_time,
-            total_price,
-            discount_applied,
-            final_price,
-            status,
-            pickup_location,
-            return_location
-        } = data;
-
         // Validate required fields
-        if (!start_date || !end_date || !start_time || !end_time || !total_price) {
-            throw new Error('Missing required fields');
+        const requiredFields = [
+            'vehicle_id', 
+            'start_date', 
+            'end_date', 
+            'pickup_location',
+            'return_location',
+            'total_price',
+            'final_price'
+        ];
+
+        for (const field of requiredFields) {
+            if (!data[field]) {
+                throw new Error(`Missing required field: ${field}`);
+            }
         }
 
-        // Create Date objects for time fields, using a dummy date (e.g., 1970-01-01)
-        const parsedStartTime = new Date(`1970-01-01T${start_time}:00Z`);
-        const parsedEndTime = new Date(`1970-01-01T${end_time}:00Z`);
+        // Parse dates
+        const pickup_date = new Date(data.start_date);
+        const return_date = new Date(data.end_date);
 
-        // Validate dates
-        if (isNaN(parsedStartTime.getTime()) || isNaN(parsedEndTime.getTime())) {
-            throw new Error('Invalid time format');
+        if (isNaN(pickup_date.getTime()) || isNaN(return_date.getTime())) {
+            throw new Error('Invalid date format');
         }
 
-        // Get the latest booking_id
-        const latestBooking = await prisma.bookings.findFirst({
-            orderBy: {
-                booking_id: 'desc'
+        if (pickup_date >= return_date) {
+            throw new Error('Return date must be after pickup date');
+        }
+
+        // Start transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Check if vehicle is available
+            const vehicle = await tx.vehicles.findFirst({
+                where: {
+                    vehicle_id: safeParseInt(data.vehicle_id),
+                    status: 'available'
+                }
+            });
+
+            if (!vehicle) {
+                throw new Error('Vehicle is not available');
             }
+
+            // Get next booking ID
+            const latestBooking = await tx.bookings.findFirst({
+                orderBy: { booking_id: 'desc' }
+            });
+            const nextBookingId = (latestBooking?.booking_id || 0) + 1;
+
+            // Create booking
+            const booking = await tx.bookings.create({
+                data: {
+                    booking_id: nextBookingId,
+                    vehicle_id: safeParseInt(data.vehicle_id),
+                    renter_id: 18, // Default renter_id for now
+                    pickup_date,
+                    pickup_time: pickup_date,
+                    return_date,
+                    return_time: return_date,
+                    total_price: safeParseFloat(data.total_price),
+                    final_price: safeParseFloat(data.final_price),
+                    status: 'confirmed',
+                    pickup_location: data.pickup_location,
+                    return_location: data.return_location,
+                    created_at: new Date(),
+                    updated_at: new Date()
+                }
+            });
+
+            // Update vehicle status
+            await tx.vehicles.update({
+                where: { vehicle_id: safeParseInt(data.vehicle_id) },
+                data: { 
+                    status: 'rented',
+                    current_booking_id: nextBookingId
+                }
+            });
+
+            return booking;
         });
 
-        const nextBookingId = (latestBooking?.booking_id || 0) + 1;
-
-        const booking = await prisma.bookings.create({
-            data: {
-                booking_id: nextBookingId,
-                vehicle_id: safeParseInt(vehicle_id),
-                renter_id: 18, // Sử dụng ID 18 làm mặc định
-                pickup_date: new Date(start_date),
-                pickup_time: parsedStartTime,
-                return_date: new Date(end_date),
-                return_time: parsedEndTime,
-                total_price: safeParseFloat(total_price),
-                discount_applied: safeParseFloat(discount_applied || 0),
-                final_price: safeParseFloat(final_price || total_price),
-                status: status || 'pending',
-                pickup_location: pickup_location,
-                return_location: return_location
-            }
-        });
+        const formattedBooking = formatBookingData(result);
 
         return NextResponse.json({
             success: true,
-            message: 'Đặt xe thành công',
-            booking: formatBookingData(booking)
+            message: 'Booking created successfully',
+            booking: formattedBooking
         });
+
     } catch (error) {
-        console.error('createBooking Error:', error);
+        console.error('Booking creation error:', error);
         return NextResponse.json({
             success: false,
-            error: error.message
-        }, { status: 500 });
+            error: error.message || 'Failed to create booking'
+        }, { 
+            status: error.message.includes('not available') ? 400 : 500 
+        });
     }
 }

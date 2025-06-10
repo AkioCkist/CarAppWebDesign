@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Calendar, MapPin, Clock, User, Mail, Phone,
   CreditCard, Banknote, Car, CheckCircle, ArrowLeft,
@@ -10,6 +10,8 @@ import {
 
 // carbooking.js - Sửa lại useEffect
 const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
+  const router = useRouter();
+
   // Chuẩn hóa dữ liệu xe đã chọn
   const normalizedCar = selectedCar
     ? {
@@ -191,56 +193,44 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     }
   };
 
-  const handleBookingComplete = async () => {
+ const handleBookingComplete = async () => {
     setIsSubmitting(true);
+    setErrors({});
 
     try {
-      // Validate all required data
+      // Validate data
       if (!normalizedCar?.id) {
-        throw new Error('Car information is missing');
+        throw new Error('Invalid car selection');
       }
 
-      if (!validateStep1()) {
-        throw new Error('Please check your trip information');
+      if (!validateStep1() || !validateStep2()) {
+        setCurrentStep(1);
+        throw new Error('Please complete all required information');
       }
 
-      if (!validateStep2()) {
-        throw new Error('Please check your personal information');
-      }
-
-      // Calculate total price
       const totalPrice = calculateTotal();
-      console.log('Calculated total price:', totalPrice);
-
-      if (!totalPrice || totalPrice <= 0) {
-        throw new Error('Invalid total price calculation. Please check your booking dates and car price.');
+      if (!totalPrice || totalPrice <= 0 || totalPrice > MAX_PRICE) {
+        throw new Error('Invalid price calculation');
       }
 
-      // Format dates and times
-      const formatDate = (dateStr) => {
-        if (!dateStr) return null;
-        const date = new Date(dateStr);
-        return date.toISOString().split('T')[0];
+      // Format dates properly
+      const formatDateForAPI = (date, time) => {
+        if (!date || !time) return null;
+        return new Date(`${date}T${time}`).toISOString();
       };
 
-      const formatTime = (timeStr) => {
-        if (!timeStr) return null;
-        return timeStr;
-      };
-
-      // Create booking data matching the API structure
-      const bookingData = {
+      // Create booking payload
+      const bookingPayload = {
         action: 'create_booking',
         vehicle_id: normalizedCar.id,
-        renter_id: Math.floor(Math.random() * 1000) + 1, // Random ID for testing
-        start_date: formatDate(searchData.pickupDate),
-        end_date: formatDate(searchData.dropoffDate),
-        start_time: formatTime(searchData.pickupTime),
-        end_time: formatTime(searchData.dropoffTime),
+        start_date: formatDateForAPI(searchData.pickupDate, searchData.pickupTime),
+        end_date: formatDateForAPI(searchData.dropoffDate, searchData.dropoffTime),
         total_price: formatPrice(totalPrice),
-        discount_applied: 0,
-        final_price: formatPrice(totalPrice),
-        status: 'pending',
+        final_price: formatPrice(totalPrice * 1.1), // Including VAT
+        payment_method: paymentMethod,
+        payment_status: paymentMethod === 'cash' ? 'pending' : 'partial',
+        deposit_amount: paymentMethod === 'bank' ? formatPrice(totalPrice * 1.1 * 0.3) : 0,
+        status: 'confirmed',
         pickup_location: searchData.pickupLocation,
         return_location: searchData.dropoffLocation,
         renter_info: {
@@ -252,98 +242,48 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
         }
       };
 
-      // Debug log
-      console.log('Booking Data:', bookingData);
-
-      // Send request to API
-      const response = await fetch('/api/booking', {
+      // Create booking
+      const bookingResponse = await fetch('/api/booking', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload)
       });
 
-      const result = await response.json();
-      console.log('API Response:', result);
+      const bookingResult = await bookingResponse.json();
 
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create booking');
-      }
-
-      // Update vehicle status to rented
-      const updateVehicleResponse = await fetch('/api/vehicles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Prepare data for /booking_ticket
+      const ticketData = {
+        car: {
+          ...normalizedCar,
+          image: normalizedCar.imageUrl,
         },
-        body: JSON.stringify({
-          action: 'update_status',
-          vehicle_id: normalizedCar.id,
-          status: 'rented'
-        }),
-      });
+        searchData: {
+          pickupLocation: searchData.pickupLocation,
+          dropoffLocation: searchData.dropoffLocation,
+          pickupDate: searchData.pickupDate,
+          pickupTime: searchData.pickupTime,
+          dropoffDate: searchData.dropoffDate,
+          dropoffTime: searchData.dropoffTime,
+        },
+        customer: {
+          name: userInfo.fullName,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          address: userInfo.address,
+          driverLicense: userInfo.driverLicense
+        }
+      };
 
-      if (!updateVehicleResponse.ok) {
-        console.error('Failed to update vehicle status');
-      }
-
-      // Prepare success message data
-      const carName = normalizedCar?.name || '';
-      const carType = normalizedCar?.type || '';
-      const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
-      const rentalDays = getDayCount();
-      const pricePerDay = normalizedCar?.price ? `${formatVND(normalizedCar.price)}` : '';
-      const total = formatVND(totalPrice);
-      const vat = formatVND(Math.round(totalPrice * 0.1));
-      const totalWithVat = formatVND(Math.round(totalPrice * 1.1));
-
-      // Show success message
-      const successMessage = `🎉 Booking successful!
-
-🚗 Car: ${carName} (${carType}${carSeats ? ' • ' + carSeats : ''})
-📅 Rental: ${searchData.pickupDate} ${searchData.pickupTime} → ${searchData.dropoffDate} ${searchData.dropoffTime} (${rentalDays} day(s))
-💵 Price per day: ${pricePerDay}
-🧾 VAT (10%): ${vat}
-💰 Total: ${totalWithVat}
-
-📋 Booking ID: ${result.booking?.booking_id || 'Pending'}
-💳 Payment method: ${paymentMethod === 'cash' ? 'Pay on Pickup' : 'Bank Transfer'}
-
-📧 Details have been sent to your email.
-📞 We will contact you for confirmation within 30 minutes.`;
-
-      // Use setTimeout to ensure state updates happen after the current render cycle
-      setTimeout(() => {
-        alert(successMessage);
-        
-        // Reset form after success
-        setCurrentStep(1);
-        setSearchData({
-          pickupLocation: '',
-          dropoffLocation: '',
-          pickupDate: '',
-          pickupTime: '',
-          dropoffDate: '',
-          dropoffTime: ''
-        });
-        setUserInfo({
-          fullName: '',
-          email: '',
-          phone: '',
-          address: '',
-          driverLicense: ''
-        });
-        setPaymentMethod('cash');
-        setErrors({});
-      }, 0);
+      // Redirect to /booking_ticket with booking data (fix: use string path)
+      router.push(
+        `/booking_ticket?data=${encodeURIComponent(JSON.stringify(ticketData))}`
+      );
 
     } catch (error) {
       console.error('Booking error:', error);
       setErrors({
-        submit: error.message || 'An error occurred while booking. Please try again.'
+        submit: error.message || 'Booking failed. Please try again.'
       });
-    } finally {
       setIsSubmitting(false);
     }
   };
@@ -374,6 +314,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     );
   };
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
       {/* Header Section */}
@@ -384,17 +329,6 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
           </div>
           <h1 className="text-4xl font-bold text-green-800 mb-2">Book Your Car</h1>
           <p className="text-green-600 text-lg">Complete your booking in just 3 simple steps</p>
-        </div>
-        {/* Info Boxes */}
-        <div className="w-full max-w-4xl flex flex-col gap-2 mb-8">
-          <div className="text-sm p-4 bg-gray-100 border border-green-200 rounded-md shadow text-green-900">
-            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {formatVND(normalizedCar?.price)} /day
-          </div>
-          <div className="text-sm p-4 bg-yellow-50 border border-yellow-200 rounded-md shadow text-yellow-900">
-            <strong>Search info:</strong><br />
-            Pickup: {searchData.pickupLocation} at {searchData.pickupDate} {searchData.pickupTime}<br />
-            Dropoff: {searchData.dropoffLocation} at {searchData.dropoffDate} {searchData.dropoffTime}
-          </div>
         </div>
       </div>
       <div className="container mx-auto px-4 py-0">
@@ -550,6 +484,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                               ? 'border-red-300 focus:border-red-500' 
                               : 'border-green-200 focus:border-green-500'
                           }`}
+                          value={searchData.pickupDate} // <-- Thêm dòng này để auto fill
                           onChange={(e) => {
                             setSearchData(prev => ({ ...prev, pickupDate: e.target.value }));
                             if (errors.pickupDate) setErrors(prev => ({ ...prev, pickupDate: '' }));
@@ -685,10 +620,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <label className="block text-green-700 font-semibold mb-3">
                       <User className="inline w-4 h-4 mr-2" />
                       Full Name *
-                    </label>
-                    <input
+                    </label>                    <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                         errors.fullName 
                           ? 'border-red-300 focus:border-red-500 bg-red-50' 
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -709,10 +643,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <label className="block text-green-700 font-semibold mb-3">
                       <Phone className="inline w-4 h-4 mr-2" />
                       Phone Number *
-                    </label>
-                    <input
+                    </label>                    <input
                       type="tel"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                         errors.phone 
                           ? 'border-red-300 focus:border-red-500 bg-red-50' 
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -734,10 +667,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <label className="block text-green-700 font-semibold mb-3">
                     <Mail className="inline w-4 h-4 mr-2" />
                     Email *
-                  </label>
-                  <input
+                  </label>                  <input
                     type="email"
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                       errors.email 
                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -758,9 +690,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <label className="block text-green-700 font-semibold mb-3">
                     <MapPin className="inline w-4 h-4 mr-2" />
                     Address *
-                  </label>
-                  <textarea
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 resize-none ${
+                  </label>                  <textarea
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black resize-none ${
                       errors.address 
                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -782,10 +713,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <label className="block text-green-700 font-semibold mb-3">
                     <CreditCard className="inline w-4 h-4 mr-2" />
                     Driver's License Number *
-                  </label>
-                  <input
+                  </label>                  <input
                     type="text"
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                       errors.driverLicense 
                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
