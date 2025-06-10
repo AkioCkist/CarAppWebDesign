@@ -656,15 +656,18 @@ export default function UserProfilePage() {
                           </div>
                         ) : (
                           <div className="overflow-x-auto">
-                            {/* Fixed height container with scroll */}
-                            <div className="max-h-80 overflow-y-auto
-                              [&::-webkit-scrollbar]:w-2
+                            {/* Fixed height container with scroll - INCREASED HEIGHT */}
+                            <div className="max-h-96 overflow-y-auto overflow-x-auto
+                              [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
                               [&::-webkit-scrollbar-track]:rounded-full
-                              [&::-webkit-scrollbar-track]:bg-gray-100
+                              [&::-webkit-scrollbar-track]:bg-green-50
                               [&::-webkit-scrollbar-thumb]:rounded-full
-                              [&::-webkit-scrollbar-thumb]:bg-gray-300
-                              dark:[&::-webkit-scrollbar-track]:bg-neutral-700
-                              dark:[&::-webkit-scrollbar-thumb]:bg-neutral-500"
+                              [&::-webkit-scrollbar-thumb]:bg-green-400
+                              [&::-webkit-scrollbar-thumb:hover]:bg-green-400
+                              [&::-webkit-scrollbar-corner]:bg-green-50
+                              dark:[&::-webkit-scrollbar-track]:bg-green-900
+                              dark:[&::-webkit-scrollbar-thumb]:bg-green-500
+                              dark:[&::-webkit-scrollbar-corner]:bg-green-900"
                             >
                               <table className="w-full">
                                 <thead className="bg-gray-50 sticky top-0 z-10">
@@ -743,7 +746,7 @@ export default function UserProfilePage() {
                             </div>
 
                             {/* Scroll indicator */}
-                            {userBookings.length > 5 && (
+                            {userBookings.length > 6 && (
                               <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
                                 <div className="flex items-center justify-center text-sm text-gray-500">
                                   <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
