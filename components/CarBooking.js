@@ -194,161 +194,99 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   };
 
  const handleBookingComplete = async () => {
-  setIsSubmitting(true);
+    setIsSubmitting(true);
+    setErrors({});
 
-  try {
-    // Validate all required data
-    if (!normalizedCar?.id) {
-      throw new Error('Car information is missing');
-    }
-
-    if (!validateStep1()) {
-      throw new Error('Please check your trip information');
-    }
-
-    if (!validateStep2()) {
-      throw new Error('Please check your personal information');
-    }
-
-    // Calculate total price
-    const totalPrice = calculateTotal();
-    console.log('Calculated total price:', totalPrice);
-
-    if (!totalPrice || totalPrice <= 0) {
-      throw new Error('Invalid total price calculation. Please check your booking dates and car price.');
-    }
-
-    // Format dates and times
-    const formatDate = (dateStr) => {
-      if (!dateStr) return null;
-      const date = new Date(dateStr);
-      return date.toISOString().split('T')[0];
-    };
-
-    const formatTime = (timeStr) => {
-      if (!timeStr) return null;
-      return timeStr;
-    };
-
-    // Create a serializable version of the car data for navigation
-    const serializableCar = {
-      ...normalizedCar,
-      // Convert image React element to image URL/path
-      image: selectedCar.image || 
-             (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0 
-               ? selectedCar.vehicle_images[0].image_url 
-               : ''),
-    };
-
-    // Create booking data matching the API structure
-    const bookingData = {
-      action: 'create_booking',
-      vehicle_id: normalizedCar.id,
-      renter_id: Math.floor(Math.random() * 1000) + 1, // Random ID for testing
-      start_date: formatDate(searchData.pickupDate),
-      end_date: formatDate(searchData.dropoffDate),
-      start_time: formatTime(searchData.pickupTime),
-      end_time: formatTime(searchData.dropoffTime),
-      total_price: formatPrice(totalPrice),
-      discount_applied: 0,
-      final_price: formatPrice(totalPrice),
-      status: 'pending',
-      pickup_location: searchData.pickupLocation,
-      return_location: searchData.dropoffLocation,
-      renter_info: {
-        full_name: userInfo.fullName,
-        email: userInfo.email,
-        phone: userInfo.phone,
-        address: userInfo.address,
-        driver_license: userInfo.driverLicense
+    try {
+      // Validate data
+      if (!normalizedCar?.id) {
+        throw new Error('Invalid car selection');
       }
-    };
 
-    // Debug log
-    console.log('Booking Data:', bookingData);
+      if (!validateStep1() || !validateStep2()) {
+        setCurrentStep(1);
+        throw new Error('Please complete all required information');
+      }
 
-    // Send request to API
-    const response = await fetch('/api/booking', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(bookingData),
-    });
+      const totalPrice = calculateTotal();
+      if (!totalPrice || totalPrice <= 0 || totalPrice > MAX_PRICE) {
+        throw new Error('Invalid price calculation');
+      }
 
-    const result = await response.json();
-    console.log('API Response:', result);
+      // Format dates properly
+      const formatDateForAPI = (date, time) => {
+        if (!date || !time) return null;
+        return new Date(`${date}T${time}`).toISOString();
+      };
 
-    if (!response.ok) {
-      throw new Error(result.error || 'Failed to create booking');
-    }
-
-    // Update vehicle status to rented
-    const updateVehicleResponse = await fetch('/api/vehicles', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        action: 'update_status',
+      // Create booking payload
+      const bookingPayload = {
+        action: 'create_booking',
         vehicle_id: normalizedCar.id,
-        status: 'rented'
-      }),
-    });
+        start_date: formatDateForAPI(searchData.pickupDate, searchData.pickupTime),
+        end_date: formatDateForAPI(searchData.dropoffDate, searchData.dropoffTime),
+        total_price: formatPrice(totalPrice),
+        final_price: formatPrice(totalPrice * 1.1), // Including VAT
+        payment_method: paymentMethod,
+        payment_status: paymentMethod === 'cash' ? 'pending' : 'partial',
+        deposit_amount: paymentMethod === 'bank' ? formatPrice(totalPrice * 1.1 * 0.3) : 0,
+        status: 'confirmed',
+        pickup_location: searchData.pickupLocation,
+        return_location: searchData.dropoffLocation,
+        renter_info: {
+          full_name: userInfo.fullName,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          address: userInfo.address,
+          driver_license: userInfo.driverLicense
+        }
+      };
 
-    if (!updateVehicleResponse.ok) {
-      console.error('Failed to update vehicle status');
+      // Create booking
+      const bookingResponse = await fetch('/api/booking', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingPayload)
+      });
+
+      const bookingResult = await bookingResponse.json();
+
+      // Prepare data for /booking_ticket
+      const ticketData = {
+        car: {
+          ...normalizedCar,
+          image: normalizedCar.imageUrl,
+        },
+        searchData: {
+          pickupLocation: searchData.pickupLocation,
+          dropoffLocation: searchData.dropoffLocation,
+          pickupDate: searchData.pickupDate,
+          pickupTime: searchData.pickupTime,
+          dropoffDate: searchData.dropoffDate,
+          dropoffTime: searchData.dropoffTime,
+        },
+        customer: {
+          name: userInfo.fullName,
+          email: userInfo.email,
+          phone: userInfo.phone,
+          address: userInfo.address,
+          driverLicense: userInfo.driverLicense
+        }
+      };
+
+      // Redirect to /booking_ticket with booking data (fix: use string path)
+      router.push(
+        `/booking_ticket?data=${encodeURIComponent(JSON.stringify(ticketData))}`
+      );
+
+    } catch (error) {
+      console.error('Booking error:', error);
+      setErrors({
+        submit: error.message || 'Booking failed. Please try again.'
+      });
+      setIsSubmitting(false);
     }
-
-    // Prepare success message data
-    const carName = normalizedCar?.name || '';
-    const carType = normalizedCar?.type || '';
-    const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
-    const rentalDays = getDayCount();
-    const pricePerDay = normalizedCar?.price ? `${formatVND(normalizedCar.price)}` : '';
-    const total = formatVND(totalPrice);
-    const vat = formatVND(Math.round(totalPrice * 0.1));
-    const totalWithVat = formatVND(Math.round(totalPrice * 1.1));
-
-    // Show success message
-    const successMessage = `🎉 Booking successful!
-
-🚗 Car: ${carName} (${carType}${carSeats ? ' • ' + carSeats : ''})
-📅 Rental: ${searchData.pickupDate} ${searchData.pickupTime} → ${searchData.dropoffDate} ${searchData.dropoffTime} (${rentalDays} day(s))
-💵 Price per day: ${pricePerDay}
-🧾 VAT (10%): ${vat}
-💰 Total: ${totalWithVat}
-
-📋 Booking ID: ${result.booking?.booking_id || 'Pending'}
-💳 Payment method: ${paymentMethod === 'cash' ? 'Pay on Pickup' : 'Bank Transfer'}
-
-📧 Details have been sent to your email.
-📞 We will contact you for confirmation within 30 minutes.`;
-
-    // Navigate to booking ticket page with all booking data
-    const navigationData = {
-      car: serializableCar,
-      searchData,
-      userInfo,
-      paymentMethod,
-      bookingResult: result,
-      totalPrice: totalPrice,
-      rentalDays: getDayCount(),
-      successMessage: successMessage
-    };
-    
-    const encodedData = encodeURIComponent(JSON.stringify(navigationData));
-    router.push(`/booking_ticket?data=${encodedData}`);
-
-  } catch (error) {
-    console.error('Booking error:', error);
-    setErrors({
-      submit: error.message || 'An error occurred while booking. Please try again.'
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+  };
 
   // Format number as Vietnamese currency (e.g. 8.500.000 VND)
   const formatVND = (amount) => {
