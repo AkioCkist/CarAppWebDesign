@@ -16,13 +16,33 @@ export default function Header() {
   const [fadeOut, setFadeOut] = useState(false);
   const [bgOpacity, setBgOpacity] = useState(0);
   const [showWhiteFade, setShowWhiteFade] = useState(false);
+  const [prevScrollY, setPrevScrollY] = useState(0);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const isCarFindingPage = pathname?.includes('/finding_car');
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrollY(window.scrollY);
+      const currentScrollY = window.scrollY;
+      setScrollY(currentScrollY);
+      
+      // Header visibility logic
+      if (currentScrollY > 100) { // Only start hiding after scrolling 100px
+        if (currentScrollY > prevScrollY && currentScrollY > 200) {
+          // Scrolling down and past 200px - hide header
+          setIsHeaderVisible(false);
+        } else if (currentScrollY < prevScrollY) {
+          // Scrolling up - show header
+          setIsHeaderVisible(true);
+        }
+      } else {
+        // Near top of page - always show header
+        setIsHeaderVisible(true);
+      }
+      
+      setPrevScrollY(currentScrollY);
     };
+    
     if (!isCarFindingPage) {
       window.addEventListener("scroll", handleScroll);
     }
@@ -31,7 +51,7 @@ export default function Header() {
         window.removeEventListener("scroll", handleScroll);
       }
     };
-  }, [isCarFindingPage]);
+  }, [isCarFindingPage, prevScrollY]);
 
   const handleNavigation = (href) => {
     setFadeOut(true);
@@ -179,7 +199,15 @@ export default function Header() {
       <motion.header
         variants={fadeVariant}
         initial="hidden"
-        animate="visible"
+        animate={{
+          ...fadeVariant.visible,
+          y: isHeaderVisible ? 0 : -100,
+          opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0.9) : 1,
+        }}
+        transition={{
+          y: { duration: 0.3, ease: "easeInOut" },
+          opacity: { duration: 0.3, ease: "easeInOut" },
+        }}
         className="fixed top-0 left-0 w-full z-30 text-white"
         style={{
           backgroundColor: isCarFindingPage
@@ -187,10 +215,6 @@ export default function Header() {
             : scrollY > 50
               ? "rgba(17, 24, 39, 0.9)"
               : "rgba(17, 24, 39, " + bgOpacity + ")",
-          opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0) : 1,
-          transition: isCarFindingPage
-            ? "none"
-            : "background-color 0.5s cubic-bezier(0.4,0,0.2,1)",
           backdropFilter: isCarFindingPage ? "blur(10px)" : "none",
         }}
       >
@@ -317,7 +341,7 @@ export default function Header() {
 
                         {/* Menu items */}
                         <ul className="py-2 text-sm text-gray-700">
-                          <li><a href="/user_dashboard" className="block px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                          <li><a href="/user_dashboard" className="px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
                             <i className="fas fa-tachometer-alt w-4"></i> My Dashboard
                           </a></li>
                         </ul>

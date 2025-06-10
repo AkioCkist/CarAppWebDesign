@@ -212,6 +212,9 @@ export default function HomePage() {
   const [isPickupDropdownOpen, setIsPickupDropdownOpen] = useState(false);
   const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
   const fleetContainerRef = useRef(null);
+  const fleetScrollRef = useRef(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Instead of state and useEffect for scrollY:
   // const [scrollY, setScrollY] = useState(0);
@@ -458,6 +461,42 @@ export default function HomePage() {
     setIsModalOpen(false);
     setSelectedCar(null);
   };
+
+  // Fleet scroll functions
+  const scrollFleet = (direction) => {
+    if (fleetScrollRef.current) {
+      const scrollAmount = 400; // Adjust based on card width
+      const newScrollLeft = direction === 'left' 
+        ? fleetScrollRef.current.scrollLeft - scrollAmount
+        : fleetScrollRef.current.scrollLeft + scrollAmount;
+      
+      fleetScrollRef.current.scrollTo({
+        left: newScrollLeft,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const updateScrollButtons = () => {
+    if (fleetScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = fleetScrollRef.current;
+      setCanScrollLeft(scrollLeft > 0);
+      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  // Add scroll event listener for fleet section
+  useEffect(() => {
+    const scrollElement = fleetScrollRef.current;
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', updateScrollButtons);
+      updateScrollButtons(); // Initial check
+      
+      return () => {
+        scrollElement.removeEventListener('scroll', updateScrollButtons);
+      };
+    }
+  }, [fleetVehicles]);
 
   return isLoading ? (
     <CarLoadingScreen />
@@ -969,58 +1008,93 @@ export default function HomePage() {
         </div>
       </motion.section>
 
-      {/* Car Fleet Section - Carousel */}
+      {/* Car Fleet Section - Enhanced Carousel */}
       <motion.section
         variants={fadeVariant}
         initial="hidden"
         animate="visible"
         custom={3}
         id="renting"
-        className="w-full">
-        <div className="max-w-6xl mx-auto px-4 py-16 text-center">
-          <h2 className="text-3xl font-bold text-center mb-10">Our Fleet</h2>
+        className="w-full bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 py-20 text-center"> {/* Increased max-width and padding */}
+          <h2 className="text-4xl font-bold text-center mb-16 text-gray-800">Our Fleet</h2> {/* Enhanced title */}
           <div className="relative">
-            <div className="overflow-x-auto scrollbar-hide">
-              <ul className="flex gap-8 py-4" style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+            {/* Navigation Arrows */}
+            <button
+              onClick={() => scrollFleet('left')}
+              className={`absolute left-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-3 shadow-lg transition-all duration-300 ${
+                canScrollLeft ? 'opacity-100 hover:scale-110' : 'opacity-50 cursor-not-allowed'
+              } md:opacity-0 md:hover:opacity-100`}
+              disabled={!canScrollLeft}
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button
+              onClick={() => scrollFleet('right')}
+              className={`absolute right-2 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white border border-gray-200 rounded-full p-3 shadow-lg transition-all duration-300 ${
+                canScrollRight ? 'opacity-100 hover:scale-110' : 'opacity-50 cursor-not-allowed'
+              } md:opacity-0 md:hover:opacity-100`}
+              disabled={!canScrollRight}
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
+
+            {/* Scroll Hint for Mobile */}
+            <div className="md:hidden flex justify-center items-center gap-2 mb-6 text-sm text-gray-500">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
+              </svg>
+              <span>Swipe to explore more cars</span>
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </div>
+
+            {/* Fleet Container with Hidden Scrollbars */}
+            <div 
+              ref={fleetScrollRef}
+              className="overflow-x-auto overflow-y-hidden scrollbar-hide"
+              style={{
+                /* Hide scrollbar for Chrome, Safari and Opera */
+                WebkitScrollbar: 'none',
+                /* Hide scrollbar for IE, Edge and Firefox */
+                msOverflowStyle: 'none',
+                scrollbarWidth: 'none',
+                /* Smooth scrolling for touch devices */
+                WebkitOverflowScrolling: 'touch'
+              }}
+            >
+              <ul className="flex gap-6 py-4 px-2" style={{ listStyle: 'none', margin: 0, padding: 0 }}> {/* Reduced gap for better fit */}
                 {fleetLoading ? (
-                  // Skeleton loading for 4 cars với animation đẹp hơn
+                  // Enhanced Skeleton loading for 4 cars
                   Array.from({ length: 4 }).map((_, idx) => (
-                    <li key={idx} className="min-w-[400px] max-w-xs flex-shrink-0">
-                      <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-200 h-[520px] w-full">
+                    <li key={idx} className="min-w-[450px] max-w-[450px] flex-shrink-0"> {/* Bigger cards */}
+                      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 h-[600px] w-full"> {/* Enhanced styling */}
                         {/* Image skeleton */}
                         <div className="w-full h-80 bg-gray-200 animate-pulse relative overflow-hidden">
                           <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-shimmer"></div>
                         </div>
 
                         {/* Content skeleton */}
-                        <div className="p-4 space-y-3">
-                          {/* Title skeleton */}
-                          <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
-
-                          {/* Features skeleton */}
-                          <div className="grid grid-cols-3 gap-2">
-                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                        <div className="p-6 space-y-4"> {/* Increased padding */}
+                          <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+                          <div className="grid grid-cols-3 gap-3">
+                            <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-5 bg-gray-200 rounded animate-pulse"></div>
                           </div>
-
-                          {/* Location skeleton */}
-                          <div className="h-4 bg-gray-200 rounded animate-pulse w-3/4"></div>
-
-                          {/* Rating skeleton */}
-                          <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2"></div>
-
-                          {/* Price skeleton */}
-                          <div className="h-6 bg-gray-200 rounded animate-pulse w-2/3"></div>
-
-                          {/* Description skeleton */}
+                          <div className="h-5 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                          <div className="h-5 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                          <div className="h-7 bg-gray-200 rounded animate-pulse w-2/3"></div>
                           <div className="space-y-2">
-                            <div className="h-3 bg-gray-200 rounded animate-pulse"></div>
-                            <div className="h-3 bg-gray-200 rounded animate-pulse w-4/5"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                            <div className="h-4 bg-gray-200 rounded animate-pulse w-4/5"></div>
                           </div>
-
-                          {/* Button skeleton */}
-                          <div className="h-12 bg-gray-200 rounded animate-pulse mt-4"></div>
+                          <div className="h-14 bg-gray-200 rounded animate-pulse mt-6"></div> {/* Bigger button */}
                         </div>
                       </div>
                     </li>
@@ -1029,100 +1103,96 @@ export default function HomePage() {
                   fleetVehicles.map((vehicle, idx) => (
                     <motion.li
                       key={vehicle.id || idx}
-                      className="min-w-[320px] sm:min-w-[360px] md:min-w-[400px] max-w-xs flex-shrink-0" // Adjusted min-width for smaller screens
+                      className="min-w-[450px] max-w-[450px] flex-shrink-0" // Bigger, consistent card size
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
                         duration: 0.5,
-                        delay: idx * 0.1, // Stagger animation
+                        delay: idx * 0.1,
                         ease: "easeOut"
                       }}
                     >
-                      {/* Existing vehicle card code */}
-                      {/* Copy phần VehicleCard ở VehicleList.js vào đây */}
-                      <div
-                        className="bg-white rounded-xl shadow-md overflow-visible flex flex-col border border-gray-200 relative h-[520px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-2 group" // Added group for hover states, overflow-visible
-                      >
-                        <div className="relative w-full h-72 sm:h-80 overflow-hidden rounded-t-xl"> {/* Adjusted height for smaller cards, rounded top corners */}
+                      <div className="bg-white rounded-2xl shadow-lg overflow-visible flex flex-col border border-gray-100 relative h-[600px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-3 group"> {/* Enhanced styling and size */}
+                        <div className="relative w-full h-80 overflow-hidden rounded-t-2xl"> {/* Larger image height, rounded corners */}
                           <img
                             src={vehicle.image}
                             alt={vehicle.name}
-                            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110" // Added group-hover for image scale
+                            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> {/* Use group-hover */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                         </div>
-                        <div className="p-3 sm:p-4 flex flex-col flex-1"> {/* Adjusted padding */}
-                          <div className="flex items-center gap-2 mb-1 sm:mb-2"> {/* Adjusted margin */}
-                            <span className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-1"> {/* Adjusted text size, line-clamp */}
+                        <div className="p-6 flex flex-col flex-1"> {/* Increased padding */}
+                          <div className="flex items-center gap-2 mb-3"> {/* Increased margin */}
+                            <span className="font-bold text-lg text-gray-900 line-clamp-1"> {/* Larger font */}
                               {vehicle.name}
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 gap-x-3 sm:gap-x-4 gap-y-1"> {/* Adjusted text size, gaps, margin */}
-                            <div className="grid grid-cols-3 gap-1 sm:gap-2 w-full text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2"> {/* Adjusted text size, gaps, margin */}
-                              <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
+                          <div className="flex flex-wrap items-center text-sm text-gray-600 mb-3 gap-x-4 gap-y-2"> {/* Increased text size, margin, gaps */}
+                            <div className="grid grid-cols-3 gap-3 w-full text-sm text-gray-600 mb-3"> {/* Increased gaps, margin */}
+                              <span className="flex items-center gap-2">
                                 <img
                                   src={vehicle.transmission.toLowerCase().includes('manual')
                                     ? "/icons/IconDetailCarCard/Transmission.svg"
                                     : "/icons/IconDetailCarCard/transmissionautomatic.svg"
                                   }
                                   alt="transmission"
-                                  className="w-3 h-3 sm:w-4 sm:h-4" // Adjusted icon size
+                                  className="w-5 h-5" // Larger icons
                                 />
-                                {vehicle.transmission}
+                                <span className="text-xs">{vehicle.transmission}</span>
                               </span>
-                              <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
-                                <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
-                                {vehicle.seats} seats
+                              <span className="flex items-center gap-2">
+                                <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-5 h-5" />
+                                <span className="text-xs">{vehicle.seats} seats</span>
                               </span>
-                              <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
-                                <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
-                                {vehicle.fuel}
+                              <span className="flex items-center gap-2">
+                                <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-5 h-5" />
+                                <span className="text-xs">{vehicle.fuel}</span>
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2"> {/* Adjusted text size, margin */}
-                            <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
-                              <img src="/icons/IconDetailCarCard/location.svg" alt="location" className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" /> {/* Adjusted icon size */}
+                          <div className="flex items-center text-sm text-gray-600 mb-3"> {/* Increased margin */}
+                            <span className="flex items-center gap-2">
+                              <img src="/icons/IconDetailCarCard/location.svg" alt="location" className="w-5 h-5 text-green-500" />
                               {vehicle.location}
                             </span>
                           </div>
-                          <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3"> {/* Adjusted text size, margin */}
+                          <div className="flex items-center text-sm text-gray-600 mb-4"> {/* Increased margin */}
                             <span className="flex items-center text-yellow-500 gap-1">
-                              <svg className="w-3 h-3 sm:w-4 sm:h-4 fill-current" viewBox="0 0 20 20"> {/* Adjusted icon size */}
+                              <svg className="w-5 h-5 fill-current" viewBox="0 0 20 20"> {/* Larger icon */}
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                               {vehicle.rating}
                             </span>
-                            <span className="mx-1 sm:mx-2 text-gray-400">・</span> {/* Adjusted margin */}
+                            <span className="mx-3 text-gray-400">・</span> {/* Increased margin */}
                             <span className="flex items-center gap-1">
-                              <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
+                              <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-5 h-5" />
                               {vehicle.trips} trips
                             </span>
                           </div>
-                          <div className="flex items-baseline gap-1 sm:gap-2 mb-1 sm:mb-2"> {/* Adjusted gap, margin, items-baseline */}
-                            <span className="text-green-600 font-bold text-base sm:text-lg"> {/* Adjusted text size */}
+                          <div className="flex items-baseline gap-2 mb-3"> {/* Increased gap, margin */}
+                            <span className="text-green-600 font-bold text-xl"> {/* Larger text */}
                               {vehicle.priceDisplay}
                             </span>
                             {vehicle.oldPrice && (
-                              <span className="text-gray-400 line-through text-xs sm:text-sm"> {/* Adjusted text size */}
+                              <span className="text-gray-400 line-through text-sm">
                                 {`${(vehicle.oldPrice / 1000).toFixed(0)}K/${vehicle.pricePer}`}
                               </span>
                             )}
                           </div>
                           {vehicle.priceDiscount && (
-                            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2"> {/* Adjusted gap, margin */}
-                              <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-full font-medium"> {/* Adjusted text size, padding */}
+                            <div className="flex items-center gap-2 mb-3"> {/* Increased margin */}
+                              <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
                                 {vehicle.priceDiscount}
                               </span>
                             </div>
                           )}
-                          <div className="text-[11px] sm:text-xs text-gray-700 mb-2 sm:mb-3 line-clamp-2 h-7 sm:h-8 overflow-hidden"> {/* Adjusted text size, height, margin */}
+                          <div className="text-sm text-gray-700 mb-4 line-clamp-2 h-10 overflow-hidden"> {/* Larger text, increased margin, height */}
                             {vehicle.description}
                           </div>
                           <div className="mt-auto">
                             <button
                               onClick={() => handleBookClick(vehicle.id)}
-                              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95" // Adjusted padding, text size
+                              className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-base transition-all duration-300 transform hover:scale-105 active:scale-95" // Larger padding, text, rounded corners
                             >
                               <span className="flex items-center justify-center gap-2">
                                 More Details
