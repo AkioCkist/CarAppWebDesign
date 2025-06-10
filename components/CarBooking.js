@@ -5,12 +5,19 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Calendar, MapPin, Clock, User, Mail, Phone,
   CreditCard, Banknote, Car, CheckCircle, ArrowLeft,
-  ArrowRight, Star, Shield, Award, Users
+  ArrowRight, Star, Shield, Award, Users, ChevronDown
 } from 'lucide-react';
 
 // carbooking.js - Sửa lại useEffect
 const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   const router = useRouter();
+
+  // Danh sách các địa điểm có sẵn (giống như homepage)
+  const locations = [
+    'TP.HCM',
+    'Hà Nội',
+    'Đà Nẵng',
+  ];
 
   // Chuẩn hóa dữ liệu xe đã chọn
   const normalizedCar = selectedCar
@@ -60,6 +67,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
 
+  // State cho dropdown
+  const [showPickupDropdown, setShowPickupDropdown] = useState(false);
+  const [showDropoffDropdown, setShowDropoffDropdown] = useState(false);
+
   const searchParams = useSearchParams();
 
   const MAX_PRICE = 9999999999999.99; // Maximum value for numeric(15,2)
@@ -93,6 +104,21 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     console.log('Current searchData:', searchData);
   }, [searchData]);
 
+  // Đóng dropdown khi click bên ngoài
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest('.location-dropdown')) {
+        setShowPickupDropdown(false);
+        setShowDropoffDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const calculateTotal = () => {
     if (!searchData.pickupDate || !searchData.dropoffDate || !normalizedCar?.price) {
       return 0;
@@ -120,10 +146,10 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     const newErrors = {};
 
     if (!searchData.pickupLocation?.trim()) {
-      newErrors.pickupLocation = 'Please enter pickup location';
+      newErrors.pickupLocation = 'Please select pickup location';
     }
     if (!searchData.dropoffLocation?.trim()) {
-      newErrors.dropoffLocation = 'Please enter dropoff location';
+      newErrors.dropoffLocation = 'Please select dropoff location';
     }
     if (!searchData.pickupDate) {
       newErrors.pickupDate = 'Please select pickup date';
@@ -288,6 +314,24 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     }
   };
 
+  // Function để handle chọn địa điểm pickup
+  const handlePickupLocationSelect = (location) => {
+    setSearchData(prev => ({ ...prev, pickupLocation: location }));
+    setShowPickupDropdown(false);
+    if (errors.pickupLocation) {
+      setErrors(prev => ({ ...prev, pickupLocation: '' }));
+    }
+  };
+
+  // Function để handle chọn địa điểm dropoff
+  const handleDropoffLocationSelect = (location) => {
+    setSearchData(prev => ({ ...prev, dropoffLocation: location }));
+    setShowDropoffDropdown(false);
+    if (errors.dropoffLocation) {
+      setErrors(prev => ({ ...prev, dropoffLocation: '' }));
+    }
+  };
+
   // Format number as Vietnamese currency (e.g. 8.500.000 VND)
   const formatVND = (amount) => {
     if (typeof amount !== 'number') amount = Number(amount) || 0;
@@ -314,6 +358,47 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     );
   };
 
+  // Component LocationDropdown để tái sử dụng
+  const LocationDropdown = ({
+    value,
+    placeholder,
+    isOpen,
+    onToggle,
+    onSelect,
+    error
+  }) => (
+    <div className="location-dropdown relative">
+      <button
+        type="button"
+        onClick={onToggle}
+        className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-left flex items-center justify-between ${error
+            ? 'border-red-300 focus:border-red-500 bg-red-50'
+            : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+          }`}
+      >
+        <span className={value ? 'text-black' : 'text-gray-500'}>
+          {value || placeholder}
+        </span>
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-green-200 rounded-xl shadow-lg z-50 max-h-48 overflow-y-auto">
+          {locations.map((location) => (
+            <button
+              key={location}
+              type="button"
+              className="w-full px-4 py-3 text-left hover:bg-green-50 transition-colors duration-150 text-black border-b border-gray-100 last:border-b-0"
+              onClick={() => onSelect(location)}
+            >
+              {location}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
   // Scroll to top when step changes
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -339,8 +424,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg transition-all duration-300 ${currentStep >= step
-                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg scale-110'
-                    : 'bg-gray-300'
+                  ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg scale-110'
+                  : 'bg-gray-300'
                   } ${currentStep === step ? 'ring-4 ring-green-200' : ''}`}>
                   {currentStep > step ? <CheckCircle className="w-6 h-6" /> : step}
                 </div>
@@ -425,16 +510,13 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <MapPin className="inline w-5 h-5 mr-2" />
                       Pickup Location
                     </label>
-                    <input
-                      type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.pickupLocation
-                          ? 'border-red-300 focus:border-red-500 bg-red-50'
-                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                        }`}
+                    <LocationDropdown
                       value={searchData.pickupLocation}
-                      onChange={(e) =>
-                        setSearchData((prev) => ({ ...prev, pickupLocation: e.target.value }))
-                      }
+                      placeholder="Please select pickup location"
+                      isOpen={showPickupDropdown}
+                      onToggle={() => setShowPickupDropdown(!showPickupDropdown)}
+                      onSelect={handlePickupLocationSelect}
+                      error={errors.pickupLocation}
                     />
                     {errors.pickupLocation && (
                       <p className="text-red-500 text-sm mt-1">{errors.pickupLocation}</p>
@@ -446,17 +528,13 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       <MapPin className="inline w-5 h-5 mr-2" />
                       Dropoff Location
                     </label>
-                    <input
-                      type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.dropoffLocation
-                          ? 'border-red-300 focus:border-red-500 bg-red-50'
-                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
-                        }`}
+                    <LocationDropdown
                       value={searchData.dropoffLocation}
-                      onChange={(e) => {
-                        setSearchData({ ...searchData, dropoffLocation: e.target.value });
-                        if (errors.dropoffLocation) setErrors({ ...errors, dropoffLocation: '' });
-                      }}
+                      placeholder="Please select dropoff location"
+                      isOpen={showDropoffDropdown}
+                      onToggle={() => setShowDropoffDropdown(!showDropoffDropdown)}
+                      onSelect={handleDropoffLocationSelect}
+                      error={errors.dropoffLocation}
                     />
                     {errors.dropoffLocation && (
                       <p className="text-red-500 text-sm mt-1">{errors.dropoffLocation}</p>
@@ -477,8 +555,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                           type="date"
                           min={new Date().toISOString().split('T')[0]}
                           className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.pickupDate
-                              ? 'border-red-300 focus:border-red-500'
-                              : 'border-green-200 focus:border-green-500'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-green-200 focus:border-green-500'
                             }`}
                           value={searchData.pickupDate} // <-- Thêm dòng này để auto fill
                           onChange={(e) => {
@@ -497,8 +575,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                           type="time"
                           value={searchData.pickupTime}
                           className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.pickupTime
-                              ? 'border-red-300 focus:border-red-500'
-                              : 'border-green-200 focus:border-green-500'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-green-200 focus:border-green-500'
                             }`}
                           onChange={(e) => {
                             setSearchData({ ...searchData, pickupTime: e.target.value });
@@ -524,8 +602,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                           type="date"
                           min={searchData.pickupDate || new Date().toISOString().split('T')[0]}
                           className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.dropoffDate
-                              ? 'border-red-300 focus:border-red-500'
-                              : 'border-green-200 focus:border-green-500'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-green-200 focus:border-green-500'
                             }`}
                           value={searchData.dropoffDate}
                           onChange={(e) => {
@@ -544,8 +622,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                           type="time"
                           value={searchData.dropoffTime}
                           className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${errors.dropoffTime
-                              ? 'border-red-300 focus:border-red-500'
-                              : 'border-green-200 focus:border-green-500'
+                            ? 'border-red-300 focus:border-red-500'
+                            : 'border-green-200 focus:border-green-500'
                             }`}
                           onChange={(e) => {
                             setSearchData({ ...searchData, dropoffTime: e.target.value });
@@ -617,8 +695,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <input
                       type="text"
                       className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.fullName
-                          ? 'border-red-300 focus:border-red-500 bg-red-50'
-                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
+                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
                         }`}
                       placeholder="Nguyễn Văn A"
                       value={userInfo.fullName}
@@ -640,8 +718,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     </label>                    <input
                       type="tel"
                       className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.phone
-                          ? 'border-red-300 focus:border-red-500 bg-red-50'
-                          : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                        ? 'border-red-300 focus:border-red-500 bg-red-50'
+                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
                         }`}
                       placeholder="0123 456 789"
                       value={userInfo.phone}
@@ -663,8 +741,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   </label>                  <input
                     type="email"
                     className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.email
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      ? 'border-red-300 focus:border-red-500 bg-red-50'
+                      : 'border-green-200 focus:border-green-500 focus:bg-green-50'
                       }`}
                     placeholder="example@email.com"
                     value={userInfo.email}
@@ -684,8 +762,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     Address *
                   </label>                  <textarea
                     className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black resize-none ${errors.address
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      ? 'border-red-300 focus:border-red-500 bg-red-50'
+                      : 'border-green-200 focus:border-green-500 focus:bg-green-50'
                       }`}
                     placeholder="123 Đường ABC, Phường XYZ, Quận/Huyện, Thành phố"
                     rows="3"
@@ -707,8 +785,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   </label>                  <input
                     type="text"
                     className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${errors.driverLicense
-                        ? 'border-red-300 focus:border-red-500 bg-red-50'
-                        : 'border-green-200 focus:border-green-500 focus:bg-green-50'
+                      ? 'border-red-300 focus:border-red-500 bg-red-50'
+                      : 'border-green-200 focus:border-green-500 focus:bg-green-50'
                       }`}
                     placeholder="123456789"
                     value={userInfo.driverLicense}
@@ -776,8 +854,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <div className="space-y-4">
                     <div
                       className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${paymentMethod === 'cash'
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-green-300'
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-green-300'
                         }`}
                       onClick={() => setPaymentMethod('cash')}
                     >
@@ -798,8 +876,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
                     <div
                       className={`border-2 rounded-xl p-4 cursor-pointer transition-all duration-300 ${paymentMethod === 'bank'
-                          ? 'border-green-500 bg-green-50'
-                          : 'border-gray-200 hover:border-green-300'
+                        ? 'border-green-500 bg-green-50'
+                        : 'border-gray-200 hover:border-green-300'
                         }`}
                       onClick={() => setPaymentMethod('bank')}
                     >
@@ -986,8 +1064,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     onClick={handleBookingComplete}
                     disabled={isSubmitting}
                     className={`w-full font-bold py-5 px-8 rounded-2xl transition-all duration-300 text-xl shadow-lg flex items-center justify-center ${isSubmitting
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white hover:shadow-xl transform hover:scale-105'
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white hover:shadow-xl transform hover:scale-105'
                       }`}
                   >
                     {isSubmitting ? (
