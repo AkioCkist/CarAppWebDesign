@@ -410,18 +410,18 @@ const BookingTicket = () => {
               <div className="bg-green-50 rounded-xl p-4 border border-green-100">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                   <div>
-                    <span className="text-green-700 font-semibold block mb-1">Invoice No</span>
-                    <span className="text-green-900 font-mono">{invoiceNumber}</span>
+                    <span className="font-semibold block mb-1 text-neutral-900">Invoice No</span>
+                    <span className="font-mono text-black">{invoiceNumber}</span>
                   </div>
                   <div>
-                    <span className="text-green-700 font-semibold block mb-1">Customer Name</span>
-                    <span className="text-green-900">
+                    <span className="font-semibold block mb-1 text-neutral-900">Customer Name</span>
+                    <span className="text-black">
                       {booking.customer?.name?.trim() ? booking.customer.name : 'Guest User'}
                     </span>
                   </div>
                   <div>
-                    <span className="text-green-700 font-semibold block mb-1">Date</span>
-                    <span className="text-green-900">{bookingDate}</span>
+                    <span className="font-semibold block mb-1 text-neutral-900">Date</span>
+                    <span className="text-black">{bookingDate}</span>
                   </div>
                 </div>
               </div>
@@ -440,9 +440,9 @@ const BookingTicket = () => {
                   )}
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-green-800 mb-1">{booking.car.name}</h2>
-                  <div className="flex items-center gap-2 text-green-600 text-base">
-                    <Users className="w-4 h-4" />
+                  <h2 className="text-2xl font-bold text-black mb-1">{booking.car.name}</h2>
+                  <div className="flex items-center gap-2 text-base text-neutral-900">
+                    <Users className="w-4 h-4 text-green-600" />
                     <span>{booking.car.type} • {booking.car.seats} seats</span>
                     <span className="ml-2">{booking.car.transmission}</span>
                     <Star className="w-4 h-4 ml-2 text-yellow-400 fill-yellow-400" />
@@ -453,12 +453,12 @@ const BookingTicket = () => {
 
               {/* Car Features */}
               <div className="bg-green-50 rounded-xl p-4 border border-green-100">
-                <h3 className="text-green-700 font-semibold mb-3">Vehicle Features</h3>
+                <h3 className="font-semibold mb-3 text-neutral-900">Vehicle Features</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {booking.car.features.map((feature, index) => (
                     <div key={index} className="flex items-center gap-2 bg-white rounded-lg p-2">
                       <CheckCircle className="w-4 h-4 text-green-500" />
-                      <span className="text-green-700 text-sm">{feature}</span>
+                      <span className="text-black text-sm">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -468,15 +468,15 @@ const BookingTicket = () => {
               <div className="bg-green-50 rounded-xl p-4 border border-green-100">
                 <div className="flex items-center gap-3 mb-2">
                   <Calendar className="w-5 h-5 text-green-600" />
-                  <span className="font-semibold text-green-700">Rental Period</span>
+                  <span className="font-semibold text-neutral-900">Rental Period</span>
                 </div>
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="text-green-800 font-medium">{booking.searchData.pickupDate} {booking.searchData.pickupTime}</span>
+                    <span className="font-medium text-black">{booking.searchData.pickupDate} {booking.searchData.pickupTime}</span>
                     <span className="text-green-500 font-bold text-xl">→</span>
-                    <span className="text-green-800 font-medium">{booking.searchData.dropoffDate} {booking.searchData.dropoffTime}</span>
+                    <span className="font-medium text-black">{booking.searchData.dropoffDate} {booking.searchData.dropoffTime}</span>
                   </div>
-                  <span className="text-green-600 text-sm">({rentalDays} day(s))</span>
+                  <span className="text-neutral-900 text-sm">({rentalDays} day(s))</span>
                 </div>
               </div>
 
@@ -485,8 +485,8 @@ const BookingTicket = () => {
                 <div className="flex-1 bg-white border border-green-100 rounded-xl p-4 flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-green-600" />
                   <div>
-                    <div className="text-green-700 font-semibold">Pickup Location</div>
-                    <div className="text-green-600 text-sm">
+                    <div className="font-semibold text-neutral-900">Pickup Location</div>
+                    <div className="text-black text-sm">
                       {booking.searchData?.pickupLocation || 'N/A'}
                     </div>
                   </div>
@@ -494,8 +494,8 @@ const BookingTicket = () => {
                 <div className="flex-1 bg-white border border-green-100 rounded-xl p-4 flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-green-600" />
                   <div>
-                    <div className="text-green-700 font-semibold">Dropoff Location</div>
-                    <div className="text-green-600 text-sm">
+                    <div className="font-semibold text-neutral-900">Dropoff Location</div>
+                    <div className="text-black text-sm">
                       {booking.searchData?.dropoffLocation || 'N/A'}
                     </div>
                   </div>
@@ -507,50 +507,50 @@ const BookingTicket = () => {
           {/* Right: Pricing & Actions */}
           <div className="flex flex-col justify-between md:border-l border-green-200 bg-gradient-to-b md:bg-gradient-to-r from-green-100 to-emerald-50 rounded-b-3xl md:rounded-bl-none md:rounded-r-3xl p-6 min-w-[320px] w-full md:w-[350px]">
             <div>
-              <h3 className="font-bold text-emerald-700 text-xl mb-4 flex items-center gap-2">
+              <h3 className="font-bold text-neutral-900 text-xl mb-4 flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-green-500" />
                 Order Summary
               </h3>
               <div className="space-y-3 text-base">
                 <div className="flex justify-between">
-                  <span className="text-green-700 font-semibold">Car:</span>
-                  <span className="text-emerald-900 font-bold">{booking.car?.name || 'Car'}</span>
+                  <span className="font-semibold text-neutral-900">Car:</span>
+                  <span className="font-bold text-black">{booking.car?.name || 'Car'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700 font-semibold">Category:</span>
-                  <span className="text-emerald-900">
+                  <span className="font-semibold text-neutral-900">Category:</span>
+                  <span className="text-black">
                     {booking.car?.type || 'Type'} • {booking.car?.seats || 'N/A'} seats
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700 font-semibold">Rental Period:</span>
-                  <span className="text-emerald-900">
+                  <span className="font-semibold text-neutral-900">Rental Period:</span>
+                  <span className="text-black">
                     {booking.searchData?.pickupDate || ''} {booking.searchData?.pickupTime || ''} →{' '}
                     {booking.searchData?.dropoffDate || ''} {booking.searchData?.dropoffTime || ''}
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700 font-semibold">Duration:</span>
-                  <span className="text-emerald-900">{rentalDays} day(s)</span>
+                  <span className="font-semibold text-neutral-900">Duration:</span>
+                  <span className="text-black">{rentalDays} day(s)</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700 font-semibold">Pickup:</span>
-                  <span className="text-emerald-900">{booking.searchData?.pickupLocation || 'N/A'}</span>
+                  <span className="font-semibold text-neutral-900">Pickup:</span>
+                  <span className="text-black">{booking.searchData?.pickupLocation || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700 font-semibold">Dropoff:</span>
-                  <span className="text-emerald-900">{booking.searchData?.dropoffLocation || 'N/A'}</span>
+                  <span className="font-semibold text-neutral-900">Dropoff:</span>
+                  <span className="text-black">{booking.searchData?.dropoffLocation || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between pt-2">
-                  <span className="text-green-700">Price per day:</span>
-                  <span className="font-bold text-emerald-800">{formatVND(pricePerDay)}</span>
+                  <span className="text-neutral-900">Price per day:</span>
+                  <span className="font-bold text-black">{formatVND(pricePerDay)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-green-700">VAT (10%):</span>
-                  <span className="font-bold text-emerald-800">{formatVND(vat)}</span>
+                  <span className="text-neutral-900">VAT (10%):</span>
+                  <span className="font-bold text-black">{formatVND(vat)}</span>
                 </div>
                 <div className="flex justify-between border-t border-green-200 pt-3 text-xl">
-                  <span className="font-bold text-green-900">Total:</span>
+                  <span className="font-bold text-neutral-900">Total:</span>
                   <span className="font-bold text-emerald-600">{formatVND(total)}</span>
                 </div>
               </div>
