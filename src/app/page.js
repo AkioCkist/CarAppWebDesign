@@ -1030,7 +1030,7 @@ export default function HomePage() {
                   fleetVehicles.map((vehicle, idx) => (
                     <motion.li
                       key={vehicle.id || idx}
-                      className="min-w-[400px] max-w-xs flex-shrink-0"
+                      className="min-w-[320px] sm:min-w-[360px] md:min-w-[400px] max-w-xs flex-shrink-0" // Adjusted min-width for smaller screens
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{
@@ -1039,91 +1039,91 @@ export default function HomePage() {
                         ease: "easeOut"
                       }}
                     >
-                      {/* Existing vehicle card code */
-                      /* Copy phần VehicleCard ở VehicleList.js vào đây */}
+                      {/* Existing vehicle card code */}
+                      {/* Copy phần VehicleCard ở VehicleList.js vào đây */}
                       <div
-                        className="bg-white rounded-xl shadow-md overflow-hidden flex flex-col border border-gray-200 relative h-[520px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-2"
+                        className="bg-white rounded-xl shadow-md overflow-visible flex flex-col border border-gray-200 relative h-[520px] w-full transition-all duration-300 ease-in-out transform hover:shadow-2xl hover:scale-105 hover:-translate-y-2 group" // Added group for hover states, overflow-visible
                       >
-                        <div className="relative w-full h-80 overflow-hidden">
+                        <div className="relative w-full h-72 sm:h-80 overflow-hidden rounded-t-xl"> {/* Adjusted height for smaller cards, rounded top corners */}
                           <img
                             src={vehicle.image}
                             alt={vehicle.name}
-                            className="w-full h-full object-cover transition-all duration-500"
+                            className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110" // Added group-hover for image scale
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" /> {/* Use group-hover */}
                         </div>
-                        <div className="p-4 flex flex-col flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold text-base text-gray-900">
+                        <div className="p-3 sm:p-4 flex flex-col flex-1"> {/* Adjusted padding */}
+                          <div className="flex items-center gap-2 mb-1 sm:mb-2"> {/* Adjusted margin */}
+                            <span className="font-semibold text-sm sm:text-base text-gray-900 line-clamp-1"> {/* Adjusted text size, line-clamp */}
                               {vehicle.name}
                             </span>
                           </div>
-                          <div className="flex flex-wrap items-center text-sm text-gray-600 mb-2 gap-x-4 gap-y-1">
-                            <div className="grid grid-cols-3 gap-2 w-full text-sm text-gray-600 mb-2">
-                              <span className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2 gap-x-3 sm:gap-x-4 gap-y-1"> {/* Adjusted text size, gaps, margin */}
+                            <div className="grid grid-cols-3 gap-1 sm:gap-2 w-full text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2"> {/* Adjusted text size, gaps, margin */}
+                              <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
                                 <img
                                   src={vehicle.transmission.toLowerCase().includes('manual')
                                     ? "/icons/IconDetailCarCard/Transmission.svg"
                                     : "/icons/IconDetailCarCard/transmissionautomatic.svg"
                                   }
                                   alt="transmission"
-                                  className="w-4 h-4"
+                                  className="w-3 h-3 sm:w-4 sm:h-4" // Adjusted icon size
                                 />
                                 {vehicle.transmission}
                               </span>
-                              <span className="flex items-center gap-2">
-                                <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-4 h-4" />
+                              <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
+                                <img src="/icons/IconDetailCarCard/seat.svg" alt="seats" className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
                                 {vehicle.seats} seats
                               </span>
-                              <span className="flex items-center gap-2">
-                                <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-4 h-4" />
+                              <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
+                                <img src="/icons/IconDetailCarCard/fuel.svg" alt="fuel" className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
                                 {vehicle.fuel}
                               </span>
                             </div>
                           </div>
-                          <div className="flex items-center text-sm text-gray-600 mb-2">
-                            <span className="flex items-center gap-2">
-                              <img src="/icons/IconDetailCarCard/location.svg" alt="location" className="w-4 h-4 text-green-500" />
+                          <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-1 sm:mb-2"> {/* Adjusted text size, margin */}
+                            <span className="flex items-center gap-1 sm:gap-2"> {/* Adjusted gap */}
+                              <img src="/icons/IconDetailCarCard/location.svg" alt="location" className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" /> {/* Adjusted icon size */}
                               {vehicle.location}
                             </span>
                           </div>
-                          <div className="flex items-center text-sm text-gray-600 mb-3">
+                          <div className="flex items-center text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3"> {/* Adjusted text size, margin */}
                             <span className="flex items-center text-yellow-500 gap-1">
-                              <svg className="w-4 h-4 fill-current" viewBox="0 0 20 20">
+                              <svg className="w-3 h-3 sm:w-4 sm:h-4 fill-current" viewBox="0 0 20 20"> {/* Adjusted icon size */}
                                 <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
                               </svg>
                               {vehicle.rating}
                             </span>
-                            <span className="mx-2 text-gray-400">・</span>
+                            <span className="mx-1 sm:mx-2 text-gray-400">・</span> {/* Adjusted margin */}
                             <span className="flex items-center gap-1">
-                              <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-4 h-4" />
+                              <img src="/icons/IconDetailCarCard/trips.svg" alt="trips" className="w-3 h-3 sm:w-4 sm:h-4" /> {/* Adjusted icon size */}
                               {vehicle.trips} trips
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-green-600 font-bold text-lg">
+                          <div className="flex items-baseline gap-1 sm:gap-2 mb-1 sm:mb-2"> {/* Adjusted gap, margin, items-baseline */}
+                            <span className="text-green-600 font-bold text-base sm:text-lg"> {/* Adjusted text size */}
                               {vehicle.priceDisplay}
                             </span>
                             {vehicle.oldPrice && (
-                              <span className="text-gray-400 line-through text-sm">
+                              <span className="text-gray-400 line-through text-xs sm:text-sm"> {/* Adjusted text size */}
                                 {`${(vehicle.oldPrice / 1000).toFixed(0)}K/${vehicle.pricePer}`}
                               </span>
                             )}
                           </div>
                           {vehicle.priceDiscount && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-xs px-3 py-1 rounded-full font-medium">
+                            <div className="flex items-center gap-1 sm:gap-2 mb-1 sm:mb-2"> {/* Adjusted gap, margin */}
+                              <span className="bg-gradient-to-r from-green-100 to-green-200 text-green-700 text-[10px] sm:text-xs px-2 sm:px-3 py-1 rounded-full font-medium"> {/* Adjusted text size, padding */}
                                 {vehicle.priceDiscount}
                               </span>
                             </div>
                           )}
-                          <div className="text-xs text-gray-700 mb-3 line-clamp-2 h-8 overflow-hidden">
+                          <div className="text-[11px] sm:text-xs text-gray-700 mb-2 sm:mb-3 line-clamp-2 h-7 sm:h-8 overflow-hidden"> {/* Adjusted text size, height, margin */}
                             {vehicle.description}
                           </div>
                           <div className="mt-auto">
                             <button
                               onClick={() => handleBookClick(vehicle.id)}
-                              className="w-full px-4 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 active:scale-95"
+                              className="w-full px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-semibold text-sm sm:text-base transition-all duration-300 transform hover:scale-105 active:scale-95" // Adjusted padding, text size
                             >
                               <span className="flex items-center justify-center gap-2">
                                 More Details
@@ -1263,45 +1263,58 @@ export default function HomePage() {
       </motion.section>
 
       {/* Contact Form Section */}
-      <section className="py-16 bg-white border-t border-gray-100 mt-10">
-        <div className="max-w-2xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-center mb-6 text-gray-900">Contact Us</h2>
-          <form className="space-y-6" onSubmit={async e => {
-            e.preventDefault();
-            const form = e.target;
-            const name = form.name.value;
-            const email = form.email.value;
-            const message = form.message.value;
-            try {
-              const res = await fetch('/myapi/contact.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, message })
-              });
-              const data = await res.json();
-              if (data.success) {
-                alert('Thank you for contacting us!');
-                form.reset();
-              } else {
-                alert(data.error || 'Failed to send.');
+      <section id="contact-us" className="py-12 sm:py-16 bg-gradient-to-br from-gray-50 to-slate-100"> {/* Changed background, padding */}
+        <div className="max-w-xl mx-auto px-4"> {/* Reduced max-width for a more compact form */}
+          <div className="text-center mb-8 sm:mb-10"> {/* Adjusted margin */}
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Get in Touch</h2> {/* Changed text */}
+            <p className="text-sm sm:text-base text-gray-600">We'd love to hear from you! Send us a message and we'll respond as soon as possible.</p>
+          </div>
+          <form
+            className="bg-white p-6 sm:p-8 rounded-xl shadow-xl space-y-5 border border-gray-200" /* Added border, adjusted padding, shadow, spacing */
+            onSubmit={async e => {
+              e.preventDefault();
+              const form = e.target;
+              const name = form.name.value;
+              const email = form.email.value;
+              const message = form.message.value;
+              try {
+                const res = await fetch('/myapi/contact.php', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name, email, message })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  alert('Thank you for contacting us!');
+                  form.reset();
+                } else {
+                  alert(data.error || 'Failed to send.');
+                }
+              } catch (err) {
+                alert('Error sending contact form.');
               }
-            } catch (err) {
-              alert('Error sending contact form.');
-            }
-          }}>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Your Name</label>
-              <input name="name" type="text" required className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none" placeholder="Enter your name" />
+            }}
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5"> {/* Grid for name and email */}
+              <div>
+                <label htmlFor="name" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Your Name</label> {/* Adjusted label size, margin */}
+                <input id="name" name="name" type="text" required className="w-full p-2.5 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-shadow duration-200 text-sm sm:text-base" placeholder="e.g. John Doe" /> {/* Adjusted padding, border, focus, text size */}
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Email Address</label> {/* Adjusted label size, margin */}
+                <input id="email" name="email" type="email" required className="w-full p-2.5 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-shadow duration-200 text-sm sm:text-base" placeholder="you@example.com" /> {/* Adjusted padding, border, focus, text size */}
+              </div>
             </div>
             <div>
-              <label className="block text-gray-700 font-medium mb-2">Email</label>
-              <input name="email" type="email" required className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none" placeholder="Enter your email" />
+              <label htmlFor="message" className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">Message</label> {/* Adjusted label size, margin */}
+              <textarea id="message" name="message" required className="w-full p-2.5 sm:p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none transition-shadow duration-200 text-sm sm:text-base" placeholder="Your message here..." rows="5"></textarea> {/* Adjusted padding, border, focus, text size, rows */}
             </div>
-            <div>
-              <label className="block text-gray-700 font-medium mb-2">Contents</label>
-              <textarea name="message" required className="w-full p-3 border-2 border-green-200 rounded-lg focus:border-green-500 focus:outline-none" placeholder="Enter your message" rows="4"></textarea>
-            </div>
-            <button type="submit" className="w-full bg-green-500 text-white font-bold py-3 px-6 rounded-lg hover:bg-green-600 transition duration-300">Send form</button>
+            <button
+              type="submit"
+              className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold py-2.5 sm:py-3 px-6 rounded-lg hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 text-sm sm:text-base" /* Gradient, hover, active, focus states, text size */
+            >
+              Send Message
+            </button>
           </form>
         </div>
       </section>
@@ -1367,7 +1380,7 @@ export default function HomePage() {
               fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+              <path d="M6.62 10.79c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
             </motion.svg>
           </motion.div>
           <motion.div
