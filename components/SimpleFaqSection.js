@@ -1,9 +1,14 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Added useEffect
 import { ChevronDown, ChevronUp, FileText, Car, CreditCard, MapPin, Calendar, Shield } from 'lucide-react';
 import Link from 'next/link'; // Add this import
 
 export default function ModernFaqAccordion() {
-  const [openIndex, setOpenIndex] = useState(0); // First question open by default
+  const [openIndex, setOpenIndex] = useState(null); // Initialize with null, so all are closed by default
+
+  // useEffect(() => {
+  //   // Set the first question to be open by default when component mounts
+  //   // setOpenIndex(0); // Commented out to keep all closed by default
+  // }, []);
 
   const faqData = [
     {
@@ -234,74 +239,45 @@ export default function ModernFaqAccordion() {
   ];
 
   const toggleAccordion = (index) => {
-    setOpenIndex(openIndex === index ? -1 : index);
+    setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4">
-      <div className="max-w-4xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Frequently Asked Questions
-          </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Find answers to common questions about our car rental service in Vietnam
-          </p>
-        </div>
-
-        {/* FAQ Accordion */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          {faqData.map((faq, index) => (
-            <div key={faq.id} className="border-b border-gray-200 last:border-b-0">
-              <button
-                className={`w-full px-8 py-6 text-left flex items-center justify-between hover:bg-gray-50 transition-colors duration-500 ${
-                  openIndex === index ? 'bg-blue-50' : ''
-                }`}
-                onClick={() => toggleAccordion(index)}
-                aria-expanded={openIndex === index}
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`p-2 rounded-lg transition-colors duration-500 ${
-                    openIndex === index 
-                      ? 'bg-blue-100 text-blue-600' 
-                      : 'bg-gray-100 text-gray-600'
-                  }`}>
-                    {faq.icon}
-                  </div>
-                  <h3 className={`text-lg font-semibold transition-colors duration-500 ${
-                    openIndex === index ? 'text-blue-900' : 'text-gray-900'
-                  }`}>
-                    {faq.question}
-                  </h3>
+    <div className="w-full max-w-4xl mx-auto py-8 px-4 md:px-0">
+      <div className="text-center mb-10 md:mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-3">Frequently Asked Questions</h2>
+        <p className="text-sm md:text-base text-gray-600 max-w-2xl mx-auto">
+          Find quick answers to common questions about our car rental services. If you can't find what you're looking for, feel free to <Link href="#contact-us" className="text-green-600 hover:text-green-700 font-medium underline">contact us</Link>.
+        </p>
+      </div>
+      <div className="space-y-3 md:space-y-4">
+        {faqData.map((item, index) => (
+          <div key={item.id} className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-lg transition-shadow duration-300">
+            <button
+              onClick={() => toggleAccordion(index)}
+              className="w-full flex items-center justify-between p-4 md:p-5 text-left focus:outline-none transition-colors duration-200 hover:bg-gray-50 rounded-t-xl"
+            >
+              <div className="flex items-center">
+                <div className="mr-3 md:mr-4 text-green-600 bg-green-100 p-2 rounded-lg">
+                  {item.icon}
                 </div>
-                <div className={`transition-transform duration-500 ${
-                  openIndex === index ? 'rotate-180' : ''
-                }`}>
-                  <ChevronDown className={`w-5 h-5 ${
-                    openIndex === index ? 'text-blue-600' : 'text-gray-400'
-                  }`} />
-                </div>
-              </button>
-              
-              <div className={`overflow-hidden transition-all duration-700 ease-in-out ${
-                openIndex === index ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
-              }`}>
-                <div className="px-8 pb-6 pl-20">
-                  {faq.answer}
+                <span className="font-medium text-sm md:text-base text-gray-800">{item.question}</span>
+              </div>
+              {openIndex === index ? (
+                <ChevronUp className="w-5 h-5 text-green-600 flex-shrink-0" />
+              ) : (
+                <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
+              )}
+            </button>
+            {openIndex === index && (
+              <div className="p-4 md:p-5 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+                <div className="text-xs md:text-sm text-gray-700 leading-relaxed">
+                  {item.answer}
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-
-        {/* See All FAQs Button - Updated with Link */}
-        <div className="text-center mt-8">
-          <Link href="/faq" className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-500 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
-            <FileText className="w-5 h-5 mr-2" />
-            View All FAQs & Documentation
-          </Link>
-        </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
