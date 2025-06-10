@@ -608,7 +608,7 @@ function CarListingPageContent() {
       <ToastNotification toasts={toasts} removeToast={removeToast} />
 
       <Header />
-      <div className="h-21 bg-gray-800/95"></div>
+      <div className="h-21 bg-gray/100"></div>
 
       {/* Location & Date Info Bar */}
       <div className="bg-white shadow-sm border-b">
