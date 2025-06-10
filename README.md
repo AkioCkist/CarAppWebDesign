@@ -124,7 +124,3 @@ Whale Xe is a modern, responsive web application for car rentals built with Next
 
 ### Admin Dashboard
 ![Admin Dashboard](public/shot/11.jpg)
-![Picture](public/images/admin-bookings.png)
-
-Admin: Customer Management  
-![Picture](public/images/admin-customers.png)
