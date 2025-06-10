@@ -625,10 +625,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <label className="block text-green-700 font-semibold mb-3">
                       <User className="inline w-4 h-4 mr-2" />
                       Full Name *
-                    </label>
-                    <input
+                    </label>                    <input
                       type="text"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                         errors.fullName 
                           ? 'border-red-300 focus:border-red-500 bg-red-50' 
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -649,10 +648,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <label className="block text-green-700 font-semibold mb-3">
                       <Phone className="inline w-4 h-4 mr-2" />
                       Phone Number *
-                    </label>
-                    <input
+                    </label>                    <input
                       type="tel"
-                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                      className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                         errors.phone 
                           ? 'border-red-300 focus:border-red-500 bg-red-50' 
                           : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -674,10 +672,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <label className="block text-green-700 font-semibold mb-3">
                     <Mail className="inline w-4 h-4 mr-2" />
                     Email *
-                  </label>
-                  <input
+                  </label>                  <input
                     type="email"
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                       errors.email 
                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -698,9 +695,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <label className="block text-green-700 font-semibold mb-3">
                     <MapPin className="inline w-4 h-4 mr-2" />
                     Address *
-                  </label>
-                  <textarea
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 resize-none ${
+                  </label>                  <textarea
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black resize-none ${
                       errors.address 
                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
@@ -722,10 +718,9 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                   <label className="block text-green-700 font-semibold mb-3">
                     <CreditCard className="inline w-4 h-4 mr-2" />
                     Driver's License Number *
-                  </label>
-                  <input
+                  </label>                  <input
                     type="text"
-                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 text-lg text-black border-green-200 focus:border-green-500 focus:bg-green-50 ${
+                    className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                       errors.driverLicense 
                         ? 'border-red-300 focus:border-red-500 bg-red-50' 
                         : 'border-green-200 focus:border-green-500 focus:bg-green-50'
