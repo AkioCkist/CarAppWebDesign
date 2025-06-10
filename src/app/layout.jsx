@@ -28,7 +28,7 @@ export const metadata = {
     siteName: "Whale Xe",
     images: [
       {
-        url: "https://car-ap-web-design.vercel.app/logo/logo.webp", // Đường dẫn tuyệt đối đến logo của bạn
+        url: "https://car-ap-web-design.vercel.app/logo/logo.png", // Đường dẫn tuyệt đối đến logo của bạn
         width: 1200, // Kích thước khuyến nghị cho Open Graph image
         height: 630, // Kích thước khuyến nghị cho Open Graph image
         alt: "Whale Xe Logo - Cho thuê xe tự lái Hà Nội, Đà Nẵng, Hồ Chí Minh",
