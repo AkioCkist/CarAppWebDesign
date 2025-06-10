@@ -43,6 +43,35 @@ body {
 
   /* Other styles here */
 
+  /* Hide scrollbars */
+  .scrollbar-hide {
+    -ms-overflow-style: none;  /* Internet Explorer 10+ */
+    scrollbar-width: none;  /* Firefox */
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;  /* Safari and Chrome */
+  }
+
+  /* Fleet scroll animations */
+  .fleet-scroll-smooth {
+    scroll-behavior: smooth;
+  }
+
+  /* Shimmer animation for skeleton loading */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+  }
+
   .sign-in-btn {
     @apply px-6 py-2 rounded-md bg-green-500 text-white font-medium hover:bg-green-600 transition;
   }
