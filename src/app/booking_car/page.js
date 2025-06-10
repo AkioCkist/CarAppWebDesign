@@ -5,12 +5,15 @@ import { useEffect, useState, Suspense } from 'react';
 import CarBookingPage from '../../../components/CarBooking';
 import Header from '../../../components/Header';
 import Footer from '../../../components/Footer';
+import { useCarLoading } from '../../../components/CarLoading';
 
 function BookingContent() {
   const searchParams = useSearchParams();
   const [selectedCar, setSelectedCar] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const { isLoading: isCarLoading, startLoading, stopLoading, CarLoadingScreen } = useCarLoading();
 
   const carId = searchParams.get('carId');
   
@@ -28,12 +31,14 @@ function BookingContent() {
     if (!carId) {
       setError('Car information not found');
       setIsLoading(false);
+      stopLoading();
       return;
     }
 
     const fetchCar = async () => {
       try {
         setIsLoading(true);
+        startLoading();
         // Gọi API Next.js (không dùng PHP nữa)
         const res = await fetch(`/api/vehicles?id=${encodeURIComponent(carId)}`);
         if (!res.ok) throw new Error('Unable to fetch car data');
@@ -50,18 +55,16 @@ function BookingContent() {
         setError('Unable to load car information. Please try again later.');
       } finally {
         setIsLoading(false);
+        stopLoading();
       }
     };
 
     fetchCar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [carId]);
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+  if (isLoading || isCarLoading) {
+    return <CarLoadingScreen />;
   }
 
   if (error) {
@@ -86,7 +89,7 @@ function BookingContent() {
 
 export default function BookingPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={null}>
       <BookingContent />
     </Suspense>
   );
