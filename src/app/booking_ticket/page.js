@@ -170,89 +170,125 @@ const pdfStyles = StyleSheet.create({
   },
 });
 
+// --- Helper Functions ---
+function getCurrentDateFormatted() {
+  const now = new Date();
+  const day = String(now.getDate()).padStart(2, '0');
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const year = now.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
+function isFutureDate(dateStr) {
+  if (!dateStr) return false;
+  const inputDate = new Date(dateStr);
+  const now = new Date();
+  return inputDate > now;
+}
+
+function generateInvoiceNumber() {
+  return `INV-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+}
+
 // --- PDF Document Component ---
-const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
-  <Document>
-    <Page size="A4" style={pdfStyles.page}>
-      <View style={pdfStyles.header}>
-        <Text style={pdfStyles.companyName}>CAR RENTAL</Text>
-        <Text style={pdfStyles.companyInfo}>WHALE XE vehicle rental service</Text>
-        <Text style={pdfStyles.companyInfo}>VNUK, Da Nang, vietnam</Text>
-        <Text style={pdfStyles.companyInfo}>tel.: +84 7355608</Text>
-      </View>
-      <Text style={pdfStyles.documentTitle}>TAX INVOICE</Text>
+const BookingPDF = ({ booking, rentalDays, formatVND, total }) => {
+  // Use current date, fallback if booking date is in the future
+  const bookingDate =
+    booking?.searchData?.pickupDate && !isFutureDate(booking.searchData.pickupDate)
+      ? booking.searchData.pickupDate
+      : getCurrentDateFormatted();
 
-      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
-        <View style={{ flex: 1, marginLeft: 20 }}>
-          <View style={pdfStyles.infoBlock}>
-            <Text style={pdfStyles.label}>Invoice No:</Text>
-            <Text style={pdfStyles.value}>#{Math.random().toString(36).substr(2, 9).toUpperCase()}</Text>
+  const invoiceNumber = generateInvoiceNumber();
+
+  return (
+    <Document>
+      <Page size="A4" style={pdfStyles.page}>
+        <View style={pdfStyles.header}>
+          <Text style={pdfStyles.companyName}>CAR RENTAL</Text>
+          <Text style={pdfStyles.companyInfo}>WHALE XE vehicle rental service</Text>
+          <Text style={pdfStyles.companyInfo}>VNUK, Da Nang, Vietnam</Text>
+          <Text style={pdfStyles.companyInfo}>Tel.: +84 7355608</Text>
+        </View>
+        <Text style={pdfStyles.documentTitle}>TAX INVOICE</Text>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
+          <View style={{ flex: 1, marginLeft: 20 }}>
+            <View style={pdfStyles.infoBlock}>
+              <Text style={pdfStyles.label}>Invoice No:</Text>
+              <Text style={pdfStyles.value}>{invoiceNumber}</Text>
+            </View>
+            <View style={pdfStyles.infoBlock}>
+              <Text style={pdfStyles.label}>Date:</Text>
+              <Text style={pdfStyles.value}>{bookingDate}</Text>
+            </View>
           </View>
-          <View style={pdfStyles.infoBlock}>
-            <Text style={pdfStyles.label}>Date:</Text>
-            <Text style={pdfStyles.value}>{new Date().toLocaleDateString()}</Text>
+        </View>
+
+        <View style={pdfStyles.customerInfo}>
+          <View style={pdfStyles.customerBlock}>
+            <Text style={pdfStyles.customerLabel}>Customer Name:</Text>
+            <Text style={pdfStyles.customerValue}>
+              {booking.customer?.name?.trim() ? booking.customer.name : 'Guest User'}
+            </Text>
+          </View>
+          <View style={pdfStyles.customerBlock}>
+            <Text style={pdfStyles.customerLabel}>Pickup Location:</Text>
+            <Text style={pdfStyles.customerValue}>
+              {booking.searchData?.pickupLocation || 'N/A'}
+            </Text>
+          </View>
+          <View style={pdfStyles.customerBlock}>
+            <Text style={pdfStyles.customerLabel}>Dropoff Location:</Text>
+            <Text style={pdfStyles.customerValue}>
+              {booking.searchData?.dropoffLocation || 'N/A'}
+            </Text>
           </View>
         </View>
-      </View>
 
-      <View style={pdfStyles.customerInfo}>
-        <View style={pdfStyles.customerBlock}>
-          <Text style={pdfStyles.customerLabel}>Customer Name:</Text>
-          <Text style={pdfStyles.customerValue}>{booking.customer?.name || 'Guest User'}</Text>
+        <View style={pdfStyles.table}>
+          <View style={pdfStyles.tableHeader}>
+            <Text style={pdfStyles.col1}>Items</Text>
+            <Text style={pdfStyles.col2}>Duration</Text>
+            <Text style={pdfStyles.col3}>Price/Day</Text>
+            <Text style={pdfStyles.col4}>Amount</Text>
+          </View>
+          <View style={pdfStyles.tableRow}>
+            <Text style={pdfStyles.col1}>{booking.car?.name || 'Car'}</Text>
+            <Text style={pdfStyles.col2}>{rentalDays} days</Text>
+            <Text style={pdfStyles.col3}>{formatVND(booking.car?.base_price)}</Text>
+            <Text style={pdfStyles.col4}>{formatVND((booking.car?.base_price || 0) * rentalDays)}</Text>
+          </View>
         </View>
-        <View style={pdfStyles.customerBlock}>
-          <Text style={pdfStyles.customerLabel}>Pickup Location:</Text>
-          <Text style={pdfStyles.customerValue}>{booking.searchData.pickupLocation}</Text>
-        </View>
-        <View style={pdfStyles.customerBlock}>
-          <Text style={pdfStyles.customerLabel}>Dropoff Location:</Text>
-          <Text style={pdfStyles.customerValue}>{booking.searchData.dropoffLocation}</Text>
-        </View>
-      </View>
 
-      <View style={pdfStyles.table}>
-        <View style={pdfStyles.tableHeader}>
-          <Text style={pdfStyles.col1}>Items</Text>
-          <Text style={pdfStyles.col2}>Duration</Text>
-          <Text style={pdfStyles.col3}>Price/Day</Text>
-          <Text style={pdfStyles.col4}>Amount</Text>
+        <View style={pdfStyles.totalSection}>
+          <View style={pdfStyles.totalRow}>
+            <Text>Taxable Amount</Text>
+            <Text>{formatVND((booking.car?.base_price || 0) * rentalDays)}</Text>
+          </View>
+          <View style={pdfStyles.totalRow}>
+            <Text>VAT (10%)</Text>
+            <Text>{formatVND(Math.round((booking.car?.base_price || 0) * rentalDays * 0.1))}</Text>
+          </View>
+          <View style={[pdfStyles.totalRow, { fontWeight: 'bold', marginTop: 10 }]}>
+            <Text>Total Amount</Text>
+            <Text>{formatVND(total)}</Text>
+          </View>
         </View>
-        <View style={pdfStyles.tableRow}>
-          <Text style={pdfStyles.col1}>{booking.car.name}</Text>
-          <Text style={pdfStyles.col2}>{rentalDays} days</Text>
-          <Text style={pdfStyles.col3}>{formatVND(booking.car.base_price)}</Text>
-          <Text style={pdfStyles.col4}>{formatVND(booking.car.base_price * rentalDays)}</Text>
-        </View>
-      </View>
 
-      <View style={pdfStyles.totalSection}>
-        <View style={pdfStyles.totalRow}>
-          <Text>Taxable Amount</Text>
-          <Text>{formatVND(booking.car.base_price * rentalDays)}</Text>
+        <View style={pdfStyles.footer}>
+          <View>
+            <Text style={{ fontSize: 10, marginBottom: 30 }}>Customer Signature</Text>
+            <Text style={{ fontSize: 10 }}>_________________</Text>
+          </View>
+          <View>
+            <Text style={{ fontSize: 10, marginBottom: 30 }}>Authorized Signatory</Text>
+            <Text style={{ fontSize: 10 }}>_________________</Text>
+          </View>
         </View>
-        <View style={pdfStyles.totalRow}>
-          <Text>VAT (10%)</Text>
-          <Text>{formatVND(Math.round(booking.car.base_price * rentalDays * 0.1))}</Text>
-        </View>
-        <View style={[pdfStyles.totalRow, { fontWeight: 'bold', marginTop: 10 }]}>
-          <Text>Total Amount</Text>
-          <Text>{formatVND(total)}</Text>
-        </View>
-      </View>
-
-      <View style={pdfStyles.footer}>
-        <View>
-          <Text style={{ fontSize: 10, marginBottom: 30 }}>Customer Signature</Text>
-          <Text style={{ fontSize: 10 }}>_________________</Text>
-        </View>
-        <View>
-          <Text style={{ fontSize: 10, marginBottom: 30 }}>Authorized Signatory</Text>
-          <Text style={{ fontSize: 10 }}>_________________</Text>
-        </View>
-      </View>
-    </Page>
-  </Document>
-);
+      </Page>
+    </Document>
+  );
+};
 
 // This new component handles all the client-side logic and rendering
 const BookingTicket = () => {
@@ -266,9 +302,9 @@ const BookingTicket = () => {
     if (!data) {
       setError('No booking data found in URL.');
       const timer = setTimeout(() => router.push('/booking_car'), 3000);
-      return () => clearTimeout(timer); // Cleanup timer on unmount
+      return () => clearTimeout(timer);
     }
-    
+
     try {
       const decodedData = JSON.parse(decodeURIComponent(data));
       if (!decodedData.car || !decodedData.searchData) {
@@ -280,7 +316,7 @@ const BookingTicket = () => {
       console.error('Failed to parse booking data:', err);
       setError('Failed to load booking details. Data might be corrupted.');
       const timer = setTimeout(() => router.push('/booking_car'), 3000);
-      return () => clearTimeout(timer); // Cleanup timer on unmount
+      return () => clearTimeout(timer);
     }
   }, [searchParams, router]);
 
@@ -325,10 +361,18 @@ const BookingTicket = () => {
 
   // --- Derived Data ---
   const rentalDays = getDayCount();
-  const pricePerDay = booking.car.base_price;
+  const pricePerDay = booking.car?.base_price || 0;
   const rentalPrice = pricePerDay * rentalDays;
   const vat = Math.round(rentalPrice * 0.1);
   const total = rentalPrice + vat;
+
+  // Use current date, fallback if booking date is in the future
+  const bookingDate =
+    booking?.searchData?.pickupDate && !isFutureDate(booking.searchData.pickupDate)
+      ? booking.searchData.pickupDate
+      : getCurrentDateFormatted();
+
+  const invoiceNumber = generateInvoiceNumber();
 
   return (
     <main className="flex min-h-screen flex-col bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
@@ -362,20 +406,22 @@ const BookingTicket = () => {
 
             {/* Ticket Body - Modified with new sections */}
             <div className="space-y-6 p-8 pb-6">
-              {/* Reservation ID & Customer Info - New Section */}
+              {/* Invoice & Customer Info - Improved Section */}
               <div className="bg-green-50 rounded-xl p-4 border border-green-100">
                 <div className="flex flex-col sm:flex-row justify-between gap-4">
                   <div>
-                    <span className="text-green-700 font-semibold block mb-1">Reservation ID</span>
-                    <span className="text-green-900 font-mono">#RSV-{Math.random().toString(36).substr(2, 9).toUpperCase()}</span>
+                    <span className="text-green-700 font-semibold block mb-1">Invoice No</span>
+                    <span className="text-green-900 font-mono">{invoiceNumber}</span>
                   </div>
                   <div>
                     <span className="text-green-700 font-semibold block mb-1">Customer Name</span>
-                    <span className="text-green-900">{booking.customer?.name || 'Guest User'}</span>
+                    <span className="text-green-900">
+                      {booking.customer?.name?.trim() ? booking.customer.name : 'Guest User'}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-green-700 font-semibold block mb-1">Booking Date</span>
-                    <span className="text-green-900">{new Date().toLocaleDateString()}</span>
+                    <span className="text-green-700 font-semibold block mb-1">Date</span>
+                    <span className="text-green-900">{bookingDate}</span>
                   </div>
                 </div>
               </div>
@@ -405,7 +451,7 @@ const BookingTicket = () => {
                 </div>
               </div>
 
-              {/* Car Features - Enhanced Section */}
+              {/* Car Features */}
               <div className="bg-green-50 rounded-xl p-4 border border-green-100">
                 <h3 className="text-green-700 font-semibold mb-3">Vehicle Features</h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -440,14 +486,18 @@ const BookingTicket = () => {
                   <MapPin className="w-5 h-5 text-green-600" />
                   <div>
                     <div className="text-green-700 font-semibold">Pickup Location</div>
-                    <div className="text-green-600 text-sm">{booking.searchData.pickupLocation}</div>
+                    <div className="text-green-600 text-sm">
+                      {booking.searchData?.pickupLocation || 'N/A'}
+                    </div>
                   </div>
                 </div>
                 <div className="flex-1 bg-white border border-green-100 rounded-xl p-4 flex items-center gap-3">
                   <MapPin className="w-5 h-5 text-green-600" />
                   <div>
                     <div className="text-green-700 font-semibold">Dropoff Location</div>
-                    <div className="text-green-600 text-sm">{booking.searchData.dropoffLocation}</div>
+                    <div className="text-green-600 text-sm">
+                      {booking.searchData?.dropoffLocation || 'N/A'}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -464,15 +514,20 @@ const BookingTicket = () => {
               <div className="space-y-3 text-base">
                 <div className="flex justify-between">
                   <span className="text-green-700 font-semibold">Car:</span>
-                  <span className="text-emerald-900 font-bold">{booking.car.name}</span>
+                  <span className="text-emerald-900 font-bold">{booking.car?.name || 'Car'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700 font-semibold">Category:</span>
-                  <span className="text-emerald-900">{booking.car.type} • {booking.car.seats} seats</span>
+                  <span className="text-emerald-900">
+                    {booking.car?.type || 'Type'} • {booking.car?.seats || 'N/A'} seats
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700 font-semibold">Rental Period:</span>
-                  <span className="text-emerald-900">{booking.searchData.pickupDate} {booking.searchData.pickupTime} → {booking.searchData.dropoffDate} {booking.searchData.dropoffTime}</span>
+                  <span className="text-emerald-900">
+                    {booking.searchData?.pickupDate || ''} {booking.searchData?.pickupTime || ''} →{' '}
+                    {booking.searchData?.dropoffDate || ''} {booking.searchData?.dropoffTime || ''}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700 font-semibold">Duration:</span>
@@ -480,11 +535,11 @@ const BookingTicket = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700 font-semibold">Pickup:</span>
-                  <span className="text-emerald-900">{booking.searchData.pickupLocation}</span>
+                  <span className="text-emerald-900">{booking.searchData?.pickupLocation || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-green-700 font-semibold">Dropoff:</span>
-                  <span className="text-emerald-900">{booking.searchData.dropoffLocation}</span>
+                  <span className="text-emerald-900">{booking.searchData?.dropoffLocation || 'N/A'}</span>
                 </div>
                 <div className="flex justify-between pt-2">
                   <span className="text-green-700">Price per day:</span>
@@ -503,7 +558,7 @@ const BookingTicket = () => {
             <div className="flex flex-col gap-3 mt-8">
               <PDFDownloadLink
                 document={
-                  <BookingPDF 
+                  <BookingPDF
                     booking={booking}
                     rentalDays={rentalDays}
                     formatVND={formatVND}
