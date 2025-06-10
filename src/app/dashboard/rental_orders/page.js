@@ -121,7 +121,7 @@ export default function RentalOrdersPage() {
     }
 
     if (loading) {
-        return <SkeletonLoader type="rental-orders-full-page" />;
+        return <SkeletonLoader type="rental-orders-page" />;
     }
 
     return (

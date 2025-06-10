@@ -17,7 +17,7 @@ const VehicleListPage = () => {
   }, []);
 
   if (loading) {
-    return <SkeletonLoader type="vehicle-list-full-page" />;
+    return <SkeletonLoader type="vehicle-list-page" />;
   }
 
   return (
