@@ -80,7 +80,6 @@ async function getBookings(searchParams, request) {
             ];
         }
 
-        const [bookings, total] = await Promise.all([
         // If userId is provided, filter by that user's bookings
         if (userId) {
             const requestedUserId = safeParseInt(userId);
@@ -89,7 +88,9 @@ async function getBookings(searchParams, request) {
 
         if (status && status !== 'all') {
             whereClause.status = status;
-        } const [bookings, total] = await Promise.all([
+        }
+
+        const [bookings, total] = await Promise.all([
             prisma.bookings.findMany({
                 where: whereClause,
                 include: {
