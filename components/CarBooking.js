@@ -62,7 +62,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   const searchParams = useSearchParams();
 
-  const MAX_PRICE = 99999999.99; // Maximum value for numeric(10,2)
+  const MAX_PRICE = 999999999.99; // Maximum value for numeric(10,2)
 
   // Tự động fill thông tin tìm kiếm nếu đã có preFilledSearchData
   useEffect(() => {
