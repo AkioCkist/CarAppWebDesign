@@ -320,7 +320,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
   }, [currentStep]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100 pb-24">
       {/* Header Section */}
       <div className="container mx-auto px-4 py-8 flex flex-col items-center">
         <div className="text-center mb-6">
