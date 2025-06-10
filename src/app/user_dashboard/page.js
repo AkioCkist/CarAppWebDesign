@@ -8,6 +8,7 @@ import VehicleList from "../../../components/VehicleList";
 import ProfileEditPanel from "../../../components/ProfileEditPanel";
 import ToastNotification from "../../../components/ToastNotification";
 import { getUserFavorites, toggleVehicleFavorite } from "../../../lib/auth-utils";
+import { getUserBookings, formatBookingDate, formatBookingTime, formatPrice, getStatusText, getStatusColor } from "../../../lib/booking-api";
 import { useToast } from "../../../hooks/useToast";
 
 export default function UserProfilePage() {
@@ -17,18 +18,25 @@ export default function UserProfilePage() {
   const [user, setUser] = useState(null);
   const [fadeIn, setFadeIn] = useState(false);
   const [showFade, setShowFade] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false);
-  const [showWhiteFadeLogout, setShowWhiteFadeLogout] = useState(false);
+  const [fadeOut, setFadeOut] = useState(false); const [showWhiteFadeLogout, setShowWhiteFadeLogout] = useState(false);
   const [activePanel, setActivePanel] = useState('dashboard');
   const [favoriteCars, setFavoriteCars] = useState([]);
-  // User data effect
+  const [userBookings, setUserBookings] = useState([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsError, setBookingsError] = useState(null);  // User data effect
   useEffect(() => {
     const userData = localStorage.getItem('user');
     if (userData) {
-      setUser(JSON.parse(userData));
+      try {
+        setUser(JSON.parse(userData));
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        localStorage.removeItem('user');
+        router.push('/');
+      }
     } else {
-      // Redirect to signin if no user data
-      router.push('/signin_registration');
+      //  Redirect về homepage
+      router.push('/');
     }
   }, [router]);
 
@@ -60,6 +68,43 @@ export default function UserProfilePage() {
 
     loadFavorites();
   }, [user]);
+
+  // Load user bookings when user data is available
+  useEffect(() => {
+    const loadBookings = async () => {
+      if (user && (user.account_id || user.id)) {
+        setBookingsLoading(true);
+        setBookingsError(null);
+        try {
+          const userId = user.account_id || user.id;
+          const result = await getUserBookings(userId, { limit: 50 });
+          console.log('getUserBookings result:', result);
+          if (result.success) {
+            console.log('Setting userBookings to:', result.records);
+            setUserBookings(result.records);
+          } else {
+            setBookingsError(result.error || 'Failed to load bookings');
+            setUserBookings([]);
+          }
+        } catch (error) {
+          console.error('Error loading user bookings:', error);
+          setBookingsError('Failed to load bookings');
+          setUserBookings([]);
+        } finally {
+          setBookingsLoading(false);
+        }
+      }
+    };
+
+    loadBookings();
+  }, [user]);
+
+  // Debug log for userBookings
+  useEffect(() => {
+    console.log('userBookings state changed:', userBookings);
+    console.log('bookingsLoading:', bookingsLoading);
+    console.log('bookingsError:', bookingsError);
+  }, [userBookings, bookingsLoading, bookingsError]);
 
   // NOW HANDLE LOADING STATE AFTER ALL HOOKS ARE DECLARED
   if (!user) {
@@ -474,20 +519,6 @@ export default function UserProfilePage() {
                   </motion.a>
                   <motion.a
                     href="#"
-                    onClick={e => { e.preventDefault(); setActivePanel('orders'); }}
-                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${activePanel === 'orders' ? 'text-white bg-green-500' : 'text-gray-700 hover:bg-gray-100'}`}
-                    variants={buttonVariants}
-                    initial="idle"
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    My Orders
-                  </motion.a>
-                  <motion.a
-                    href="#"
                     onClick={e => { e.preventDefault(); setActivePanel('favoriteCars'); }}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${activePanel === 'favoriteCars' ? 'text-white bg-green-500' : 'text-gray-700 hover:bg-gray-100'}`}
                     variants={buttonVariants}
@@ -499,7 +530,8 @@ export default function UserProfilePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     My Favorite Cars
-                  </motion.a>                  <motion.a
+                  </motion.a>
+                  <motion.a
                     href="#"
                     onClick={e => {
                       e.preventDefault();
@@ -539,35 +571,51 @@ export default function UserProfilePage() {
                       initial="hidden"
                       animate="visible"
                       className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6"
-                    >
-                      {Object.entries({
-                        totalOrders: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-                        completedRides: "M13 10V3L4 14h7v7l9-11h-7z",
-                        totalBookings: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z",
-                        totalCars: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      }).map(([key, iconPath], index) => (
-                        <motion.div
-                          key={key}
-                          variants={itemVariants}
-                          className="bg-white rounded-lg p-6 text-center shadow-sm"
-                          whileHover={{
-                            scale: 1.05,
-                            boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
-                            transition: { duration: 0.2 }
-                          }}
-                        >
-                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                            <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={iconPath} />
-                            </svg>
-                          </div>
-                          <h3 className="text-2xl font-bold text-gray-800">{userData[key]}</h3>
-                          <p className="text-sm text-gray-600">{key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</p>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-
-                    {/* Recent Orders Table */}
+                    >                      {[
+                      {
+                        key: 'totalBookings',
+                        value: userBookings.length,
+                        label: 'Total Bookings',
+                        icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                      },
+                      {
+                        key: 'completedRides',
+                        value: userBookings.filter(b => b.status === 'completed').length,
+                        label: 'Completed Rides',
+                        icon: "M13 10V3L4 14h7v7l9-11h-7z"
+                      },
+                      {
+                        key: 'pendingOrders',
+                        value: userBookings.filter(b => b.status === 'pending').length,
+                        label: 'Pending Orders',
+                        icon: "M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"
+                      },
+                      {
+                        key: 'favoriteCars',
+                        value: favoriteCars.length,
+                        label: 'Favorite Cars',
+                        icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+                      }
+                    ].map(({ key, value, label, icon }, index) => (
+                      <motion.div
+                        key={key}
+                        variants={itemVariants}
+                        className="bg-white rounded-lg p-6 text-center shadow-sm"
+                        whileHover={{
+                          scale: 1.05,
+                          boxShadow: "0 8px 25px rgba(0,0,0,0.1)",
+                          transition: { duration: 0.2 }
+                        }}
+                      >                          <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={icon} />
+                          </svg>
+                        </div>
+                        <h3 className="text-2xl font-bold text-gray-800">{value}</h3>
+                        <p className="text-sm text-gray-600">{label}</p>
+                      </motion.div>
+                    ))}
+                    </motion.div>                    {/* All Orders Table - REPLACED Recent Orders */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -575,43 +623,141 @@ export default function UserProfilePage() {
                       className="bg-white rounded-lg shadow-sm mb-6"
                     >
                       <div className="p-6 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-800">My Recent Orders</h3>
+                        <h3 className="text-lg font-semibold text-gray-800">All My Orders</h3>
+                        {bookingsError && (
+                          <div className="mt-2 text-red-600 text-sm">
+                            Error loading orders: {bookingsError}
+                          </div>
+                        )}
                       </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Location</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent Date</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {userData.recentOrders.map((order, index) => (
-                              <motion.tr
-                                key={order.id}
-                                className="hover:bg-gray-50"
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1, duration: 0.3 }}
+
+                      {/* Scrollable Table Container */}
+                      <div className="relative">
+                        {bookingsLoading ? (
+                          <div className="flex items-center justify-center py-12">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mr-3"></div>
+                            <span className="text-gray-600">Loading orders...</span>
+                          </div>
+                        ) : userBookings.length === 0 ? (
+                          <div className="text-center py-12">
+                            <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p className="text-gray-500 text-lg mb-2">No orders found</p>
+                            <p className="text-gray-400 text-sm">You haven't made any car bookings yet.</p>
+                            <div className="mt-6 pb-6">
+                              <button
+                                onClick={() => router.push('/finding_car')}
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                               >
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.pickup}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.rentDate}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{order.returnDate}</td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                    {order.status}
-                                  </span>
-                                </td>
-                              </motion.tr>
-                            ))}
-                          </tbody>
-                        </table>
+                                Browse Cars
+                              </button>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="overflow-x-auto">
+                            {/* Fixed height container with scroll - INCREASED HEIGHT */}
+                            <div className="max-h-96 overflow-y-auto overflow-x-auto
+                              [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar]:h-2
+                              [&::-webkit-scrollbar-track]:rounded-full
+                              [&::-webkit-scrollbar-track]:bg-green-50
+                              [&::-webkit-scrollbar-thumb]:rounded-full
+                              [&::-webkit-scrollbar-thumb]:bg-green-400
+                              [&::-webkit-scrollbar-thumb:hover]:bg-green-400
+                              [&::-webkit-scrollbar-corner]:bg-green-50
+                              dark:[&::-webkit-scrollbar-track]:bg-green-900
+                              dark:[&::-webkit-scrollbar-thumb]:bg-green-500
+                              dark:[&::-webkit-scrollbar-corner]:bg-green-900"
+                            >
+                              <table className="w-full">
+                                <thead className="bg-gray-50 sticky top-0 z-10">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pick up Location</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Location</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Time Day</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Time Day</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Price</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {userBookings.map((booking, index) => (
+                                    <motion.tr
+                                      key={booking.id}
+                                      className="hover:bg-gray-50 transition-colors duration-150"
+                                      initial={{ opacity: 0, y: 20 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                                    >
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        #{booking.id}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div className="flex items-center">
+                                          <div className="flex-shrink-0 h-8 w-12 mr-3">
+                                            <img
+                                              className="h-8 w-12 rounded object-cover"
+                                              src={booking.vehicle?.image || '/images/default-car.jpg'}
+                                              alt={booking.vehicle?.name || 'Car'}
+                                              onError={(e) => {
+                                                e.target.src = '/images/default-car.jpg';
+                                              }}
+                                            />
+                                          </div>
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                              {booking.vehicle?.name || 'N/A'}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {booking.pickup_location || 'N/A'}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {booking.return_location || 'N/A'}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div>
+                                          <div className="text-sm text-gray-900">{formatBookingDate(booking.pickup_date)}</div>
+                                          <div className="text-sm text-gray-500">{formatBookingTime(booking.pickup_time)}</div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div>
+                                          <div className="text-sm text-gray-900">{formatBookingDate(booking.return_date)}</div>
+                                          <div className="text-sm text-gray-500">{formatBookingTime(booking.return_time)}</div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                                        {formatPrice(booking.final_price)}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                                          {getStatusText(booking.status)}
+                                        </span>
+                                      </td>
+                                    </motion.tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Scroll indicator */}
+                            {userBookings.length > 6 && (
+                              <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+                                <div className="flex items-center justify-center text-sm text-gray-500">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                  </svg>
+                                  Scroll to see more orders
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </motion.div>
                   </motion.div>
@@ -630,68 +776,6 @@ export default function UserProfilePage() {
                   </motion.div>
                 )}
 
-                {/* Orders Panel */}
-                {activePanel === 'orders' && (
-                  <motion.div
-                    key="orders"
-                    variants={panelVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    <div className="bg-white rounded-lg shadow-sm">
-                      <div className="p-6 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-800">All My Orders</h3>
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full">
-                          <thead className="bg-gray-50">
-                            <tr>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Route</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                          </thead>
-                          <tbody className="bg-white divide-y divide-gray-200">
-                            {userData.recentOrders.map((order, index) => (
-                              <motion.tr
-                                key={order.id}
-                                className="hover:bg-gray-50"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1, duration: 0.3 }}
-                              >
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{order.id}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{order.car}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {order.pickup} → {order.destination}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                  {order.rentDate} - {order.returnDate}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap">
-                                  <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(order.status)}`}>
-                                    {order.status}
-                                  </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                  <button className="text-green-600 hover:text-green-900 mr-3">View</button>
-                                  {order.status.toLowerCase() === 'pending' && (
-                                    <button className="text-red-600 hover:text-red-900">Cancel</button>
-                                  )}
-                                </td>
-                              </motion.tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
                 {/* Favorite Cars Panel */}
                 {activePanel === 'favoriteCars' && (
                   <motion.div
@@ -706,30 +790,31 @@ export default function UserProfilePage() {
                         <h3 className="text-lg font-semibold text-gray-800">My Favorite Cars</h3>
                         <p className="text-sm text-gray-600 mt-1">Cars you've marked as favorites</p>
                       </div>
-                      <div className="p-6">                        {favoriteCars.length > 0 ? (
-                        <VehicleList
-                          vehicles={favoriteCars}
-                          onFavoriteToggle={handleFavoriteToggle}
-                          favorites={favoriteCars.map(car => car.id)}
-                          showFavoriteButton={true}
-                        />
-                      ) : (
-                        <div className="text-center py-12">
-                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                          <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
-                          <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
-                          <div className="mt-6">
-                            <button
-                              onClick={() => router.push('/finding_car')}
-                              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            >
-                              Browse Cars
-                            </button>
+                      <div className="p-6">
+                        {favoriteCars.length > 0 ? (
+                          <VehicleList
+                            vehicles={favoriteCars}
+                            onFavoriteToggle={handleFavoriteToggle}
+                            favorites={favoriteCars.map(car => car.id)}
+                            showFavoriteButton={true}
+                          />
+                        ) : (
+                          <div className="text-center py-12">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
+                            <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
+                            <div className="mt-6">
+                              <button
+                                onClick={() => router.push('/finding_car')}
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              >
+                                Browse Cars
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       </div>
                     </div>
                   </motion.div>
