@@ -314,6 +314,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     );
   };
 
+  // Scroll to top when step changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentStep]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-100">
       {/* Header Section */}
@@ -324,17 +329,6 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
           </div>
           <h1 className="text-4xl font-bold text-green-800 mb-2">Book Your Car</h1>
           <p className="text-green-600 text-lg">Complete your booking in just 3 simple steps</p>
-        </div>
-        {/* Info Boxes */}
-        <div className="w-full max-w-4xl flex flex-col gap-2 mb-8">
-          <div className="text-sm p-4 bg-gray-100 border border-green-200 rounded-md shadow text-green-900">
-            <strong>Selected car:</strong> {normalizedCar?.name} ({normalizedCar?.type}) - {formatVND(normalizedCar?.price)} /day
-          </div>
-          <div className="text-sm p-4 bg-yellow-50 border border-yellow-200 rounded-md shadow text-yellow-900">
-            <strong>Search info:</strong><br />
-            Pickup: {searchData.pickupLocation} at {searchData.pickupDate} {searchData.pickupTime}<br />
-            Dropoff: {searchData.dropoffLocation} at {searchData.dropoffDate} {searchData.dropoffTime}
-          </div>
         </div>
       </div>
       <div className="container mx-auto px-4 py-0">
@@ -490,6 +484,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                               ? 'border-red-300 focus:border-red-500' 
                               : 'border-green-200 focus:border-green-500'
                           }`}
+                          value={searchData.pickupDate} // <-- Thêm dòng này để auto fill
                           onChange={(e) => {
                             setSearchData(prev => ({ ...prev, pickupDate: e.target.value }));
                             if (errors.pickupDate) setErrors(prev => ({ ...prev, pickupDate: '' }));
