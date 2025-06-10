@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Calendar, MapPin, Clock, User, Mail, Phone,
   CreditCard, Banknote, Car, CheckCircle, ArrowLeft,
@@ -10,6 +10,8 @@ import {
 
 // carbooking.js - Sửa lại useEffect
 const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
+  const router = useRouter();
+
   // Chuẩn hóa dữ liệu xe đã chọn
   const normalizedCar = selectedCar
     ? {
@@ -167,63 +169,30 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 
   const handleBookingComplete = async () => {
     setIsSubmitting(true);
+    
+    // Create a serializable version of the car data
+    const serializableCar = {
+      ...normalizedCar,
+      // Convert image React element to image URL/path
+      image: selectedCar.image || 
+             (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0 
+               ? selectedCar.vehicle_images[0].image_url 
+               : ''),
+    };
 
-    setTimeout(() => {
-      const bookingData = {
-        car: selectedCar,
-        search: searchData,
-        customer: userInfo,
-        payment: paymentMethod,
-        total: calculateTotal(),
-        bookingId: 'BK' + Date.now()
-      };
+    // Create booking data object with serializable car data
+    const bookingData = {
+      car: serializableCar,
+      searchData,
+      userInfo,
+      paymentMethod
+    };
 
-      // Compose dynamic popup content
-      const carName = normalizedCar?.name || '';
-      const carType = normalizedCar?.type || '';
-      const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
-      const rentalDays = getDayCount();
-      const pricePerDay = normalizedCar?.price ? `${normalizedCar.price} ₫` : '';
-      const total = `${calculateTotal()} ₫`;
-      const vat = `${Math.round(calculateTotal() * 0.1)} ₫`;
-      const totalWithVat = `${Math.round(calculateTotal() * 1.1)} ₫`;
-
-      alert(
-        `🎉 Booking successful!
-
-🚗 Car: ${carName} (${carType}${carSeats ? ' • ' + carSeats : ''})
-📅 Rental: ${searchData.pickupDate} ${searchData.pickupTime} → ${searchData.dropoffDate} ${searchData.dropoffTime} (${rentalDays} day(s))
-💵 Price per day: ${pricePerDay}
-🧾 VAT (10%): ${vat}
-💰 Total: ${totalWithVat}
-
-📋 Booking ID: ${bookingData.bookingId}
-💳 Payment method: ${paymentMethod === 'cash' ? 'Pay on Pickup' : 'Bank Transfer'}
-
-📧 Details have been sent to your email.
-📞 We will contact you for confirmation within 30 minutes.`
-      );
-
-      setIsSubmitting(false);
-      // Reset form after success
-      setCurrentStep(1);
-      setSearchData({
-        pickupLocation: '',
-        dropoffLocation: '',
-        pickupDate: '',
-        pickupTime: '',
-        dropoffDate: '',
-        dropoffTime: ''
-      });
-      setUserInfo({
-        fullName: '',
-        email: '',
-        phone: '',
-        address: '',
-        driverLicense: ''
-      });
-      setPaymentMethod('cash');
-    }, 2000);
+    // Encode booking data for URL
+    const encodedData = encodeURIComponent(JSON.stringify(bookingData));
+    
+    // Navigate to booking ticket page with data
+    router.push(`/booking_ticket?data=${encodedData}`);
   };
 
   const calculateTotal = () => {
