@@ -16,6 +16,9 @@ Built with the tools and technologies:
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow)
 ![React](https://img.shields.io/badge/React-Next.js-61DAFB)
 
+## Website
+https://car-app-web-design.vercel.app/
+
 ## Team Member
 <li>Trần Ngọc Quân - 23020020</li>
 <li>Ngô Hoàng Nhật Khang - 23020004</li>
@@ -32,9 +35,9 @@ Whale Xe is a modern, responsive web application for car rentals built with Next
 - **🔍 Search Cars Button**: Navigate to comprehensive vehicle listing with advanced filters
 - **⭐ Featured Vehicles**: Highlighted premium and popular options
 - **🎉 Promotional Offers**: Special deals and discounts display
-- **📰 Latest News: Recent updates and announcements display
-- **❓ Frequently Asked Questions: Common queries and helpful answers display
-- **📞 Get in Touch: Contact options and inquiry form display
+- **📰 Latest News**: Recent updates and announcements display
+- **❓ Frequently Asked Questions**: Common queries and helpful answers display
+- **📞 Get in Touch**: Contact options and inquiry form display
 
 ### 🔍 Vehicle Search & Booking Page
 - **📍 Location & Date Selection**: Easy input for pickup/return details
@@ -66,16 +69,16 @@ Whale Xe is a modern, responsive web application for car rentals built with Next
 - **🛒 Booking Cart**: Add multiple vehicles for comparison
 - **👤 User Profile**: Personal information and preferences
 - **📚 Rental History**: Track past and current bookings
-- **❤️ My Favourite: Your saved or preferred vehicles display
+- **❤️ My Favourite**: Your saved or preferred vehicles display
 
 ---
 
 ## 👨‍💼 Admin Functions
 
 ### 📊 **Analytics Dashboard**
-- **📈 Overview: Quick insights on rentals, revenue, and performance
-- **🚗 Vehicle List: Full inventory management and vehicle details
-- **📋 Rental Orders: Track, manage, and fulfill rental orders
+- **📈 Overview**: Quick insights on rentals, revenue, and performance
+- **🚗 Vehicle List**: Full inventory management and vehicle details
+- **📋 Rental Orders**: Track, manage, and fulfill rental orders
 
 ## Admin Account:
 + Phone number: 0998877665
