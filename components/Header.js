@@ -20,12 +20,14 @@ export default function Header() {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
 
   const isCarFindingPage = pathname?.includes('/finding_car');
+  const isBookingPage = pathname?.includes('/booking_car');
+  const isBookingTicketPage = pathname?.includes('/booking_ticket'); // Thêm dòng này
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
       setScrollY(currentScrollY);
-      
+
       // Header visibility logic
       if (currentScrollY > 100) { // Only start hiding after scrolling 100px
         if (currentScrollY > prevScrollY && currentScrollY > 200) {
@@ -39,10 +41,10 @@ export default function Header() {
         // Near top of page - always show header
         setIsHeaderVisible(true);
       }
-      
+
       setPrevScrollY(currentScrollY);
     };
-    
+
     if (!isCarFindingPage) {
       window.addEventListener("scroll", handleScroll);
     }
@@ -146,7 +148,7 @@ export default function Header() {
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
+
     return () => {
       window.removeEventListener('storage', handleStorageChange);
     };
@@ -155,12 +157,12 @@ export default function Header() {
   const handleLogout = () => {
     // Start white fade overlay
     setShowWhiteFade(true);
-    
+
     // Clear user data
     localStorage.removeItem('user');
     setUser(null);
     setShowDropdown(false);
-    
+
     // Wait for fade animation to complete, then refresh
     setTimeout(() => {
       window.location.reload();
@@ -202,7 +204,12 @@ export default function Header() {
         animate={{
           ...fadeVariant.visible,
           y: isHeaderVisible ? 0 : -100,
-          opacity: isCarFindingPage ? 1 : scrollY > 5 ? Math.max(1 - (scrollY - 5) / 5, 0.9) : 1,
+          // Nếu là booking_ticket thì luôn opacity 1, không hiệu ứng mờ
+          opacity: isCarFindingPage || isBookingPage || isBookingTicketPage
+            ? 1
+            : scrollY > 5
+              ? Math.max(1 - (scrollY - 5) / 5, 0.9)
+              : 1,
         }}
         transition={{
           y: { duration: 0.3, ease: "easeInOut" },
@@ -212,10 +219,12 @@ export default function Header() {
         style={{
           backgroundColor: isCarFindingPage
             ? "rgba(17, 24, 39, 0.95)"
-            : scrollY > 50
-              ? "rgba(17, 24, 39, 0.9)"
-              : "rgba(17, 24, 39, " + bgOpacity + ")",
-          backdropFilter: isCarFindingPage ? "blur(10px)" : "none",
+            : isBookingPage || isBookingTicketPage
+              ? "rgba(17, 24, 39, 0.95)" // Luôn nền đậm cho booking và booking_ticket, không hiệu ứng
+              : scrollY > 50
+                ? "rgba(17, 24, 39, 0.9)"
+                : "rgba(17, 24, 39, " + bgOpacity + ")",
+          backdropFilter: isCarFindingPage || isBookingPage || isBookingTicketPage ? "blur(10px)" : "none",
         }}
       >
         <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
@@ -302,58 +311,58 @@ export default function Header() {
                     <i className="fas fa-chevron-down text-xs text-white hidden sm:block flex-shrink-0 transition-colors duration-200 group-hover:text-green-400" />
                   </motion.div>
                   <AnimatePresence>
-                    {showDropdown && (                      <motion.div
-                        className="absolute right-0 mt-2 z-50 bg-white rounded-lg shadow-lg w-48 sm:w-52"
-                        variants={dropdownVariants}
-                        initial="hidden"
-                        animate="visible"
-                        exit="exit"
-                      >                        {/* User info section */}
-                        <div className="px-4 py-3 border-b border-gray-100">                          <div className="flex items-center gap-3">
-                            <img
-                              src={user.avatar || "/avatar/default_avatar.jpg"}
-                              className="w-10 h-10 rounded-full border border-gray-200 object-cover"
-                              alt="User avatar"
-                              onError={(e) => {
-                                e.target.src = "/avatar/default_avatar.jpg";
-                              }}
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="text-sm font-medium text-gray-900 truncate">
-                                {user.name || "User"}
-                              </div>
-                              <div className="text-xs text-gray-500 truncate">
-                                {user.phone}
-                              </div>
-                              {user.roles && user.roles.length > 0 && (
-                                <div className="text-xs text-green-600 font-medium capitalize">
-                                  {user.roles[0].name}
-                                </div>
-                              )}
-                              {user.id && (
-                                <div className="text-xs text-gray-400">
-                                  ID: {user.id}
-                                </div>
-                              )}
-                            </div>
+                    {showDropdown && (<motion.div
+                      className="absolute right-0 mt-2 z-50 bg-white rounded-lg shadow-lg w-48 sm:w-52"
+                      variants={dropdownVariants}
+                      initial="hidden"
+                      animate="visible"
+                      exit="exit"
+                    >                        {/* User info section */}
+                      <div className="px-4 py-3 border-b border-gray-100">                          <div className="flex items-center gap-3">
+                        <img
+                          src={user.avatar || "/avatar/default_avatar.jpg"}
+                          className="w-10 h-10 rounded-full border border-gray-200 object-cover"
+                          alt="User avatar"
+                          onError={(e) => {
+                            e.target.src = "/avatar/default_avatar.jpg";
+                          }}
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium text-gray-900 truncate">
+                            {user.name || "User"}
                           </div>
+                          <div className="text-xs text-gray-500 truncate">
+                            {user.phone}
+                          </div>
+                          {user.roles && user.roles.length > 0 && (
+                            <div className="text-xs text-green-600 font-medium capitalize">
+                              {user.roles[0].name}
+                            </div>
+                          )}
+                          {user.id && (
+                            <div className="text-xs text-gray-400">
+                              ID: {user.id}
+                            </div>
+                          )}
                         </div>
+                      </div>
+                      </div>
 
-                        {/* Menu items */}
-                        <ul className="py-2 text-sm text-gray-700">
-                          <li><a href="/user_dashboard" className="px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
-                            <i className="fas fa-tachometer-alt w-4"></i> My Dashboard
-                          </a></li>
-                        </ul>
-                        <div className="py-1 border-t border-gray-100">
-                          <button
-                            onClick={handleLogout}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
-                          >
-                            <i className="fas fa-sign-out-alt w-4"></i> Sign out
-                          </button>
-                        </div>
-                      </motion.div>
+                      {/* Menu items */}
+                      <ul className="py-2 text-sm text-gray-700">
+                        <li><a href="/user_dashboard" className="px-4 py-2 hover:bg-gray-100 transition-colors flex items-center gap-2">
+                          <i className="fas fa-tachometer-alt w-4"></i> My Dashboard
+                        </a></li>
+                      </ul>
+                      <div className="py-1 border-t border-gray-100">
+                        <button
+                          onClick={handleLogout}
+                          className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2"
+                        >
+                          <i className="fas fa-sign-out-alt w-4"></i> Sign out
+                        </button>
+                      </div>
+                    </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -381,20 +390,20 @@ export default function Header() {
                 transition={{ duration: 0.2 }}
               >
                 <nav className="py-4 space-y-2">
-                  <button 
-                    onClick={() => handleNavigation("./")} 
+                  <button
+                    onClick={() => handleNavigation("./")}
                     className="block w-full text-left px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
                   >
                     Home
                   </button>
-                  <button 
-                    onClick={() => handleNavigation("/#renting")} 
+                  <button
+                    onClick={() => handleNavigation("/#renting")}
                     className="block w-full text-left px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
                   >
                     Cars
                   </button>
-                  <button 
-                    onClick={() => handleNavigation("/#gallery")} 
+                  <button
+                    onClick={() => handleNavigation("/#gallery")}
                     className="block w-full text-left px-4 py-3 hover:bg-white hover:bg-opacity-10 rounded-lg transition-colors"
                   >
                     Gallery

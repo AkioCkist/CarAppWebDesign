@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'; // Added useEffect
 import { ChevronDown, ChevronUp, FileText, Car, CreditCard, MapPin, Calendar, Shield } from 'lucide-react';
 import Link from 'next/link'; // Add this import
+import { motion, AnimatePresence } from 'framer-motion'; // Import motion and AnimatePresence
 
 export default function ModernFaqAccordion() {
   const [openIndex, setOpenIndex] = useState(null); // Initialize with null, so all are closed by default
@@ -269,13 +270,21 @@ export default function ModernFaqAccordion() {
                 <ChevronDown className="w-5 h-5 text-gray-500 flex-shrink-0" />
               )}
             </button>
-            {openIndex === index && (
-              <div className="p-4 md:p-5 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-                <div className="text-xs md:text-sm text-gray-700 leading-relaxed">
-                  {item.answer}
-                </div>
-              </div>
-            )}
+            <AnimatePresence>
+              {openIndex === index && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  transition={{ duration: 0.3, ease: "easeOut" }}
+                  className="p-4 md:p-5 border-t border-gray-200 bg-gray-50 rounded-b-xl overflow-hidden"
+                >
+                  <div className="text-xs md:text-sm text-gray-700 leading-relaxed">
+                    {item.answer}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         ))}
       </div>
