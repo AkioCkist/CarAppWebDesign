@@ -105,7 +105,7 @@ Whale Xe is a modern, responsive web application for car rentals built with Next
 ![Car List](public/shot/13.jpg)
 
 ### User Favorite List
-![Car List](public/shot/13.jpg)
+![Car List](public/shot/14.jpg)
 
 ### Car Detail
 ![Car Detail](public/shot/5.jpg)
