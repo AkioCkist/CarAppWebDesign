@@ -25,10 +25,11 @@ export async function GET(request) {
     try {
         const { searchParams } = new URL(request.url)
         const id = searchParams.get('id')
+
         if (id) {
-            return await getBookingDetail(safeParseInt(id))
+            return await getBookingDetail(safeParseInt(id), request)
         }
-        return await getBookings(searchParams)
+        return await getBookings(searchParams, request)
     } catch (error) {
         console.error('GET Error:', error)
         return NextResponse.json({ error: error.message }, { status: 500 })
@@ -42,11 +43,9 @@ export async function POST(request) {
         const { action } = body
 
         if (action === 'update_status') {
-            return await updateBookingStatus(body)
-        }
-
-        if (action === 'create_booking') {
-            return await createBooking(body)
+            return await updateBookingStatus(body, request)
+        } if (action === 'create_booking') {
+            return await createBooking(body, request)
         }
 
         return NextResponse.json(
@@ -60,7 +59,7 @@ export async function POST(request) {
 }
 
 
-async function getBookings(searchParams) {
+async function getBookings(searchParams, request) {
     try {
         const userId = searchParams.get('userId')
         const status = searchParams.get('status')
@@ -68,10 +67,16 @@ async function getBookings(searchParams) {
         const offset = searchParams.get('offset') ? safeParseInt(searchParams.get('offset')) : undefined
 
         let whereClause = {}
-        if (userId) whereClause.renter_id = safeParseInt(userId)
-        if (status) whereClause.status = status
 
-        const [bookings, total] = await Promise.all([
+        // If userId is provided, filter by that user's bookings
+        if (userId) {
+            const requestedUserId = safeParseInt(userId);
+            whereClause.renter_id = requestedUserId;
+        }
+
+        if (status && status !== 'all') {
+            whereClause.status = status;
+        } const [bookings, total] = await Promise.all([
             prisma.bookings.findMany({
                 where: whereClause,
                 include: {
@@ -134,17 +139,29 @@ async function getBookings(searchParams) {
     }
 }
 
-async function updateBookingStatus(data) {
-    const { booking_id, status } = data
-
-    if (!booking_id || !status) {
-        return NextResponse.json(
-            { success: false, error: 'booking_id và status là bắt buộc' },
-            { status: 400 }
-        )
-    }
-
+async function updateBookingStatus(data, request) {
     try {
+        const { booking_id, status } = data
+
+        if (!booking_id || !status) {
+            return NextResponse.json(
+                { success: false, error: 'booking_id và status là bắt buộc' },
+                { status: 400 }
+            )
+        }
+
+        // Check if booking exists
+        const existingBooking = await prisma.bookings.findFirst({
+            where: { booking_id: safeParseInt(booking_id) }
+        });
+
+        if (!existingBooking) {
+            return NextResponse.json(
+                { success: false, error: 'Booking not found' },
+                { status: 404 }
+            )
+        }
+
         await prisma.bookings.update({
             where: { booking_id: safeParseInt(booking_id) },
             data: {
@@ -164,7 +181,7 @@ async function updateBookingStatus(data) {
 }
 
 
-async function getBookingDetail(id) {
+async function getBookingDetail(id, request) {
     try {
         const booking = await prisma.bookings.findFirst({
             where: { booking_id: id },
@@ -192,11 +209,13 @@ async function getBookingDetail(id) {
                 }
             }
         })
+
         if (!booking) {
             return NextResponse.json({
                 message: 'Không tìm thấy đơn đặt xe.'
             }, { status: 404 })
         }
+
         const formattedBooking = formatBookingData(booking);
         console.log('Booking detail after formatBookingData:', formattedBooking);
         return NextResponse.json(formattedBooking)
@@ -280,13 +299,13 @@ function formatBookingData(booking) {
     return formattedBooking;
 }
 
-async function createBooking(data) {
+async function createBooking(data, request) {
     try {
         // Validate required fields
         const requiredFields = [
-            'vehicle_id', 
-            'start_date', 
-            'end_date', 
+            'vehicle_id',
+            'start_date',
+            'end_date',
             'pickup_location',
             'return_location',
             'total_price',
@@ -331,12 +350,12 @@ async function createBooking(data) {
             });
             const nextBookingId = (latestBooking?.booking_id || 0) + 1;
 
-            // Create booking
+            // Create booking - use provided renter_id or default to 1
             const booking = await tx.bookings.create({
                 data: {
                     booking_id: nextBookingId,
                     vehicle_id: safeParseInt(data.vehicle_id),
-                    renter_id: 18, // Default renter_id for now
+                    renter_id: safeParseInt(data.renter_id) || 1, // Use provided renter_id or default to user 1
                     pickup_date,
                     pickup_time: pickup_date,
                     return_date,
@@ -354,9 +373,8 @@ async function createBooking(data) {
             // Update vehicle status
             await tx.vehicles.update({
                 where: { vehicle_id: safeParseInt(data.vehicle_id) },
-                data: { 
-                    status: 'rented',
-                    current_booking_id: nextBookingId
+                data: {
+                    status: 'rented'
                 }
             });
 
@@ -376,8 +394,8 @@ async function createBooking(data) {
         return NextResponse.json({
             success: false,
             error: error.message || 'Failed to create booking'
-        }, { 
-            status: error.message.includes('not available') ? 400 : 500 
+        }, {
+            status: error.message.includes('not available') ? 400 : 500
         });
     }
 }
