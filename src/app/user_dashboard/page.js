@@ -519,20 +519,6 @@ export default function UserProfilePage() {
                   </motion.a>
                   <motion.a
                     href="#"
-                    onClick={e => { e.preventDefault(); setActivePanel('orders'); }}
-                    className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${activePanel === 'orders' ? 'text-white bg-green-500' : 'text-gray-700 hover:bg-gray-100'}`}
-                    variants={buttonVariants}
-                    initial="idle"
-                    whileHover="hover"
-                    whileTap="tap"
-                  >
-                    <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    My Orders
-                  </motion.a>
-                  <motion.a
-                    href="#"
                     onClick={e => { e.preventDefault(); setActivePanel('favoriteCars'); }}
                     className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${activePanel === 'favoriteCars' ? 'text-white bg-green-500' : 'text-gray-700 hover:bg-gray-100'}`}
                     variants={buttonVariants}
@@ -544,7 +530,8 @@ export default function UserProfilePage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
                     My Favorite Cars
-                  </motion.a>                  <motion.a
+                  </motion.a>
+                  <motion.a
                     href="#"
                     onClick={e => {
                       e.preventDefault();
@@ -628,92 +615,13 @@ export default function UserProfilePage() {
                         <p className="text-sm text-gray-600">{label}</p>
                       </motion.div>
                     ))}
-                    </motion.div>                    {/* Recent Orders Table */}
+                    </motion.div>                    {/* All Orders Table - REPLACED Recent Orders */}
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.3, duration: 0.5 }}
                       className="bg-white rounded-lg shadow-sm mb-6"
                     >
-                      <div className="p-6 border-b border-gray-200">
-                        <h3 className="text-lg font-semibold text-gray-800">My Recent Orders</h3>
-                      </div>
-                      <div className="overflow-x-auto">
-                        {bookingsLoading ? (
-                          <div className="flex items-center justify-center py-8">
-                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mr-2"></div>
-                            <span className="text-gray-600 text-sm">Loading recent orders...</span>
-                          </div>
-                        ) : userBookings.length === 0 ? (
-                          <div className="text-center py-8">
-                            <p className="text-gray-500">No recent orders found.</p>
-                          </div>
-                        ) : (
-                          <table className="w-full">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Location</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Rent Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Date</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {userBookings.slice(0, 5).map((booking, index) => (
-                                <motion.tr
-                                  key={booking.id}
-                                  className="hover:bg-gray-50"
-                                  initial={{ opacity: 0, x: -20 }}
-                                  animate={{ opacity: 1, x: 0 }}
-                                  transition={{ delay: index * 0.1, duration: 0.3 }}
-                                >
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">#{booking.id}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{booking.vehicle?.name || 'N/A'}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.pickup_location || 'N/A'}</td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {formatBookingDate(booking.pickup_date)}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {formatBookingDate(booking.return_date)}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
-                                      {getStatusText(booking.status)}
-                                    </span>
-                                  </td>
-                                </motion.tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        )}
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                )}
-
-                {/* Profile Edit Panel */}
-                {activePanel === 'profile' && (
-                  <motion.div
-                    key="profile"
-                    variants={panelVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    <ProfileEditPanel user={userData} />
-                  </motion.div>
-                )}                {/* Orders Panel */}
-                {activePanel === 'orders' && (
-                  <motion.div
-                    key="orders"
-                    variants={panelVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    <div className="bg-white rounded-lg shadow-sm">
                       <div className="p-6 border-b border-gray-200">
                         <h3 className="text-lg font-semibold text-gray-800">All My Orders</h3>
                         {bookingsError && (
@@ -791,7 +699,20 @@ export default function UserProfilePage() {
                           </table>
                         )}
                       </div>
-                    </div>
+                    </motion.div>
+                  </motion.div>
+                )}
+
+                {/* Profile Edit Panel */}
+                {activePanel === 'profile' && (
+                  <motion.div
+                    key="profile"
+                    variants={panelVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                  >
+                    <ProfileEditPanel user={userData} />
                   </motion.div>
                 )}
 
@@ -809,30 +730,31 @@ export default function UserProfilePage() {
                         <h3 className="text-lg font-semibold text-gray-800">My Favorite Cars</h3>
                         <p className="text-sm text-gray-600 mt-1">Cars you've marked as favorites</p>
                       </div>
-                      <div className="p-6">                        {favoriteCars.length > 0 ? (
-                        <VehicleList
-                          vehicles={favoriteCars}
-                          onFavoriteToggle={handleFavoriteToggle}
-                          favorites={favoriteCars.map(car => car.id)}
-                          showFavoriteButton={true}
-                        />
-                      ) : (
-                        <div className="text-center py-12">
-                          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                          </svg>
-                          <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
-                          <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
-                          <div className="mt-6">
-                            <button
-                              onClick={() => router.push('/finding_car')}
-                              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            >
-                              Browse Cars
-                            </button>
+                      <div className="p-6">
+                        {favoriteCars.length > 0 ? (
+                          <VehicleList
+                            vehicles={favoriteCars}
+                            onFavoriteToggle={handleFavoriteToggle}
+                            favorites={favoriteCars.map(car => car.id)}
+                            showFavoriteButton={true}
+                          />
+                        ) : (
+                          <div className="text-center py-12">
+                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                            </svg>
+                            <h3 className="mt-2 text-sm font-medium text-gray-900">No favorite cars yet</h3>
+                            <p className="mt-1 text-sm text-gray-500">Start browsing and add cars to your favorites!</p>
+                            <div className="mt-6">
+                              <button
+                                onClick={() => router.push('/finding_car')}
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              >
+                                Browse Cars
+                              </button>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       </div>
                     </div>
                   </motion.div>
