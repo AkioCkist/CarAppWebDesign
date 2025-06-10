@@ -73,22 +73,26 @@ export default function RentalOrdersPage() {
         return colors[status] || 'bg-gray-100 text-gray-800';
     };
 
+    const getButtonStyle = (option) => {
+        if (statusFilter === option.value) {
+            if (option.value === 'all') {
+                return 'bg-gray-200 text-gray-900 font-semibold border border-gray-300';
+            }
+            return getStatusColor(option.value);
+        }
+        return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+    };
+
     return (
         <div className="container mx-auto px-4 py-8">
-            <div className="mb-10 text-center">
-                <h1 className="text-3xl font-bold text-gray-800 mb-4 tracking-wide">
-                    Rental Orders
-                </h1>
-                <div className="flex flex-wrap justify-center gap-3 mt-4">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900">Rental Orders</h1>
+                <div className="flex flex-wrap justify-start gap-3">
                     {statusOptions.map(option => (
                         <button
                             key={option.value}
                             onClick={() => setStatusFilter(option.value)}
-                            className={`px-4 py-2 rounded-md transition ${
-                                statusFilter === option.value
-                                    ? getStatusColor(option.value)
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
+                            className={`px-4 py-2 rounded-md transition ${getButtonStyle(option)}`}
                         >
                             {option.label}
                         </button>
