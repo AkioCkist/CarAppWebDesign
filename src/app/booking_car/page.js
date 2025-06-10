@@ -78,6 +78,7 @@ function BookingContent() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-200 via-white to-gray-50">
       <Header />
+      <div className="h-21 bg-gray/100"></div>
       <CarBookingPage 
         selectedCar={selectedCar} 
         preFilledSearchData={preFilledSearchData}
