@@ -601,8 +601,7 @@ export default function HomePage() {
                     </div>
                     <div className="flex-1 min-w-0 relative z-10">
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Drop Off Location</label>
-                      <div className="relative">
-                        <AnimatedDropdown
+                      <div className="relative">                        <AnimatedDropdown
                           options={dropoffOptions}
                           value={form.dropOffLocation}
                           onChange={handleFormChange}
@@ -616,7 +615,7 @@ export default function HomePage() {
                           onFocus={() => setIsDropoffLocationFocused(true)}
                           onBlur={() => setIsDropoffLocationFocused(false)}
                           isFocused={isDropoffLocationFocused}
-                          zIndex={50} // Lower z-index for dropoff
+                          zIndex={9999} // Very high z-index for dropoff to appear above all elements
                         />
                         <motion.svg
                           variants={iconVariants}
