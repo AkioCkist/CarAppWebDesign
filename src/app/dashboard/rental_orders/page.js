@@ -1,26 +1,27 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import BookingCard from '../../../../components/BookingCard'
 import ModalBookingDetail from '../../../../components/ModalBookingDetail'
+import SkeletonLoader from '../../../../components/SkeletonLoader'
 
 export default function RentalOrdersPage() {
     const [bookings, setBookings] = useState([])
     const [loading, setLoading] = useState(true)
+    const [loadingContent, setLoadingContent] = useState(false)
     const [error, setError] = useState(null)
     const [statusFilter, setStatusFilter] = useState('all')
+    const [searchTerm, setSearchTerm] = useState('')
     const [selectedBooking, setSelectedBooking] = useState(null)
 
-    useEffect(() => {
-        fetchBookings()
-    }, [statusFilter])
-
-    const fetchBookings = async () => {
+    const fetchData = useCallback(async (currentStatusFilter, currentSearchTerm) => {
         try {
-            setLoading(true)
             const url = new URL('/api/booking', window.location.origin)
-            if (statusFilter !== 'all') {
-                url.searchParams.append('status', statusFilter)
+            if (currentStatusFilter !== 'all') {
+                url.searchParams.append('status', currentStatusFilter)
+            }
+            if (currentSearchTerm) {
+                url.searchParams.append('search', currentSearchTerm)
             }
 
             const response = await fetch(url)
@@ -30,12 +31,36 @@ export default function RentalOrdersPage() {
 
             const data = await response.json()
             setBookings(data.records)
+            return data.records;
         } catch (err) {
             setError(err.message)
-        } finally {
-            setLoading(false)
+            return [];
         }
-    }
+    }, [])
+
+    useEffect(() => {
+        const initialLoadHandler = setTimeout(async () => {
+            setLoading(true);
+            await fetchData(statusFilter, searchTerm);
+            setLoading(false);
+        }, 500);
+
+        return () => clearTimeout(initialLoadHandler);
+    }, []);
+
+    useEffect(() => {
+        if (!loading) {
+            setLoadingContent(true);
+            const handler = setTimeout(async () => {
+                await fetchData(statusFilter, searchTerm);
+                setLoadingContent(false);
+            }, 500);
+
+            return () => {
+                clearTimeout(handler);
+            };
+        }
+    }, [searchTerm, statusFilter, fetchData]);
 
     const handleBookingClick = (booking) => {
         setSelectedBooking(booking)
@@ -64,30 +89,46 @@ export default function RentalOrdersPage() {
 
     const getStatusColor = (status) => {
         const colors = {
-            pending: 'bg-yellow-100 text-yellow-800 border border-yellow-300',
-            confirmed: 'bg-blue-100 text-blue-800 border border-blue-300',
-            ongoing: 'bg-green-100 text-green-800 border border-green-300',
-            completed: 'bg-gray-100 text-gray-800 border border-gray-300',
-            cancelled: 'bg-red-100 text-red-800 border border-red-300'
+            pending: 'bg-yellow-100 text-yellow-800 border border-yellow-300 font-bold',
+            confirmed: 'bg-blue-100 text-blue-800 border border-blue-300 font-bold',
+            ongoing: 'bg-green-100 text-green-800 border border-green-300 font-bold',
+            completed: 'bg-gray-100 text-gray-800 border border-gray-300 font-bold',
+            cancelled: 'bg-red-100 text-red-800 border border-red-300 font-bold'
         };
-        return colors[status] || 'bg-gray-100 text-gray-800';
+        return colors[status] || 'bg-gray-100 text-gray-800 font-bold';
     };
 
     const getButtonStyle = (option) => {
         if (statusFilter === option.value) {
             if (option.value === 'all') {
-                return 'bg-gray-200 text-gray-900 font-semibold border border-gray-300';
+                return 'bg-gray-200 text-gray-900 font-bold border border-gray-300';
             }
             return getStatusColor(option.value);
         }
-        return 'bg-gray-100 text-gray-700 hover:bg-gray-200';
+        return 'bg-gray-100 text-gray-700 hover:bg-gray-200 font-medium';
     };
+
+    if (error) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-6 py-4 rounded-lg shadow-md max-w-lg text-center">
+                    <p className="font-bold text-xl mb-2">Error Loading Data</p>
+                    <p>{error}</p>
+                    <p className="text-sm text-gray-600 mt-4">Please try refreshing the page or contact support if the issue persists.</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (loading) {
+        return <SkeletonLoader type="rental-orders-full-page" />;
+    }
 
     return (
         <div className="container mx-auto px-4 py-8">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Rental Orders</h1>
-                <div className="flex flex-wrap justify-start gap-3">
+                <div className="flex flex-wrap justify-start gap-3 mt-4 mb-4">
                     {statusOptions.map(option => (
                         <button
                             key={option.value}
@@ -98,24 +139,19 @@ export default function RentalOrdersPage() {
                         </button>
                     ))}
                 </div>
+                <div className="mb-4">
+                    <input
+                        type="text"
+                        placeholder="Search by vehicle name, renter name or location..."
+                        className="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700 font-semibold"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
             </div>
 
-            {error ? (
-                <div className="flex items-center justify-center min-h-screen">
-                    <div className="text-red-600 text-center">
-                        <p>Error: {error}</p>
-                        <button
-                            onClick={fetchBookings}
-                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                        >
-                            Retry
-                        </button>
-                    </div>
-                </div>
-            ) : loading ? (
-                <div className="flex items-center justify-center py-12">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-                </div>
+            {loadingContent ? (
+                <SkeletonLoader type="booking-cards-grid" />
             ) : bookings.length === 0 ? (
                 <div className="text-center py-12">
                     <p className="text-gray-500 text-lg">No rental orders found</p>

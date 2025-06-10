@@ -2,8 +2,24 @@
 
 import React from 'react';
 import VehicleTable from '../../../../components/VehicleTable';
+import SkeletonLoader from '../../../../components/SkeletonLoader';
 
 const VehicleListPage = () => {
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate data fetching
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500); // Adjust time to match actual data loading
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return <SkeletonLoader type="vehicle-list-full-page" />;
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-6">
