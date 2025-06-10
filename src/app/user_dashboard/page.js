@@ -624,13 +624,21 @@ export default function UserProfilePage() {
                     >
                       <div className="p-6 border-b border-gray-200">
                         <h3 className="text-lg font-semibold text-gray-800">All My Orders</h3>
+                        <p className="text-sm text-gray-600 mt-1">
+                          {userBookings.length > 0
+                            ? `Showing ${Math.min(5, userBookings.length)} of ${userBookings.length} orders`
+                            : 'No orders found'
+                          }
+                        </p>
                         {bookingsError && (
                           <div className="mt-2 text-red-600 text-sm">
                             Error loading orders: {bookingsError}
                           </div>
                         )}
                       </div>
-                      <div className="overflow-x-auto">
+
+                      {/* Scrollable Table Container */}
+                      <div className="relative">
                         {bookingsLoading ? (
                           <div className="flex items-center justify-center py-12">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-500 mr-3"></div>
@@ -643,60 +651,113 @@ export default function UserProfilePage() {
                             </svg>
                             <p className="text-gray-500 text-lg mb-2">No orders found</p>
                             <p className="text-gray-400 text-sm">You haven't made any car bookings yet.</p>
+                            <div className="mt-6 pb-6">
+                              <button
+                                onClick={() => router.push('/finding_car')}
+                                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              >
+                                Browse Cars
+                              </button>
+                            </div>
                           </div>
                         ) : (
-                          <table className="w-full">
-                            <thead className="bg-gray-50">
-                              <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pick up Location</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Location</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Time Day</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Time Day</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Price</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                              </tr>
-                            </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
-                              {userBookings.map((booking, index) => (
-                                <motion.tr
-                                  key={booking.id}
-                                  className="hover:bg-gray-50"
-                                  initial={{ opacity: 0, y: 20 }}
-                                  animate={{ opacity: 1, y: 0 }}
-                                  transition={{ delay: index * 0.1, duration: 0.3 }}
-                                >
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                    #{booking.id}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    {booking.vehicle?.name || 'N/A'}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {booking.pickup_location || 'N/A'}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {booking.return_location || 'N/A'}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {formatBookingDate(booking.pickup_date)} {formatBookingTime(booking.pickup_time)}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                    {formatBookingDate(booking.return_date)} {formatBookingTime(booking.return_time)}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
-                                    {formatPrice(booking.final_price)}
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
-                                      {getStatusText(booking.status)}
-                                    </span>
-                                  </td>
-                                </motion.tr>
-                              ))}
-                            </tbody>
-                          </table>
+                          <div className="overflow-x-auto">
+                            {/* Fixed height container with scroll */}
+                            <div
+                              className="max-h-80 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100"
+                              style={{
+                                scrollbarWidth: 'thin',
+                                scrollbarColor: '#D1D5DB #F3F4F6'
+                              }}
+                            >
+                              <table className="w-full">
+                                <thead className="bg-gray-50 sticky top-0 z-10">
+                                  <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order ID</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Car Model</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pick up Location</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Location</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pickup Time Day</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Time Day</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Last Price</th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                  </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                  {userBookings.map((booking, index) => (
+                                    <motion.tr
+                                      key={booking.id}
+                                      className="hover:bg-gray-50 transition-colors duration-150"
+                                      initial={{ opacity: 0, y: 20 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{ delay: index * 0.05, duration: 0.3 }}
+                                    >
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                        #{booking.id}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                        <div className="flex items-center">
+                                          <div className="flex-shrink-0 h-8 w-12 mr-3">
+                                            <img
+                                              className="h-8 w-12 rounded object-cover"
+                                              src={booking.vehicle?.image || '/images/default-car.jpg'}
+                                              alt={booking.vehicle?.name || 'Car'}
+                                              onError={(e) => {
+                                                e.target.src = '/images/default-car.jpg';
+                                              }}
+                                            />
+                                          </div>
+                                          <div>
+                                            <div className="text-sm font-medium text-gray-900">
+                                              {booking.vehicle?.name || 'N/A'}
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {booking.pickup_location || 'N/A'}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        {booking.return_location || 'N/A'}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div>
+                                          <div className="text-sm text-gray-900">{formatBookingDate(booking.pickup_date)}</div>
+                                          <div className="text-sm text-gray-500">{formatBookingTime(booking.pickup_time)}</div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                        <div>
+                                          <div className="text-sm text-gray-900">{formatBookingDate(booking.return_date)}</div>
+                                          <div className="text-sm text-gray-500">{formatBookingTime(booking.return_time)}</div>
+                                        </div>
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-green-600">
+                                        {formatPrice(booking.final_price)}
+                                      </td>
+                                      <td className="px-6 py-4 whitespace-nowrap">
+                                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                                          {getStatusText(booking.status)}
+                                        </span>
+                                      </td>
+                                    </motion.tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Scroll indicator */}
+                            {userBookings.length > 5 && (
+                              <div className="bg-gray-50 px-6 py-3 border-t border-gray-200">
+                                <div className="flex items-center justify-center text-sm text-gray-500">
+                                  <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                  </svg>
+                                  Scroll to see more orders
+                                </div>
+                              </div>
+                            )}
+                          </div>
                         )}
                       </div>
                     </motion.div>
