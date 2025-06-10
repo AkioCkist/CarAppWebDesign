@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import {
   Calendar, MapPin, Clock, User, Mail, Phone,
   CreditCard, Banknote, Car, CheckCircle, ArrowLeft,
@@ -10,6 +10,8 @@ import {
 
 // carbooking.js - Sửa lại useEffect
 const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
+  const router = useRouter();
+
   // Chuẩn hóa dữ liệu xe đã chọn
   const normalizedCar = selectedCar
     ? {
@@ -191,115 +193,125 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
     }
   };
 
-  const handleBookingComplete = async () => {
-    setIsSubmitting(true);
+ const handleBookingComplete = async () => {
+  setIsSubmitting(true);
 
-    try {
-      // Validate all required data
-      if (!normalizedCar?.id) {
-        throw new Error('Car information is missing');
+  try {
+    // Validate all required data
+    if (!normalizedCar?.id) {
+      throw new Error('Car information is missing');
+    }
+
+    if (!validateStep1()) {
+      throw new Error('Please check your trip information');
+    }
+
+    if (!validateStep2()) {
+      throw new Error('Please check your personal information');
+    }
+
+    // Calculate total price
+    const totalPrice = calculateTotal();
+    console.log('Calculated total price:', totalPrice);
+
+    if (!totalPrice || totalPrice <= 0) {
+      throw new Error('Invalid total price calculation. Please check your booking dates and car price.');
+    }
+
+    // Format dates and times
+    const formatDate = (dateStr) => {
+      if (!dateStr) return null;
+      const date = new Date(dateStr);
+      return date.toISOString().split('T')[0];
+    };
+
+    const formatTime = (timeStr) => {
+      if (!timeStr) return null;
+      return timeStr;
+    };
+
+    // Create a serializable version of the car data for navigation
+    const serializableCar = {
+      ...normalizedCar,
+      // Convert image React element to image URL/path
+      image: selectedCar.image || 
+             (selectedCar.vehicle_images && selectedCar.vehicle_images.length > 0 
+               ? selectedCar.vehicle_images[0].image_url 
+               : ''),
+    };
+
+    // Create booking data matching the API structure
+    const bookingData = {
+      action: 'create_booking',
+      vehicle_id: normalizedCar.id,
+      renter_id: Math.floor(Math.random() * 1000) + 1, // Random ID for testing
+      start_date: formatDate(searchData.pickupDate),
+      end_date: formatDate(searchData.dropoffDate),
+      start_time: formatTime(searchData.pickupTime),
+      end_time: formatTime(searchData.dropoffTime),
+      total_price: formatPrice(totalPrice),
+      discount_applied: 0,
+      final_price: formatPrice(totalPrice),
+      status: 'pending',
+      pickup_location: searchData.pickupLocation,
+      return_location: searchData.dropoffLocation,
+      renter_info: {
+        full_name: userInfo.fullName,
+        email: userInfo.email,
+        phone: userInfo.phone,
+        address: userInfo.address,
+        driver_license: userInfo.driverLicense
       }
+    };
 
-      if (!validateStep1()) {
-        throw new Error('Please check your trip information');
-      }
+    // Debug log
+    console.log('Booking Data:', bookingData);
 
-      if (!validateStep2()) {
-        throw new Error('Please check your personal information');
-      }
+    // Send request to API
+    const response = await fetch('/api/booking', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bookingData),
+    });
 
-      // Calculate total price
-      const totalPrice = calculateTotal();
-      console.log('Calculated total price:', totalPrice);
+    const result = await response.json();
+    console.log('API Response:', result);
 
-      if (!totalPrice || totalPrice <= 0) {
-        throw new Error('Invalid total price calculation. Please check your booking dates and car price.');
-      }
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create booking');
+    }
 
-      // Format dates and times
-      const formatDate = (dateStr) => {
-        if (!dateStr) return null;
-        const date = new Date(dateStr);
-        return date.toISOString().split('T')[0];
-      };
-
-      const formatTime = (timeStr) => {
-        if (!timeStr) return null;
-        return timeStr;
-      };
-
-      // Create booking data matching the API structure
-      const bookingData = {
-        action: 'create_booking',
+    // Update vehicle status to rented
+    const updateVehicleResponse = await fetch('/api/vehicles', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        action: 'update_status',
         vehicle_id: normalizedCar.id,
-        renter_id: Math.floor(Math.random() * 1000) + 1, // Random ID for testing
-        start_date: formatDate(searchData.pickupDate),
-        end_date: formatDate(searchData.dropoffDate),
-        start_time: formatTime(searchData.pickupTime),
-        end_time: formatTime(searchData.dropoffTime),
-        total_price: formatPrice(totalPrice),
-        discount_applied: 0,
-        final_price: formatPrice(totalPrice),
-        status: 'pending',
-        pickup_location: searchData.pickupLocation,
-        return_location: searchData.dropoffLocation,
-        renter_info: {
-          full_name: userInfo.fullName,
-          email: userInfo.email,
-          phone: userInfo.phone,
-          address: userInfo.address,
-          driver_license: userInfo.driverLicense
-        }
-      };
+        status: 'rented'
+      }),
+    });
 
-      // Debug log
-      console.log('Booking Data:', bookingData);
+    if (!updateVehicleResponse.ok) {
+      console.error('Failed to update vehicle status');
+    }
 
-      // Send request to API
-      const response = await fetch('/api/booking', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(bookingData),
-      });
+    // Prepare success message data
+    const carName = normalizedCar?.name || '';
+    const carType = normalizedCar?.type || '';
+    const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
+    const rentalDays = getDayCount();
+    const pricePerDay = normalizedCar?.price ? `${formatVND(normalizedCar.price)}` : '';
+    const total = formatVND(totalPrice);
+    const vat = formatVND(Math.round(totalPrice * 0.1));
+    const totalWithVat = formatVND(Math.round(totalPrice * 1.1));
 
-      const result = await response.json();
-      console.log('API Response:', result);
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to create booking');
-      }
-
-      // Update vehicle status to rented
-      const updateVehicleResponse = await fetch('/api/vehicles', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          action: 'update_status',
-          vehicle_id: normalizedCar.id,
-          status: 'rented'
-        }),
-      });
-
-      if (!updateVehicleResponse.ok) {
-        console.error('Failed to update vehicle status');
-      }
-
-      // Prepare success message data
-      const carName = normalizedCar?.name || '';
-      const carType = normalizedCar?.type || '';
-      const carSeats = normalizedCar?.seats ? `${normalizedCar.seats} seats` : '';
-      const rentalDays = getDayCount();
-      const pricePerDay = normalizedCar?.price ? `${formatVND(normalizedCar.price)}` : '';
-      const total = formatVND(totalPrice);
-      const vat = formatVND(Math.round(totalPrice * 0.1));
-      const totalWithVat = formatVND(Math.round(totalPrice * 1.1));
-
-      // Show success message
-      const successMessage = `🎉 Booking successful!
+    // Show success message
+    const successMessage = `🎉 Booking successful!
 
 🚗 Car: ${carName} (${carType}${carSeats ? ' • ' + carSeats : ''})
 📅 Rental: ${searchData.pickupDate} ${searchData.pickupTime} → ${searchData.dropoffDate} ${searchData.dropoffTime} (${rentalDays} day(s))
@@ -313,30 +325,30 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
 📧 Details have been sent to your email.
 📞 We will contact you for confirmation within 30 minutes.`;
 
-      // Use setTimeout to ensure state updates happen after the current render cycle
-      setTimeout(() => {
-        alert(successMessage);
-        
-        // Reset form after success
-        setCurrentStep(1);
-        setSearchData({
-          pickupLocation: '',
-          dropoffLocation: '',
-          pickupDate: '',
-          pickupTime: '',
-          dropoffDate: '',
-          dropoffTime: ''
-        });
-        setUserInfo({
-          fullName: '',
-          email: '',
-          phone: '',
-          address: '',
-          driverLicense: ''
-        });
-        setPaymentMethod('cash');
-        setErrors({});
-      }, 0);
+    // Navigate to booking ticket page with all booking data
+    const navigationData = {
+      car: serializableCar,
+      searchData,
+      userInfo,
+      paymentMethod,
+      bookingResult: result,
+      totalPrice: totalPrice,
+      rentalDays: getDayCount(),
+      successMessage: successMessage
+    };
+    
+    const encodedData = encodeURIComponent(JSON.stringify(navigationData));
+    router.push(`/booking_ticket?data=${encodedData}`);
+
+  } catch (error) {
+    console.error('Booking error:', error);
+    setErrors({
+      submit: error.message || 'An error occurred while booking. Please try again.'
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
     } catch (error) {
       console.error('Booking error:', error);
