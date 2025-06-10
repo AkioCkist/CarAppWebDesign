@@ -6,7 +6,6 @@ import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion"
 import { animate, scroll } from "motion";
 import { useCarLoading } from "../../components/CarLoading";
 import SimpleFaqSection from "../../components/SimpleFaqSection";
-import VehicleList from "../../components/VehicleList";
 import CarRentalModal from "../../components/CarRentalModal";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -108,7 +107,7 @@ const AnimatedDropdown = ({
   onToggle,
   onFocus,
   onBlur,
-  isFocused,
+  isFocused, // eslint-disable-line @typescript-eslint/no-unused-vars
   zIndex = 50 // Add zIndex prop with default value
 }) => {
   const selectedOption = options.find(opt => opt.value === value);
@@ -188,17 +187,7 @@ const AnimatedDropdown = ({
 };
 
 export default function HomePage() {
-  const [user, setUser] = useState(null);
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      setUser(JSON.parse(userData));
-    }
-  }, []);
-
   const [sameLocation, setSameLocation] = useState(true);
-  const [fadeOut, setFadeOut] = useState(false);
   const [showPhoneBubble, setShowPhoneBubble] = useState(false);
   const [showEmailBubble, setShowEmailBubble] = useState(false);
   const [isPickupDateFocused, setIsPickupDateFocused] = useState(false);
@@ -213,8 +202,6 @@ export default function HomePage() {
   const [isDropoffDropdownOpen, setIsDropoffDropdownOpen] = useState(false);
   const fleetContainerRef = useRef(null);
   const fleetScrollRef = useRef(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
 
   // Instead of state and useEffect for scrollY:
   // const [scrollY, setScrollY] = useState(0);
@@ -223,7 +210,7 @@ export default function HomePage() {
   const { scrollY } = useScroll(); // Get raw scroll position
   const backgroundY = useTransform(scrollY, [0, 1000], [0, 400]); // Example: move 400px when scrolled 1000px
 
-  const { isLoading, CarLoadingScreen, startLoading, stopLoading } = useCarLoading();
+  const { isLoading, CarLoadingScreen, startLoading } = useCarLoading();
   const [form, setForm] = useState({
     vehicleType: vehicleTypes[0], // Using vehicleTypes here
     pickUpLocation: "",
@@ -233,24 +220,12 @@ export default function HomePage() {
     dropOffDate: "",
     dropOffTime: "",
   });
-  const [fadeIn, setFadeIn] = useState(false);
   const router = useRouter();
   const [fleetVehicles, setFleetVehicles] = useState([]);
   const [fleetLoading, setFleetLoading] = useState(true);
   const [selectedCar, setSelectedCar] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
-
-  const handleNavigation = (href) => {
-    setFadeOut(true);
-    setTimeout(() => {
-      if (href.startsWith("/")) {
-        router.push(href);
-      } else {
-        window.location.href = href;
-      }
-    }, 200);
-  };
 
   useEffect(() => {
     setFadeIn(true);
@@ -275,7 +250,7 @@ export default function HomePage() {
   }, [router]);
 
   const handleFormChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    const { name, value, checked } = e.target;
     if (name === "sameLocation") {
       setSameLocation(checked);
       setForm((f) => ({ ...f, dropOffLocation: checked ? "same" : f.dropOffLocation }));
@@ -451,7 +426,8 @@ export default function HomePage() {
       const res = await fetch(`/api/vehicles?id=${vehicleId}`);
       const data = await res.json();
       setSelectedCar(data);
-    } catch (e) {
+    } catch (error) {
+      console.error('Error fetching car details:', error);
       setSelectedCar(null);
     }
     setLoadingDetail(false);
@@ -461,42 +437,6 @@ export default function HomePage() {
     setIsModalOpen(false);
     setSelectedCar(null);
   };
-
-  // Fleet scroll functions
-  const scrollFleet = (direction) => {
-    if (fleetScrollRef.current) {
-      const scrollAmount = 400; // Adjust based on card width
-      const newScrollLeft = direction === 'left' 
-        ? fleetScrollRef.current.scrollLeft - scrollAmount
-        : fleetScrollRef.current.scrollLeft + scrollAmount;
-      
-      fleetScrollRef.current.scrollTo({
-        left: newScrollLeft,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  const updateScrollButtons = () => {
-    if (fleetScrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = fleetScrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  // Add scroll event listener for fleet section
-  useEffect(() => {
-    const scrollElement = fleetScrollRef.current;
-    if (scrollElement) {
-      scrollElement.addEventListener('scroll', updateScrollButtons);
-      updateScrollButtons(); // Initial check
-      
-      return () => {
-        scrollElement.removeEventListener('scroll', updateScrollButtons);
-      };
-    }
-  }, [fleetVehicles]);
 
   return isLoading ? (
     <CarLoadingScreen />
@@ -1305,7 +1245,6 @@ export default function HomePage() {
         <div className="max-w-[98vw] xl:max-w-[1170px] mx-auto px-4">
           <div className="space-y-4">
             <SimpleFaqSection />
-            
             {/* View More FAQ Button */}
             <div className="text-center mt-4"> {/* Reduced margin from mt-8 to mt-4 */}
               <motion.button
@@ -1328,7 +1267,7 @@ export default function HomePage() {
         <div className="max-w-[98vw] xl:max-w-[1170px] mx-auto px-4"> {/* Expanded to match FAQ section width */}
           <div className="text-center mb-8 sm:mb-10"> {/* Adjusted margin */}
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">Get in Touch</h2> {/* Changed text */}
-            <p className="text-sm sm:text-base text-gray-600">We'd love to hear from you! Send us a message and we'll respond as soon as possible.</p>
+            <p className="text-sm sm:text-base text-gray-600">We&apos;d love to hear from you! Send us a message and we&apos;ll respond as soon as possible.</p>
           </div>
           <form
             className="bg-white p-6 sm:p-8 rounded-xl shadow-xl space-y-5 border border-gray-200 max-w-4xl mx-auto" /* Added max-width and center alignment to match FAQ width */
@@ -1351,7 +1290,8 @@ export default function HomePage() {
                 } else {
                   alert(data.error || 'Failed to send.');
                 }
-              } catch (err) {
+              } catch (error) {
+                console.error('Error sending contact form:', error);
                 alert('Error sending contact form.');
               }
             }}
@@ -1616,7 +1556,7 @@ export default function HomePage() {
               </div>
               <div className="flex-1">
                 <h4 className="font-semibold text-gray-800 mb-1">Send Email</h4>
-                <p className="text-gray-600 text-sm mb-3">Have questions? Drop us a message and we'll get back to you!</p>
+                <p className="text-gray-600 text-sm mb-3">Have questions? Drop us a message and we&apos;ll get back to you!</p>
                 <a
                   href="mailto:contact@whalexe.com"
                   className="inline-flex items-center gap-2 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors text-sm font-medium"
