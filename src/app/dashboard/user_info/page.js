@@ -79,7 +79,7 @@ const UserInfoDashboard = () => {
 
 
   if (loading) {
-    return <SkeletonLoader type="full-page" />;
+    return <SkeletonLoader type="user-info-page" />;
   }
 
   if (error) {
