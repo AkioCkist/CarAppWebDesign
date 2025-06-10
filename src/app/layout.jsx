@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://whalexe.vercel.app'),
   title: "Whale Xe - More than rentals, We deliver happiness",
   description: "Whale Xe là dịch vụ cho thuê xe tự lái tại Hà Nội, Đà Nẵng, Hồ Chí Minh với hơn 500 xe các loại. More than rentals, We deliver happiness.",
   icons: {
@@ -24,13 +25,13 @@ export const metadata = {
   openGraph: {
     title: "Whale Xe - Thuê xe tự lái tại Hà Nội, Đà Nẵng, Hồ Chí Minh",
     description: "Whale Xe là dịch vụ cho thuê xe tự lái hàng đầu tại Hà Nội, Đà Nẵng, Hồ Chí Minh với hơn 500 xe các loại. More than rentals, We deliver happiness.",
-    url: "https://car-ap-web-design.vercel.app/", // URL thực tế của trang web của bạn
+    url: "https://whalexe.vercel.app/",
     siteName: "Whale Xe",
     images: [
       {
-        url: "https://car-ap-web-design.vercel.app/logo/logo.png", // Đường dẫn tuyệt đối đến logo của bạn
-        width: 1200, // Kích thước khuyến nghị cho Open Graph image
-        height: 630, // Kích thước khuyến nghị cho Open Graph image
+        url: "/logo/logo.png", // Using logo for brand consistency
+        width: 1200,
+        height: 630,
         alt: "Whale Xe Logo - Cho thuê xe tự lái Hà Nội, Đà Nẵng, Hồ Chí Minh",
       },
     ],
@@ -42,8 +43,8 @@ export const metadata = {
     card: "summary_large_image",
     title: "Whale Xe - Thuê xe tự lái tại Hà Nội, Đà Nẵng, Hồ Chí Minh",
     description: "Whale Xe là dịch vụ cho thuê xe tự lái hàng đầu tại Hà Nội, Đà Nẵng, Hồ Chí Minh với hơn 500 xe các loại. More than rentals, We deliver happiness.",
-    creator: "@your_twitter_handle", // (Tùy chọn) Twitter handle của bạn
-    images: ["https://car-ap-web-design.vercel.app/logo/logo.png"], // Đường dẫn tuyệt đối đến logo của bạn
+    creator: "@whalexe_vn",
+    images: ["/logo/logo.png"], // Using logo for brand consistency
   },
 };
 
