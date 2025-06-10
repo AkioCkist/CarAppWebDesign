@@ -155,15 +155,8 @@ const BookingPDF = ({ booking, rentalDays, formatVND, total }) => (
       </View>
       <Text style={pdfStyles.documentTitle}>TAX INVOICE</Text>
 
-      {/* Bill To & Ship To */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <View style={{ flex: 1 }}>
-          <Text style={pdfStyles.sectionTitle}>BILL TO</Text>
-          <View style={pdfStyles.infoBlock}>
-            <Text style={pdfStyles.value}>{booking.customer?.name || 'Guest User'}</Text>
-            <Text style={pdfStyles.value}>{booking.searchData.pickupLocation}</Text>
-          </View>
-        </View>
+      {/* Invoice Info */}
+      <View style={{ flexDirection: 'row', justifyContent: 'flex-end' }}>
         <View style={{ flex: 1, marginLeft: 20 }}>
           <View style={pdfStyles.infoBlock}>
             <Text style={pdfStyles.label}>Invoice No:</Text>

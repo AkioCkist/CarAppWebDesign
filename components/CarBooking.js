@@ -620,7 +620,8 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     <label className="block text-green-700 font-semibold mb-3">
                       <User className="inline w-4 h-4 mr-2" />
                       Full Name *
-                    </label>                    <input
+                    </label>                    
+                      <input
                       type="text"
                       className={`w-full p-4 border-2 rounded-xl focus:outline-none transition-all duration-300 text-lg text-black ${
                         errors.fullName 
@@ -630,6 +631,7 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                       placeholder="Nguyễn Văn A"
                       value={userInfo.fullName}
                       onChange={(e) => {
+                        const value = e.target.value;
                         setUserInfo({...userInfo, fullName: e.target.value});
                         if (errors.fullName) setErrors({...errors, fullName: ''});
                       }}
