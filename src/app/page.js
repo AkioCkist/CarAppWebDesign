@@ -466,10 +466,10 @@ export default function HomePage() {
   const scrollFleet = (direction) => {
     if (fleetScrollRef.current) {
       const scrollAmount = 400; // Adjust based on card width
-      const newScrollLeft = direction === 'left' 
+      const newScrollLeft = direction === 'left'
         ? fleetScrollRef.current.scrollLeft - scrollAmount
         : fleetScrollRef.current.scrollLeft + scrollAmount;
-      
+
       fleetScrollRef.current.scrollTo({
         left: newScrollLeft,
         behavior: 'smooth'
@@ -491,7 +491,7 @@ export default function HomePage() {
     if (scrollElement) {
       scrollElement.addEventListener('scroll', updateScrollButtons);
       updateScrollButtons(); // Initial check
-      
+
       return () => {
         scrollElement.removeEventListener('scroll', updateScrollButtons);
       };
@@ -641,21 +641,21 @@ export default function HomePage() {
                     <div className="flex-1 min-w-0 relative z-10">
                       <label className="block text-left font-bold text-base text-gray-700 mb-1">Drop Off Location</label>
                       <div className="relative">                        <AnimatedDropdown
-                          options={dropoffOptions}
-                          value={form.dropOffLocation}
-                          onChange={handleFormChange}
-                          placeholder="Same as Pick Up"
-                          name="dropOffLocation"
-                          isOpen={isDropoffDropdownOpen}
-                          onToggle={() => {
-                            setIsDropoffDropdownOpen((open) => !open);
-                            setIsPickupDropdownOpen(false);
-                          }}
-                          onFocus={() => setIsDropoffLocationFocused(true)}
-                          onBlur={() => setIsDropoffLocationFocused(false)}
-                          isFocused={isDropoffLocationFocused}
-                          zIndex={9999} // Very high z-index for dropoff to appear above all elements
-                        />
+                        options={dropoffOptions}
+                        value={form.dropOffLocation}
+                        onChange={handleFormChange}
+                        placeholder="Same as Pick Up"
+                        name="dropOffLocation"
+                        isOpen={isDropoffDropdownOpen}
+                        onToggle={() => {
+                          setIsDropoffDropdownOpen((open) => !open);
+                          setIsPickupDropdownOpen(false);
+                        }}
+                        onFocus={() => setIsDropoffLocationFocused(true)}
+                        onBlur={() => setIsDropoffLocationFocused(false)}
+                        isFocused={isDropoffLocationFocused}
+                        zIndex={9999} // Very high z-index for dropoff to appear above all elements
+                      />
                         <motion.svg
                           variants={iconVariants}
                           animate={isDropoffLocationFocused || isDropoffDropdownOpen ? "focused" : "idle"}
@@ -1094,7 +1094,7 @@ export default function HomePage() {
                             src={vehicle.image}
                             alt={vehicle.name}
                             className="w-full h-full object-cover"
-                            // Removed hover scale effect
+                          // Removed hover scale effect
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0" /> {/* Removed hover opacity effect */}
                         </div>
@@ -1170,7 +1170,7 @@ export default function HomePage() {
                             <button
                               onClick={() => handleBookClick(vehicle.id)}
                               className="w-full px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl font-semibold text-base"
-                              // Removed hover effects
+                            // Removed hover effects
                             >
                               <span className="flex items-center justify-center gap-2">
                                 More Details
@@ -1443,7 +1443,7 @@ export default function HomePage() {
               fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <path d="M6.62 10.79c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
             </motion.svg>
           </motion.div>
           <motion.div
@@ -1503,8 +1503,8 @@ export default function HomePage() {
                   </svg>
                   +84 0236 3738 399
                 </a>
-                <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
               </div>
+              <div className="absolute bottom-4 -right-2 w-4 h-4 bg-white border-r border-b border-gray-100 transform rotate-45"></div>
             </div>
           </motion.div>
         </motion.div>
