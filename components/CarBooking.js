@@ -1061,11 +1061,11 @@ const CarBookingPage = ({ selectedCar, preFilledSearchData }) => {
                     </div>
                     {paymentMethod === 'bank' && (
                       <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-sm text-black">
                           <span>Pay upfront:</span>
                           <span className="font-semibold">{formatVND(Math.round(calculateTotal() * 1.1 * 0.3))}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
+                        <div className="flex justify-between text-sm text-black">
                           <span>Pay at pickup:</span>
                           <span className="font-semibold">{formatVND(Math.round(calculateTotal() * 1.1 * 0.7))}</span>
                         </div>
