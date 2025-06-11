@@ -1,0 +1,1 @@
+# **Nếu như file postgres.sql lỗi thì có thể dùng file FULL.SQL**
