@@ -1,0 +1,61 @@
+name: Ping Supabase to Prevent Pausing
+
+on:
+  schedule:
+    - cron: '0 9 * * 1,4' # Runs at 9:00 AM UTC every Monday and Thursday
+  workflow_dispatch: # Allows manual triggering from the GitHub UI
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Step 2: Set up Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20' # Use Node.js 20 (more recent LTS)
+
+      # Step 3: Install Supabase Client
+      - name: Install Supabase Client
+        run: npm install @supabase/supabase-js
+
+      # Step 4: Ping Supabase
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }} # Your Supabase project URL
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }} # Your Supabase anon key
+        run: |
+          node -e "
+          (async () => {
+            try {
+              console.log('Starting Supabase ping...');
+              
+              // Import Supabase client
+              const { createClient } = require('@supabase/supabase-js');
+              const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+
+              // Ping the accounts table to keep the database active
+              const { data, error } = await supabase
+                .from('accounts')
+                .select('account_id')
+                .limit(1);
+
+              if (error) {
+                console.error('Supabase query error:', error.message);
+                throw error;
+              }
+
+              console.log('✅ Supabase ping successful!');
+              console.log('Accounts table query returned:', data ? data.length : 0, 'rows');
+              
+            } catch (err) {
+              console.error('❌ Error pinging Supabase:', err.message);
+              process.exit(1);
+            }
+          })();
+          "
